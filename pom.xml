@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>hpl-blog</groupId>
+    <artifactId>hpl-blog</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <description>个人学习博客系统</description>
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.1</version>
+    </parent>
+
+    <properties>
+        <java.version>17</java.version>
+        <snowy.version>3.0.0</snowy.version>
+        <spring-boot.version>3.2.1</spring-boot.version>
+        <spring-framework.version>6.1.2</spring-framework.version>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <modules>
+        <!-- 主启动模块-->
+        <module>hpl-blog-web</module>
+
+        <!-- 业务逻辑模块-->
+        <module>hpl-blog-service</module>
+
+        <!-- 前端页面模块-->
+        <module>hpl-blog-ui</module>
+
+        <!-- 公共基础模块-->
+        <module>hpl-blog-commom</module>
+    </modules>
+
+
+    <dependencyManagement>
+        <dependencies>
+
+        </dependencies>
+    </dependencyManagement>
+
+
+</project>
