@@ -15,4 +15,26 @@
     <packaging>jar</packaging>
     <description>业务逻辑模块</description>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>hpl-blog</groupId>
+            <artifactId>hpl-blog-commom</artifactId>
+        </dependency>
+
+        <!-- lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- mybatis-plus -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+
+
+    </dependencies>
+
 </project>
