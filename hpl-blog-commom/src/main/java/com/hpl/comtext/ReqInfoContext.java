@@ -27,6 +27,6 @@ public class ReqInfoContext {
     public static class ReqInfo {
         private Long userId;
 
-        private User userInfo;
+//        private User userInfo;
     }
 }
