@@ -17,6 +17,18 @@
 
     <dependencies>
 
+        <!-- hpl-blog-service -->
+        <dependency>
+            <groupId>hpl-blog</groupId>
+            <artifactId>hpl-blog-service</artifactId>
+        </dependency>
+
+        <!-- hpl-blog-ui -->
+        <dependency>
+            <groupId>hpl-blog</groupId>
+            <artifactId>hpl-blog-ui</artifactId>
+        </dependency>
+
         <!-- spring-boot-starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

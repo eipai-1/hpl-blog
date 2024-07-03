@@ -1,2 +1,29 @@
 server:
   port: 8181
+
+spring:
+  config:
+    import: application-config.yml
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hpl_blog?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 1234
+
+  thymeleaf:
+    prefix: classpath:/templates/   # 页面模板位置
+    suffix: .html                   # 页面模板后缀名
+    mode: HTML
+    encoding: UTF-8
+#    servlet:
+#      content-type: text/html
+    cache: false                     # 开发时设置为false，生产时设置为true
+
+
+mybatis-plus:
+  global-config:
+    banner: false                       # 关闭mp的banner打印
+  configuration:
+    map-underscore-to-camel-case: true  # 开启下滑线转驼峰

@@ -1,15 +1,16 @@
 package com.hpl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date : 2024/6/29 14:53
  */
 @Slf4j
-@RestController
+@Controller
 @SpringBootApplication
 public class Application implements ApplicationRunner {
 
@@ -37,6 +38,10 @@ public class Application implements ApplicationRunner {
 
     @GetMapping("/")
     public String index() {
-        return "WELCOME TO HYPER PERSONAL LEARNING BLOG";
+//        return "WELCOME TO HYPER PERSONAL LEARNING BLOG";
+        return "error/test1/test001/index";
+//        return "index";
+//        return "views/rank/index";
     }
+
 }

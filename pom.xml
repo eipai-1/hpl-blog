@@ -50,6 +50,20 @@
                 <version>1.0-SNAPSHOT</version>
             </dependency>
 
+            <!-- hpl-blog-ui -->
+            <dependency>
+                <groupId>hpl-blog</groupId>
+                <artifactId>hpl-blog-ui</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+
+            <!-- hpl-blog-service -->
+            <dependency>
+                <groupId>hpl-blog</groupId>
+                <artifactId>hpl-blog-service</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+
             <!-- lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -69,6 +83,48 @@
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>8.3.0</version>
+            </dependency>
+
+            <!-- hutool -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>5.8.15</version>
+            </dependency>
+
+            <!-- javax.servlet-api -->
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>4.0.1</version>
+            </dependency>
+
+            <!-- guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>31.1-jre</version>
+            </dependency>
+
+            <!-- java-jwt -->
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>4.4.0</version>
+            </dependency>
+
+            <!-- base-plugin -->
+            <dependency>
+                <groupId>com.github.liuyueyi.media</groupId>
+                <artifactId>base-plugin</artifactId>
+                <version>3.0.0</version>
+            </dependency>
+
+            <!-- ip2region -->
+            <dependency>
+                <groupId>org.lionsoul</groupId>
+                <artifactId>ip2region</artifactId>
+                <version>2.7.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

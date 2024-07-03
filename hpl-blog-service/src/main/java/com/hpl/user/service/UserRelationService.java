@@ -1,8 +1,7 @@
 package com.hpl.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hpl.user.entity.User;
-import com.hpl.user.entity.UserRelation;
+import com.hpl.user.pojo.entity.UserRelation;
 
 /**
  * @author : rbe
