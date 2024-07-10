@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hpl.article.mapper.ArticleMapper">
+
+    <sql id="limit">
+        <if test="pageParam != null">
+            limit #{pageParam.offset}, #{pageParam.limit}
+        </if>
+    </sql>
+
+    <select id="listArticleByCategoryAndTags"
+            resultType="com.hpl.article.entity.ReadCount">
+        select DISTINCT(a.id) as documentId, rc.cnt as cnt
+        from article a
+        left join article_tag as t on a.id = t.article_id
+        left join read_count rc on rc.document_id  = a.id
+        where rc.document_type = ${@com.hpl.article.enums.DocumentTypeEnum@ARTICLE.code}
+        and a.status = ${@com.hpl.article.enums.PushStatusEnum@ONLINE.code}
+        and a.deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code}
+        <if test="categoryId != null">
+            and a.category_id = #{categoryId}
+        </if>
+        and t.tag_id in
+        <if test="tags != null and tags.size > 0">
+            <foreach collection="tags" item="tagId" open="(" close=")" separator=",">
+                #{tagId}
+            </foreach>
+        </if>
+        order by rc.cnt desc, a.id desc
+        <include refid="limit"/>
+    </select>
+
+
+    <select id="listArticlesByReadCounts"
+            resultType="com.hpl.article.dto.SimpleArticleDTO">
+        select rc.document_id as id, a.title as title, a.create_time as createTime
+        from read_count as rc left join article as a on rc.document_id = a.id
+        where rc.document_type = ${@com.hpl.article.enums.DocumentTypeEnum@ARTICLE.code}
+        and a.status = ${@com.hpl.article.enums.PushStatusEnum@ONLINE.code}
+        and a.deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code} order by rc.cnt desc
+        <include refid="limit"/>
+    </select>
+
+
+    <select id="listArticlesByParams"
+            resultType="com.hpl.article.dto.ArticleAdminDTO">
+        select a.id as article_id, a.title, a.short_title, a.offical_stat,
+        a.topping_stat, a.status, a.cream_stat, a.picture as cover,
+        a.update_time,
+        u.user_id as author, u.user_name as author_name,u.photo as author_avatar
+        from article a
+        left join user_info u on a.user_id = u.user_id
+        where a.deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code}
+        <if test="searchArticleDTO.title != null and searchArticleDTO.title != ''">
+            and a.title like concat('%', #{searchArticleDTO.title}, '%')
+        </if>
+        <if test="searchArticleDTO.userName != null and searchArticleDTO.userName != ''">
+            and u.user_name like concat('%', #{searchArticleDTO.userName}, '%')
+        </if>
+        <if test="searchArticleDTO.officalState != null and searchArticleDTO.officalState != -1">
+            and a.offical_state = #{searchArticleDTO.officalState}
+        </if>
+        <if test="searchArticleDTO.toppingStat != null and searchArticleDTO.toppingStat != -1">
+            and a.topping_state = #{searchArticleDTO.toppingStat}
+        </if>
+        <if test="searchArticleDTO.status != null and searchArticleDTO.status != -1">
+            and a.status = #{searchArticleDTO.status}
+        </if>
+
+        order by a.update_time desc
+        <include refid="limit"/>
+    </select>
+
+
+    <select id="countArticleByParams" resultType="java.lang.Long">
+        select count(*) from article a
+        left join user_info u on a.user_id = u.user_id
+
+        where a.deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code}
+        <if test="searchArticleDTO.title != null and searchArticleDTO.title != ''">
+            and a.title like concat('%', #{searchArticleDTO.title}, '%')
+        </if>
+        <if test="searchArticleDTO.userName != null and searchArticleDTO.userName != ''">
+            and u.user_name like concat('%', #{searchArticleDTO.userName}, '%')
+        </if>
+        <if test="searchArticleDTO.officalState != null and searchArticleDTO.officalState != -1">
+            and a.offical_state = #{searchArticleDTO.officalState}
+        </if>
+        <if test="searchArticleDTO.toppingStat != null and searchArticleDTO.toppingStat != -1">
+            and a.topping_state = #{searchArticleDTO.toppingStat}
+        </if>
+        <if test="searchArticleDTO.status != null and searchArticleDTO.status != -1">
+            and a.status = #{searchArticleDTO.status}
+        </if>
+
+    </select>
+
+
+    <select id="listArticlesOrderById" resultType="com.hpl.article.dto.SimpleArticleDTO">
+        select id, title, update_time as createTime from article
+        where id > #{lastId}
+          and status =${@com.hpl.article.enums.PushStatusEnum@ONLINE.code}
+          and deleted = ${@com.hpl.pojo.CommomDeletedEnum@NO.code}
+        order by id asc limit #{size}
+    </select>
+
+</mapper>

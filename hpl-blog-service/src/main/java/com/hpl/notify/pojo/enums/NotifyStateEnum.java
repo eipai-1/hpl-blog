@@ -15,7 +15,7 @@ public enum NotifyStateEnum {
     READ(1, "已读");
 
 
-    private int state;
+    private Integer state;
     private String msg;
 
     NotifyStateEnum(int state, String msg) {

@@ -1,7 +1,7 @@
 package com.hpl.notify.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.hpl.pojo.CommomEntity;
+import com.hpl.pojo.CommonEntity;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @TableName("notify_msg")
-public class NotifyMsg extends CommomEntity {
+public class NotifyMsg extends CommonEntity {
     private static final long serialVersionUID = -4043774744889659100L;
 
     /**

@@ -6,7 +6,7 @@ import com.hpl.global.comtext.ReqInfoContext;
 import com.hpl.global.component.GlobalViewConfig;
 import com.hpl.global.pojo.entity.Seo;
 import com.hpl.global.pojo.vo.GlobalVo;
-import com.hpl.notify.service.NotifyService;
+import com.hpl.notify.service.NotifyMagService;
 import com.hpl.sitemap.service.SitemapService;
 import com.hpl.statistic.service.StatisticUserService;
 import com.hpl.user.pojo.entity.UserInfo;
@@ -44,7 +44,7 @@ public class GlobalInitService {
     private GlobalViewConfig globalViewConfig;
 
     @Resource
-    private NotifyService notifyService;
+    private NotifyMagService notifyMagService;
 
     @Resource
     private SeoInjectService seoInjectService;
@@ -163,7 +163,7 @@ public class GlobalInitService {
             // 设置用户详细信息到请求信息上下文中。
             reqInfo.setUserInfo(userInfo);
             // 查询并设置用户的消息数量到请求信息上下文中。
-            reqInfo.setMsgNum(notifyService.queryUserNotifyMsgCount(userInfo.getUserId()));
+            reqInfo.setMsgNum(notifyMagService.queryUserNotifyMsgCount(userInfo.getUserId()));
         }
     }
 

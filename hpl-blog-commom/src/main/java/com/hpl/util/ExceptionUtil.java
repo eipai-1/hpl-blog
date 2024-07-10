@@ -1,7 +1,7 @@
 package com.hpl.util;
 
 import com.hpl.enums.StatusEnum;
-import com.hpl.exception.CommomException;
+import com.hpl.exception.CommonException;
 
 /**
  * @author : rbe
@@ -9,8 +9,8 @@ import com.hpl.exception.CommomException;
  */
 public class ExceptionUtil {
 
-    public static CommomException of(StatusEnum status, Object... args) {
-        return new CommomException(status, args);
+    public static CommonException of(StatusEnum status, Object... args) {
+        return new CommonException(status, args);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.hpl.sitemap.service;
 
 import com.hpl.sitemap.pojo.vo.SiteCntVo;
+import com.hpl.sitemap.pojo.vo.SiteMapVo;
 
 import java.time.LocalDate;
 
@@ -9,6 +10,26 @@ import java.time.LocalDate;
  * @date : 2024/7/1 8:40
  */
 public interface SitemapService {
+
+    /**
+     * 查询站点地图
+     *
+     * @return
+     */
+    SiteMapVo getSiteMap();
+
+    /**
+     * 刷新站点地图
+     */
+    void refreshSitemap();
+
+    /**
+     * 保存用户访问信息
+     *
+     * @param visitIp 访问者ip
+     * @param path    访问的资源路径
+     */
+    void saveVisitInfo(String visitIp, String path);
 
     /**
      * 查询站点某一天or总的访问信息

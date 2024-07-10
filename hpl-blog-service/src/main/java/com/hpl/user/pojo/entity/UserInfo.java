@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 
-import com.hpl.pojo.CommomEntity;
+import com.hpl.pojo.CommonEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -23,7 +23,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 // autoResultMap 必须存在，否则ip对象无法正确获取
 @TableName(value = "user_info", autoResultMap = true)
-public class UserInfo extends CommomEntity {
+public class UserInfo extends CommonEntity {
 
     private static final long serialVersionUID = 1L;
 

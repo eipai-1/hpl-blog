@@ -1,7 +1,6 @@
 package com.hpl.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hpl.user.pojo.entity.User;
 import com.hpl.user.pojo.entity.UserInfo;
 
 /**
@@ -23,4 +22,18 @@ public interface UserInfoService extends IService<UserInfo> {
      * @return
      */
     UserInfo getUserInfoBySessionId(String session, String clientIp);
+
+    /**
+     * 根据用户id获取用户信息
+     * @param userId
+     * @return
+     */
+    UserInfo getByUserId(Long userId);
+
+
+    /**
+     * 获取用户总数
+     * @return
+     */
+    Long getCount();
 }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  * @author : rbe
  * @date : 2024/6/29 19:25
  */
-public interface UserService extends IService<User> {
+public interface UserService extends IService<User>{
 
     /*************************
      * 登录模块业务

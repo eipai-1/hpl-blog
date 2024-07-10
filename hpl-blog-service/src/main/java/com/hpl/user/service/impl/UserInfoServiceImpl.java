@@ -1,12 +1,13 @@
 package com.hpl.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.enums.StatusEnum;
+import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.user.helper.UserRandomGenHelper;
 import com.hpl.user.helper.UserSessionHelper;
 import com.hpl.user.pojo.entity.IpInfo;
-import com.hpl.user.pojo.entity.User;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.mapper.UserInfoMapper;
 import com.hpl.user.service.UserInfoService;
@@ -110,5 +111,38 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
         // 将用户信息返回
         return userInfo;
+    }
+
+
+    /**
+     * 根据用户id获取用户信息
+     * @param userId
+     * @return
+     */
+    @Override
+    public UserInfo getByUserId(Long userId){
+
+        LambdaQueryWrapper<UserInfo> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(UserInfo::getUserId, userId)
+                .eq(UserInfo::getDeleted, CommonDeletedEnum.NO.getCode());
+        UserInfo userInfo =  userInfoMapper.selectOne(wrapper);
+
+        if (userInfo == null) {
+            throw ExceptionUtil.of(StatusEnum.USER_NOT_EXISTS, "userId=" + userId);
+        }
+
+        return userInfo;
+    }
+
+
+    /**
+     * 获取用户总数
+     * @return
+     */
+    @Override
+    public Long getCount(){
+        return lambdaQuery()
+                .eq(UserInfo::getDeleted, CommonDeletedEnum.NO.getCode())
+                .count();
     }
 }

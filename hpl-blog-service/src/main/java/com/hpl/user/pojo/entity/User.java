@@ -1,7 +1,7 @@
 package com.hpl.user.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.hpl.pojo.CommomEntity;
+import com.hpl.pojo.CommonEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("user")
-public class User extends CommomEntity {
+public class User extends CommonEntity {
 
     private static final long serialVersionUID = 1L;
 

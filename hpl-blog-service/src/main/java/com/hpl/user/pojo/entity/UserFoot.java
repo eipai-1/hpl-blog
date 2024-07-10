@@ -1,7 +1,7 @@
 package com.hpl.user.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.hpl.pojo.CommomEntity;
+import com.hpl.pojo.CommonEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("user_foot")
-public class UserFoot extends CommomEntity {
+public class UserFoot extends CommonEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,14 +29,14 @@ public class UserFoot extends CommomEntity {
     private Long documentUserId;
 
     /** 收藏状态: 0-未收藏，1-已收藏 */
-    private Integer collectionStat;
+    private Integer collectionState;
 
     /** 阅读状态: 0-未读，1-已读 */
-    private Integer readStat;
+    private Integer readState;
 
     /** 评论状态: 0-未评论，1-已评论 */
-    private Integer commentStat;
+    private Integer commentState;
 
     /** 点赞状态: 0-未点赞，1-已点赞 */
-    private Integer praiseStat;
+    private Integer praiseState;
 }
