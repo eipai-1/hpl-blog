@@ -327,7 +327,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         List<ArticleDTO> result = records.stream()
                 .map(this::fillArticleRelatedInfo)
                 .collect(Collectors.toList());
-
         // 根据转换后的文章DTO列表和分页大小，构建并返回分页列表视图对象
         return CommonPageListVo.newVo(result, pageSize);
     }

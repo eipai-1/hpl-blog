@@ -5,14 +5,14 @@
     <select id="listSimpleUserInfosByArticleId"
             resultType="com.hpl.article.pojo.dto.SimpleUserInfoDTO">
         SELECT ui.user_id as userId,
-               ui.user_name as name,
+               ui.nick_name as name,
                ui.photo as avatar,
                ui.profile as profile
         FROM user_foot uf
                  left join user_info ui on uf.user_id = ui.user_id
         WHERE uf.document_type = #{type}
           AND uf.document_id = #{documentId}
-          AND uf.praise_stat = 1
+          AND uf.praise_state = 1
         order by uf.update_time desc limit #{size}
     </select>
 
@@ -50,10 +50,10 @@
     <select id="getFootCount"
             resultType="com.hpl.statistic.pojo.dto.StatisticUserFootDTO">
         SELECT
-            sum(if (f.praise_stat =${@com.hpl.article.enums.PraiseStateEnum@PRAISE.code}, 1, 0)) as praiseCount,
-            sum(if (f.collection_stat =${@com.hpl.article.enums.CollectionStatEnum@COLLECTION.code}, 1, 0)) as collectionCount,
-            sum(if (f.read_stat =${@com.hpl.article.enums.ReadStateEnum@READ.code}, 1, 0)) as readCount,
-            sum(if (f.comment_stat =${@com.hpl.article.enums.CommentStateEnum@COMMENT.code}, 1, 0)) as commentCount
+            sum(if (f.praise_state =${@com.hpl.article.enums.PraiseStateEnum@PRAISE.code}, 1, 0)) as praiseCount,
+            sum(if (f.collection_state =${@com.hpl.article.enums.CollectionStateEnum@COLLECTION.code}, 1, 0)) as collectionCount,
+            sum(if (f.read_state =${@com.hpl.article.enums.ReadStateEnum@READ.code}, 1, 0)) as readCount,
+            sum(if (f.comment_state =${@com.hpl.article.enums.CommentStateEnum@COMMENT.code}, 1, 0)) as commentCount
         FROM
             user_foot as f
     </select>

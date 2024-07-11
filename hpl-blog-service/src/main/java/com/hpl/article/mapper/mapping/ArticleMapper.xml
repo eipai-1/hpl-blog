@@ -64,8 +64,8 @@
         <if test="searchArticleDTO.officalState != null and searchArticleDTO.officalState != -1">
             and a.offical_state = #{searchArticleDTO.officalState}
         </if>
-        <if test="searchArticleDTO.toppingStat != null and searchArticleDTO.toppingStat != -1">
-            and a.topping_state = #{searchArticleDTO.toppingStat}
+        <if test="searchArticleDTO.toppingState != null and searchArticleDTO.toppingState != -1">
+            and a.topping_state = #{searchArticleDTO.toppingState}
         </if>
         <if test="searchArticleDTO.status != null and searchArticleDTO.status != -1">
             and a.status = #{searchArticleDTO.status}
@@ -92,7 +92,7 @@
         <if test="searchArticleDTO.officalState != null and searchArticleDTO.officalState != -1">
             and a.offical_state = #{searchArticleDTO.officalState}
         </if>
-        <if test="searchArticleDTO.toppingStat != null and searchArticleDTO.toppingStat != -1">
+        <if test="searchArticleDTO.toppingState != null and searchArticleDTO.toppingState != -1">
             and a.topping_state = #{searchArticleDTO.toppingStat}
         </if>
         <if test="searchArticleDTO.status != null and searchArticleDTO.status != -1">

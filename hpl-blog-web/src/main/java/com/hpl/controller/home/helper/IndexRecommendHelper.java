@@ -52,7 +52,7 @@ public class IndexRecommendHelper {
         CategoryDTO category = categories(activeTab, vo);
         vo.setCategoryId(category.getCategoryId());
         vo.setCurrentCategory(category.getCategory());
-        // 并行调度实例，提高响应性能
+         //并行调度实例，提高响应性能 todo 并行运行不了，待处理，晚点我自己搞一个吧
         AsyncUtil.concurrentExecutor("首页响应")
                 .runAsyncWithTimeRecord(() -> vo.setArticles(articleList(category.getCategoryId())), "文章列表")
                 .runAsyncWithTimeRecord(() -> vo.setTopArticles(topArticleList(category)), "置顶文章")
@@ -61,6 +61,12 @@ public class IndexRecommendHelper {
                 .runAsyncWithTimeRecord(() -> vo.setUser(loginInfo()), "用户信息")
                 .allExecuted()
                 .prettyPrint();
+
+//        vo.setArticles(articleList(category.getCategoryId()));
+//        vo.setTopArticles(topArticleList(category));
+//        vo.setHomeCarouselList(homeCarouselList());
+//        vo.setSideBarItems(sidebarService.queryHomeSidebarList());
+//        vo.setUser(loginInfo());
         return vo;
     }
 

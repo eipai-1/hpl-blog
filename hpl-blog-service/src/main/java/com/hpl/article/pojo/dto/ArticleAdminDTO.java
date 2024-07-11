@@ -38,13 +38,13 @@ public class ArticleAdminDTO implements Serializable {
     private Integer status;
 
     /** 是否官方 */
-    private Integer officalStat;
+    private Integer officalState;
 
     /** 是否置顶 */
-    private Integer toppingStat;
+    private Integer toppingState;
 
     /** 是否加精 */
-    private Integer creamStat;
+    private Integer creamState;
 
     /** 更新时间 */
     private Date updateTime;

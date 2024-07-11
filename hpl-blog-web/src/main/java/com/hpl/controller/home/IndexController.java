@@ -34,7 +34,7 @@ public class IndexController extends CommonController {
         log.warn("global   :{}",globalInitService.globalAttr());
         IndexVo vo = indexRecommendHelper.buildIndexVo(activeTab);
         model.addAttribute("vo", vo);
-        log.warn("vo:   {}",vo);
+//        log.warn("vo:   {}",vo);
         log.warn("lalalalala");
         return "views/home/index";
 

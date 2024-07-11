@@ -8,7 +8,7 @@
 
         SELECT
         u.user_id as userId,
-        u.user_name as userName,
+        u.nick_name as userName,
         u.photo as avatar,
         r.id as relationId,
         true as followed
@@ -18,8 +18,8 @@
         r.follow_user_id = #{followUserId}
         and r.follow_state = ${@com.hpl.user.pojo.enums.FollowStateEnum@FOLLOW.code}
         ORDER BY u.id desc
-        <if test="pageParam != null">
-            limit #{pageParam.offset}, #{pageParam.limit}
-        </if>
+<!--        <if test="pageParam != null">-->
+<!--            limit #{pageParam.offset}, #{pageParam.limit}-->
+<!--        </if>-->
     </select>
 </mapper>
