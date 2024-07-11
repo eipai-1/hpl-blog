@@ -1,7 +1,7 @@
 package com.hpl.config.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hpl.article.enums.PushStatusEnum;
+import com.hpl.article.pojo.enums.PushStatusEnum;
 import com.hpl.config.mapper.ConfigMapper;
 import com.hpl.config.pojo.dto.ConfigDTO;
 import com.hpl.config.pojo.entity.Config;

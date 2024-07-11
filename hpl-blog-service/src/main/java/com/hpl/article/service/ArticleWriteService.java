@@ -1,8 +1,8 @@
 package com.hpl.article.service;
 
 
-import com.hpl.article.dto.ArticlePostDTO;
-import com.hpl.article.entity.Article;
+import com.hpl.article.pojo.dto.ArticlePostDTO;
+import com.hpl.article.pojo.entity.Article;
 
 public interface ArticleWriteService {
 

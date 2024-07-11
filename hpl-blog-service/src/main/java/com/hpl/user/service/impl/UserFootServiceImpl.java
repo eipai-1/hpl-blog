@@ -2,11 +2,11 @@ package com.hpl.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hpl.article.dto.SimpleUserInfoDTO;
-import com.hpl.article.enums.CollectionStateEnum;
-import com.hpl.article.enums.DocumentTypeEnum;
-import com.hpl.article.enums.OperateTypeEnum;
-import com.hpl.article.enums.PraiseStateEnum;
+import com.hpl.article.pojo.dto.SimpleUserInfoDTO;
+import com.hpl.article.pojo.enums.CollectionStateEnum;
+import com.hpl.article.pojo.enums.DocumentTypeEnum;
+import com.hpl.article.pojo.enums.OperateTypeEnum;
+import com.hpl.article.pojo.enums.PraiseStateEnum;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
 import com.hpl.statistic.pojo.dto.StatisticUserFootDTO;

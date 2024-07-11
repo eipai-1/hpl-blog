@@ -1,8 +1,8 @@
 package com.hpl.article.service;
 
 
-import com.hpl.article.dto.CategoryDTO;
-import com.hpl.article.entity.Category;
+import com.hpl.article.pojo.dto.CategoryDTO;
+import com.hpl.article.pojo.entity.Category;
 
 import java.util.List;
 

@@ -1,9 +1,9 @@
 package com.hpl.article.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hpl.article.dto.ColumnArticleDTO;
-import com.hpl.article.dto.SimpleArticleDTO;
-import com.hpl.article.entity.ColumnArticle;
+import com.hpl.article.pojo.dto.ColumnArticleDTO;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.entity.ColumnArticle;
 import com.hpl.pojo.CommonPageParam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

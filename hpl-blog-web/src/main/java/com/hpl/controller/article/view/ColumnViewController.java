@@ -1,24 +1,24 @@
 package com.hpl.controller.article.view;
 
-import com.github.paicoding.forum.api.model.context.ReqInfoContext;
-import com.github.paicoding.forum.api.model.enums.column.ColumnArticleReadEnum;
-import com.github.paicoding.forum.api.model.enums.column.ColumnTypeEnum;
-import com.github.paicoding.forum.api.model.enums.user.UserAIStatEnum;
-import com.github.paicoding.forum.api.model.vo.PageListVo;
-import com.github.paicoding.forum.api.model.vo.PageParam;
-import com.github.paicoding.forum.api.model.vo.article.dto.*;
-import com.github.paicoding.forum.api.model.vo.comment.dto.TopCommentDTO;
-import com.github.paicoding.forum.api.model.vo.recommend.SideBarDTO;
-import com.github.paicoding.forum.core.util.MarkdownConverter;
-import com.github.paicoding.forum.core.util.SpringUtil;
-import com.github.paicoding.forum.service.article.repository.entity.ColumnArticleDO;
-import com.github.paicoding.forum.service.article.service.ArticleReadService;
-import com.github.paicoding.forum.service.article.service.ColumnService;
-import com.github.paicoding.forum.service.comment.service.CommentReadService;
-import com.github.paicoding.forum.service.sidebar.service.SidebarService;
-import com.github.paicoding.forum.web.config.GlobalViewConfig;
-import com.github.paicoding.forum.web.front.article.vo.ColumnVo;
-import com.github.paicoding.forum.web.global.SeoInjectService;
+
+import cn.hutool.extra.spring.SpringUtil;
+import com.hpl.article.pojo.entity.ColumnArticle;
+import com.hpl.article.pojo.dto.*;
+import com.hpl.article.pojo.enums.ColumnArticleReadEnum;
+import com.hpl.article.pojo.enums.ColumnTypeEnum;
+import com.hpl.article.pojo.vo.ColumnVo;
+import com.hpl.article.service.ArticleReadService;
+import com.hpl.article.service.ColumnService;
+import com.hpl.comment.pojo.dto.TopCommentDTO;
+import com.hpl.converter.MarkdownConverter;
+import com.hpl.global.component.GlobalViewConfig;
+import com.hpl.global.comtext.ReqInfoContext;
+import com.hpl.global.service.SeoInjectService;
+import com.hpl.pojo.CommonPageListVo;
+import com.hpl.pojo.CommonPageParam;
+import com.hpl.sidebar.pojo.dto.SideBarDTO;
+import com.hpl.sidebar.service.SidebarService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.annotation.Resource;
 import java.util.List;
+
 
 /**
  * 专栏入口
@@ -38,13 +38,15 @@ import java.util.List;
 @Controller
 @RequestMapping(path = "column")
 public class ColumnViewController {
+
     @Autowired
     private ColumnService columnService;
+
     @Autowired
     private ArticleReadService articleReadService;
 
-    @Autowired
-    private CommentReadService commentReadService;
+//    @Autowired
+//    private CommentReadService commentReadService;
 
     @Autowired
     private SidebarService sidebarService;
@@ -60,7 +62,7 @@ public class ColumnViewController {
      */
     @GetMapping(path = {"list", "/", "", "home"})
     public String list(Model model) {
-        PageListVo<ColumnDTO> columns = columnService.listColumn(PageParam.newPageInstance());
+        CommonPageListVo<ColumnDTO> columns = columnService.listColumn(CommonPageParam.newInstance());
         List<SideBarDTO> sidebars = sidebarService.queryColumnSidebarList();
         ColumnVo vo = new ColumnVo();
         vo.setColumns(columns);
@@ -93,29 +95,34 @@ public class ColumnViewController {
      */
     @GetMapping(path = "{columnId}/{section}")
     public String articles(@PathVariable("columnId") Long columnId, @PathVariable("section") Integer section, Model model) {
-        if (section <= 0) section = 1;
+        if (section <= 0) {
+            section = 1;
+        }
         // 查询专栏
         ColumnDTO column = columnService.queryBasicColumnInfo(columnId);
 
-        ColumnArticleDO columnArticle = columnService.queryColumnArticle(columnId, section);
+        ColumnArticle columnArticle = columnService.queryColumnArticle(columnId, section);
         Long articleId = columnArticle.getArticleId();
         // 文章信息
-        ArticleDTO articleDTO = articleReadService.queryFullArticleInfo(articleId, ReqInfoContext.getReqInfo().getUserId());
+        ArticleDTO articleDTO = articleReadService.getFullArticleInfo(articleId, ReqInfoContext.getReqInfo().getUserId());
         // 返回html格式的文档内容
         articleDTO.setContent(MarkdownConverter.markdownToHtml(articleDTO.getContent()));
-        // 评论信息
-        List<TopCommentDTO> comments = commentReadService.getArticleComments(articleId, PageParam.newPageInstance());
 
-        // 热门评论
-        TopCommentDTO hotComment = commentReadService.queryHotComment(articleId);
+        // 评论信息 todo
+//        List<TopCommentDTO> comments = commentReadService.getArticleComments(articleId, CommonPageParam.newInstance());
+        List<TopCommentDTO> comments = null;
+
+        // 热门评论 todo
+//        TopCommentDTO hotComment = commentReadService.queryHotComment(articleId);
+        TopCommentDTO hotComment = null;
 
         // 文章列表
         List<SimpleArticleDTO> articles = columnService.queryColumnArticles(columnId);
 
         ColumnArticlesDTO vo = new ColumnArticlesDTO();
         vo.setArticle(articleDTO);
-        vo.setComments(comments);
-        vo.setHotComment(hotComment);
+        vo.setComments(null);   //todo
+        vo.setHotComment(null); //todo
         vo.setColumn(columnId);
         vo.setSection(section);
         vo.setArticleList(articles);
@@ -153,7 +160,7 @@ public class ColumnViewController {
      */
     private void updateReadType(ArticleOtherDTO vo, ColumnDTO column, ArticleDTO articleDTO, ColumnArticleReadEnum articleReadEnum) {
         Long loginUser = ReqInfoContext.getReqInfo().getUserId();
-        if (loginUser != null && loginUser.equals(articleDTO.getAuthor())) {
+        if (loginUser != null && loginUser.equals(articleDTO.getAuthorId())) {
             vo.setReadType(ColumnTypeEnum.FREE.getType());
             return;
         }
@@ -188,8 +195,9 @@ public class ColumnViewController {
      */
     private String trimContent(int readType, String content) {
         if (readType == ColumnTypeEnum.STAR_READ.getType()) {
-            // 判断登录用户是否绑定了星球，如果是，则直接阅读完整的专栏内容
-            if (ReqInfoContext.getReqInfo().getUser() != null && ReqInfoContext.getReqInfo().getUser().getStarStatus() == UserAIStatEnum.FORMAL) {
+            // 判断登录用户是否绑定了星球，如果是，则直接阅读完整的专栏内容 todo 改了 星球不弄
+//            if (ReqInfoContext.getReqInfo().getUserInfo() != null && ReqInfoContext.getReqInfo().getUserInfo().getStarStatus() == UserAIStatEnum.FORMAL) {
+            if (ReqInfoContext.getReqInfo().getUserInfo() != null) {
                 return content;
             }
 

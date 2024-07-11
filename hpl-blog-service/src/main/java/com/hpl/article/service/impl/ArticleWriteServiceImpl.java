@@ -5,17 +5,16 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hpl.annotation.permission.UserRole;
-import com.hpl.article.dto.ArticlePostDTO;
+import com.hpl.article.pojo.dto.ArticlePostDTO;
 import com.hpl.article.enent.ArticleMsgEvent;
-import com.hpl.article.entity.Article;
-import com.hpl.article.entity.ArticleDetail;
-import com.hpl.article.entity.ArticleTag;
-import com.hpl.article.enums.*;
+import com.hpl.article.pojo.entity.Article;
+import com.hpl.article.pojo.entity.ArticleDetail;
+import com.hpl.article.pojo.entity.ArticleTag;
 import com.hpl.article.mapper.ArticleDetailMapper;
 import com.hpl.article.mapper.ArticleMapper;
 import com.hpl.article.mapper.ArticleTagMapper;
+import com.hpl.article.pojo.enums.*;
 import com.hpl.article.service.ArticleWriteService;
-import com.hpl.article.service.ColumnSettingService;
 import com.hpl.enums.StatusEnum;
 import com.hpl.global.comtext.ReqInfoContext;
 import com.hpl.pojo.CommonDeletedEnum;
@@ -52,9 +51,6 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
 
     @Autowired
     private ArticleDetailMapper articleDetailMapper;
-
-    @Autowired
-    private ColumnSettingService columnSettingService;
 
     @Autowired
     private UserFootService userFootService;
@@ -110,7 +106,8 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
                 }
                 if (articlePostDTO.getColumnId() != null) {
                     // 更新文章对应的专栏信息
-                    columnSettingService.saveColumnArticle(articleId, articlePostDTO.getColumnId());
+                    //todo
+//                    columnSettingService.saveColumnArticle(articleId, articlePostDTO.getColumnId());
                 }
                 return articleId;
             }
@@ -292,7 +289,9 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
         if (user.getUserRole() != null && user.getUserRole().equals(UserRole.ADMIN.getCode())) {
             return false;
         }
-        return article.getStatus() == PushStatusEnum.ONLINE.getCode() && !articleWhiteListService.authorInArticleWhiteList(article.getAuthorId());
+//        return article.getStatus() == PushStatusEnum.ONLINE.getCode() && !articleWhiteListService.authorInArticleWhiteList(article.getAuthorId());
+        //todo
+        return article.getStatus() == PushStatusEnum.ONLINE.getCode();
     }
 
     @Override

@@ -3,17 +3,20 @@
 <mapper namespace="com.hpl.article.mapper.ColumnArticleMapper">
 
     <select id="countColumnReadUserNums" resultType="java.lang.Long">
-        select count(distinct u.user_id) from column_article as a left join user_foot as u on a.article_id = u.document_id
+        select count(distinct u.user_id)
+        from column_article as a left join user_foot as u on a.article_id = u.document_id
         where u.document_type = 1 and u.read_state = 1 and a.column_id = #{columnId}
     </select>
 
 
-    <select id="getColumnArticle" resultType="com.hpl.article.entity.ColumnArticle">
-        select article_id, `read_type` from column_article where column_id = #{columnId} and `section` = #{section} limit 1
+    <select id="getColumnArticle" resultType="com.hpl.article.pojo.entity.ColumnArticle">
+        select article_id, `read_type`
+        from column_article
+        where column_id = #{columnId} and `section` = #{section} limit 1
     </select>
 
 
-    <select id="listColumnArticles" resultType="com.hpl.article.dto.SimpleArticleDTO">
+    <select id="listColumnArticles" resultType="com.hpl.article.pojo.dto.SimpleArticleDTO">
         select
             ca.article_id as id,
             (case ca.read_type when 0 then ci.type else ca.read_type end) as `readType`,
@@ -30,7 +33,7 @@
 
 
     <select id="listColumnArticlesByColumnIdArticleName"
-            resultType="com.hpl.article.dto.ColumnArticleDTO">
+            resultType="com.hpl.article.pojo.dto.ColumnArticleDTO">
         select c.id, c.article_id, a.title, a.short_title, c.column_id,
         col.column_name as `column`, col.cover as column_cover,
         c.`section` as sort, c.create_time

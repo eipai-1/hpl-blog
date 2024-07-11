@@ -1,7 +1,7 @@
 package com.hpl.user.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hpl.article.dto.SimpleUserInfoDTO;
+import com.hpl.article.pojo.dto.SimpleUserInfoDTO;
 import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
 import com.hpl.statistic.pojo.dto.StatisticUserFootDTO;
 import com.hpl.user.pojo.entity.UserFoot;

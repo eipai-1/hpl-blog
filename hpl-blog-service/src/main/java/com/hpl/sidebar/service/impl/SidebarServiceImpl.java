@@ -2,7 +2,7 @@ package com.hpl.sidebar.service.impl;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.google.common.base.Splitter;
-import com.hpl.article.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.config.pojo.dto.ConfigDTO;
 import com.hpl.config.pojo.enums.ConfigTypeEnum;
@@ -18,6 +18,7 @@ import com.hpl.util.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * @author : rbe
  * @date : 2024/7/7 17:42
  */
+@Service
 public class SidebarServiceImpl implements SidebarService {
 
     @Autowired
@@ -36,8 +38,8 @@ public class SidebarServiceImpl implements SidebarService {
     @Autowired
     private ConfigService configService;
 
-    @Autowired
-    private UserActivityRankService userActivityRankService;
+//    @Autowired
+//    private UserActivityRankService userActivityRankService;
 
 
 
@@ -57,7 +59,8 @@ public class SidebarServiceImpl implements SidebarService {
         list.add(noticeSideBar());
         list.add(columnSideBar());
         list.add(hotArticles());
-        SideBarDTO bar = rankList();
+//        SideBarDTO bar = rankList();
+        SideBarDTO bar = new SideBarDTO();
         if (bar != null) {
             list.add(bar);
         }
@@ -142,23 +145,23 @@ public class SidebarServiceImpl implements SidebarService {
      *
      * @return
      */
-    private SideBarDTO rankList() {
-        List<RankItemDTO> list = userActivityRankService.queryRankList(ActivityRankTimeEnum.MONTH, 8);
-        if (list.isEmpty()) {
-            return null;
-        }
-        SideBarDTO sidebar = new SideBarDTO().setTitle("月度活跃排行榜").setStyle(SidebarStyleEnum.ACTIVITY_RANK.getStyle());
-        List<SideBarItemDTO> itemList = new ArrayList<>();
-        for (RankItemDTO item : list) {
-            SideBarItemDTO sideItem = new SideBarItemDTO().setName(item.getUser().getName())
-                    .setUrl(String.valueOf(item.getUser().getUserId()))
-                    .setImg(item.getUser().getAvatar())
-                    .setTime(item.getScore().longValue());
-            itemList.add(sideItem);
-        }
-        sidebar.setItems(itemList);
-        return sidebar;
-    }
+//    private SideBarDTO rankList() {
+//        List<RankItemDTO> list = userActivityRankService.queryRankList(ActivityRankTimeEnum.MONTH, 8);
+//        if (list.isEmpty()) {
+//            return null;
+//        }
+//        SideBarDTO sidebar = new SideBarDTO().setTitle("月度活跃排行榜").setStyle(SidebarStyleEnum.ACTIVITY_RANK.getStyle());
+//        List<SideBarItemDTO> itemList = new ArrayList<>();
+//        for (RankItemDTO item : list) {
+//            SideBarItemDTO sideItem = new SideBarItemDTO().setName(item.getUser().getName())
+//                    .setUrl(String.valueOf(item.getUser().getUserId()))
+//                    .setImg(item.getUser().getAvatar())
+//                    .setTime(item.getScore().longValue());
+//            itemList.add(sideItem);
+//        }
+//        sidebar.setItems(itemList);
+//        return sidebar;
+//    }
 
     /**
      * 以用户 + 文章维度进行缓存设置

@@ -1,10 +1,10 @@
 package com.hpl.sitemap.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.hpl.article.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
 import com.hpl.article.enent.ArticleMsgEvent;
-import com.hpl.article.entity.Article;
-import com.hpl.article.enums.ArticleEventEnum;
+import com.hpl.article.pojo.entity.Article;
+import com.hpl.article.pojo.enums.ArticleEventEnum;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.sitemap.pojo.constant.SitemapConstant;
 import com.hpl.sitemap.pojo.vo.SiteCntVo;

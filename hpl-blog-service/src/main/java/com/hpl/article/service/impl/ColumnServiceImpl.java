@@ -2,10 +2,12 @@ package com.hpl.article.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.hpl.article.dto.*;
-import com.hpl.article.entity.ColumnArticle;
-import com.hpl.article.entity.ColumnInfo;
-import com.hpl.article.enums.ColumnStatusEnum;
+import com.hpl.article.pojo.entity.ColumnArticle;
+import com.hpl.article.pojo.entity.ColumnInfo;
+import com.hpl.article.pojo.dto.ColumnDTO;
+import com.hpl.article.pojo.dto.ColumnFootCountDTO;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.enums.ColumnStatusEnum;
 import com.hpl.article.mapper.ColumnInfoMapper;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.ColumnArticleService;

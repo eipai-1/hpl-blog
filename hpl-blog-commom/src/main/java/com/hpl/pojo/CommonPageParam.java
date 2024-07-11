@@ -1,6 +1,7 @@
 package com.hpl.pojo;
 
 import lombok.Data;
+import lombok.Getter;
 
 /**
  * @author : rbe

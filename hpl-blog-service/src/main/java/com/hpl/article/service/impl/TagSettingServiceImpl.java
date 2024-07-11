@@ -3,10 +3,10 @@ package com.hpl.article.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.hpl.article.dto.SearchTagDTO;
-import com.hpl.article.dto.TagDTO;
-import com.hpl.article.dto.TagPostDTO;
-import com.hpl.article.entity.Tag;
+import com.hpl.article.pojo.dto.SearchTagDTO;
+import com.hpl.article.pojo.dto.TagDTO;
+import com.hpl.article.pojo.dto.TagPostDTO;
+import com.hpl.article.pojo.entity.Tag;
 import com.hpl.article.mapper.TagMapper;
 import com.hpl.article.service.TagSettingService;
 import com.hpl.pojo.CommonDeletedEnum;

@@ -2,10 +2,13 @@ package com.hpl.util;
 
 
 import com.google.common.collect.Maps;
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -26,10 +29,17 @@ import java.util.function.BiConsumer;
  * @author : rbe
  * @date : 2024/7/1 11:13
  */
+@Component
 public class RedisUtil {
     private static final Charset CODE = StandardCharsets.UTF_8;
     private static final String KEY_PREFIX = "hyper_";
+
     private static RedisTemplate<String, String> template;
+
+    @Autowired
+    public RedisUtil(RedisTemplate<String, String> template) {
+        RedisUtil.template = template;
+    }
 
     public static void registerTemplate(RedisTemplate<String, String> template) {
         RedisUtil.template = template;
@@ -322,6 +332,7 @@ public class RedisUtil {
      */
     public static <T> Map<String, T> hMGet(String key, final List<String> fields, Class<T> clz) {
         // 使用RedisTemplate的execute方法执行回调函数。
+        System.out.println("template：{}"+template);
         return template.execute(new RedisCallback<Map<String, T>>() {
 
             // 在Redis连接上执行具体的hMGet操作。
@@ -615,4 +626,5 @@ public class RedisUtil {
     public interface ThreeConsumer<T, U, P> {
         void accept(T t, U u, P p);
     }
+
 }

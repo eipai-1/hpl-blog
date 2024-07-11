@@ -1,16 +1,22 @@
 package com.hpl.global.service;
 
+import com.hpl.article.pojo.dto.ColumnArticlesDTO;
+import com.hpl.article.pojo.dto.ColumnDTO;
+import com.hpl.article.pojo.dto.TagDTO;
+import com.hpl.article.pojo.vo.ArticleDetailVo;
 import com.hpl.global.component.GlobalViewConfig;
 import com.hpl.global.comtext.ReqInfoContext;
 import com.hpl.global.pojo.entity.Seo;
 import com.hpl.global.pojo.vo.SeoTagVo;
+import com.hpl.util.DateUtil;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,106 +35,108 @@ public class SeoInjectService {
     @Resource
     private GlobalViewConfig globalViewConfig;
 
-//    /**
-//     * 文章详情页的seo标签
-//     *
-//     * @param detail
-//     */
-//    public void initColumnSeo(ArticleDetailVo detail) {
-//        Seo seo = initBasicSeoTag();
-//        List<SeoTagVo> list = seo.getOgp();
-//        Map<String, Object> jsonLd = seo.getJsonLd();
-//
-//        String title = detail.getArticle().getTitle();
-//        String description = detail.getArticle().getSummary();
-//        String authorName = detail.getAuthor().getUserName();
-//        String updateTime = DateUtil.time2LocalTime(detail.getArticle().getLastUpdateTime()).toString();
-//        String publishedTime = DateUtil.time2LocalTime(detail.getArticle().getCreateTime()).toString();
-//        String image = detail.getArticle().getCover();
-//
-//        list.add(new SeoTagVo("og:title", title));
-//        list.add(new SeoTagVo("og:description", detail.getArticle().getSummary()));
-//        list.add(new SeoTagVo("og:type", "article"));
-//        list.add(new SeoTagVo("og:locale", "zh-CN"));
-//        list.add(new SeoTagVo("og:updated_time", updateTime));
-//
-//        list.add(new SeoTagVo("article:modified_time", updateTime));
-//        list.add(new SeoTagVo("article:published_time", publishedTime));
-//        list.add(new SeoTagVo("article:tag", detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
-//        list.add(new SeoTagVo("article:section", detail.getArticle().getCategory().getCategory()));
-//        list.add(new SeoTagVo("article:author", authorName));
-//
-//        list.add(new SeoTagVo("author", authorName));
-//        list.add(new SeoTagVo("title", title));
-//        list.add(new SeoTagVo("description", description));
-//        list.add(new SeoTagVo("keywords", detail.getArticle().getCategory().getCategory() + "," + detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
-//
-//        if (StringUtils.isNotBlank(image)) {
-//            list.add(new SeoTagVo("og:image", image));
-//            jsonLd.put("image", image);
-//        }
-//
-//        jsonLd.put("headline", title);
-//        jsonLd.put("description", description);
-//        Map<String, Object> author = new HashMap<>();
-//        author.put("@type", "Person");
-//        author.put("name", authorName);
-//        jsonLd.put("author", author);
-//        jsonLd.put("dateModified", updateTime);
-//        jsonLd.put("datePublished", publishedTime);
-//
-//        ReqInfoContext.getReqInfo().setSeo(seo);
-//    }
+    /**
+     * 文章详情页的seo标签
+     *
+     * @param detail
+     */
+    public void initColumnSeo(ArticleDetailVo detail) {
+        Seo seo = initBasicSeoTag();
+        List<SeoTagVo> list = seo.getOgp();
+        Map<String, Object> jsonLd = seo.getJsonLd();
 
-//    /**
-//     * 教程详情seo标签
-//     *
-//     * @param detail
-//     */
-//    public void initColumnSeo(ColumnArticlesDTO detail, ColumnDTO column) {
-//        Seo seo = initBasicSeoTag();
-//        List<SeoTagVo> list = seo.getOgp();
-//        Map<String, Object> jsonLd = seo.getJsonLd();
-//
-//        String title = detail.getArticle().getTitle();
-//        String description = detail.getArticle().getSummary();
-//        String authorName = column.getAuthorName();
-//        String updateTime = DateUtil.time2LocalTime(detail.getArticle().getLastUpdateTime()).toString();
-//        String publishedTime = DateUtil.time2LocalTime(detail.getArticle().getCreateTime()).toString();
-//        String image = column.getCover();
-//
-//        list.add(new SeoTagVo("og:title", title));
-//        list.add(new SeoTagVo("og:description", description));
-//        list.add(new SeoTagVo("og:type", "article"));
-//        list.add(new SeoTagVo("og:locale", "zh-CN"));
-//
-//        list.add(new SeoTagVo("og:updated_time", updateTime));
-//        list.add(new SeoTagVo("og:image", image));
-//
-//        list.add(new SeoTagVo("article:modified_time", updateTime));
-//        list.add(new SeoTagVo("article:published_time", publishedTime));
-//        list.add(new SeoTagVo("article:tag", detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
-//        list.add(new SeoTagVo("article:section", column.getColumn()));
-//        list.add(new SeoTagVo("article:author", authorName));
-//
-//        list.add(new SeoTagVo("author", authorName));
-//        list.add(new SeoTagVo("title", title));
-//        list.add(new SeoTagVo("description", detail.getArticle().getSummary()));
-//        list.add(new SeoTagVo("keywords", detail.getArticle().getCategory().getCategory() + "," + detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
-//
-//
-//        jsonLd.put("headline", title);
-//        jsonLd.put("description", description);
-//        Map<String, Object> author = new HashMap<>();
-//        author.put("@type", "Person");
-//        author.put("name", authorName);
-//        jsonLd.put("author", author);
-//        jsonLd.put("dateModified", updateTime);
-//        jsonLd.put("datePublished", publishedTime);
-//        jsonLd.put("image", image);
-//
-//        if (ReqInfoContext.getReqInfo() != null) ReqInfoContext.getReqInfo().setSeo(seo);
-//    }
+        String title = detail.getArticle().getTitle();
+        String description = detail.getArticle().getSummary();
+        String authorName = detail.getAuthor().getNickName();
+        String updateTime = DateUtil.time2LocalTime(detail.getArticle().getLastUpdateTime()).toString();
+        String publishedTime = DateUtil.time2LocalTime(detail.getArticle().getCreateTime()).toString();
+        String image = detail.getArticle().getCover();
+
+        list.add(new SeoTagVo("og:title", title));
+        list.add(new SeoTagVo("og:description", detail.getArticle().getSummary()));
+        list.add(new SeoTagVo("og:type", "article"));
+        list.add(new SeoTagVo("og:locale", "zh-CN"));
+        list.add(new SeoTagVo("og:updated_time", updateTime));
+
+        list.add(new SeoTagVo("article:modified_time", updateTime));
+        list.add(new SeoTagVo("article:published_time", publishedTime));
+        list.add(new SeoTagVo("article:tag", detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
+        list.add(new SeoTagVo("article:section", detail.getArticle().getCategory().getCategory()));
+        list.add(new SeoTagVo("article:author", authorName));
+
+        list.add(new SeoTagVo("author", authorName));
+        list.add(new SeoTagVo("title", title));
+        list.add(new SeoTagVo("description", description));
+        list.add(new SeoTagVo("keywords", detail.getArticle().getCategory().getCategory() + "," + detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
+
+        if (StringUtils.isNotBlank(image)) {
+            list.add(new SeoTagVo("og:image", image));
+            jsonLd.put("image", image);
+        }
+
+        jsonLd.put("headline", title);
+        jsonLd.put("description", description);
+        Map<String, Object> author = new HashMap<>();
+        author.put("@type", "Person");
+        author.put("name", authorName);
+        jsonLd.put("author", author);
+        jsonLd.put("dateModified", updateTime);
+        jsonLd.put("datePublished", publishedTime);
+
+        ReqInfoContext.getReqInfo().setSeo(seo);
+    }
+
+    /**
+     * 教程详情seo标签
+     *
+     * @param detail
+     */
+    public void initColumnSeo(ColumnArticlesDTO detail, ColumnDTO column) {
+        Seo seo = initBasicSeoTag();
+        List<SeoTagVo> list = seo.getOgp();
+        Map<String, Object> jsonLd = seo.getJsonLd();
+
+        String title = detail.getArticle().getTitle();
+        String description = detail.getArticle().getSummary();
+        String authorName = column.getAuthorName();
+        String updateTime = DateUtil.time2LocalTime(detail.getArticle().getLastUpdateTime()).toString();
+        String publishedTime = DateUtil.time2LocalTime(detail.getArticle().getCreateTime()).toString();
+        String image = column.getCover();
+
+        list.add(new SeoTagVo("og:title", title));
+        list.add(new SeoTagVo("og:description", description));
+        list.add(new SeoTagVo("og:type", "article"));
+        list.add(new SeoTagVo("og:locale", "zh-CN"));
+
+        list.add(new SeoTagVo("og:updated_time", updateTime));
+        list.add(new SeoTagVo("og:image", image));
+
+        list.add(new SeoTagVo("article:modified_time", updateTime));
+        list.add(new SeoTagVo("article:published_time", publishedTime));
+        list.add(new SeoTagVo("article:tag", detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
+        list.add(new SeoTagVo("article:section", column.getColumn()));
+        list.add(new SeoTagVo("article:author", authorName));
+
+        list.add(new SeoTagVo("author", authorName));
+        list.add(new SeoTagVo("title", title));
+        list.add(new SeoTagVo("description", detail.getArticle().getSummary()));
+        list.add(new SeoTagVo("keywords", detail.getArticle().getCategory().getCategory() + "," + detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
+
+
+        jsonLd.put("headline", title);
+        jsonLd.put("description", description);
+        Map<String, Object> author = new HashMap<>();
+        author.put("@type", "Person");
+        author.put("name", authorName);
+        jsonLd.put("author", author);
+        jsonLd.put("dateModified", updateTime);
+        jsonLd.put("datePublished", publishedTime);
+        jsonLd.put("image", image);
+
+        if (ReqInfoContext.getReqInfo() != null) {
+            ReqInfoContext.getReqInfo().setSeo(seo);
+        }
+    }
 
 //    /**
 //     * 用户主页的seo标签

@@ -28,6 +28,7 @@ public class SeoTagVo {
      * SEO标签的值
      * 与键对应的具体内容，用于展示或配置在页面上。
      */
-    private String value;
+//    private String value;
+    private String val;
 }
 

@@ -5,7 +5,7 @@
     <select id="listArticleRelatedNotices" resultType="com.hpl.notify.pojo.dtos.NotifyMsgDTO">
         select m.id as msgId,
         m.operate_user_id as operateUserId,
-        u.user_name as operateUserName,
+        u.nick_name as operateUserName,
         u.photo as operateUserPhoto,
         m.msg as msg,
         m.type as type,
@@ -28,7 +28,7 @@
     <select id="listNormalNotices" resultType="com.hpl.notify.pojo.dtos.NotifyMsgDTO">
         select m.id as msgId,
         m.operate_user_id as operateUserId,
-        u.user_name as operateUserName,
+        u.nick_name as operateUserName,
         u.photo as operateUserPhoto,
         m.msg as msg,
         m.type as type,
@@ -39,9 +39,9 @@
         where
         m.notify_user_id = #{userId} and m.type = #{type}
         order by m.create_time desc
-        <if test="pageParam != null">
-            limit #{pageParam.offset}, #{pageParam.limit}
-        </if>
+<!--        <if test="pageParam != null">-->
+<!--            limit #{pageParam.offset}, #{pageParam.limit}-->
+<!--        </if>-->
     </select>
 
     <update id="updateNoticeRead">

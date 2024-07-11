@@ -1,11 +1,12 @@
 package com.hpl.article.service;
 
 
-import com.hpl.article.dto.ArticleDTO;
-import com.hpl.article.dto.SimpleArticleDTO;
-import com.hpl.article.dto.TagDTO;
-import com.hpl.article.entity.Article;
-import com.hpl.article.enums.HomeSelectEnum;
+import com.hpl.article.pojo.entity.ArticleTag;
+import com.hpl.article.pojo.dto.ArticleDTO;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto.TagDTO;
+import com.hpl.article.pojo.entity.Article;
+import com.hpl.article.pojo.enums.HomeSelectEnum;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonPageVo;
@@ -170,4 +171,8 @@ public interface ArticleReadService {
 
 
     List<SimpleArticleDTO> listArticlesOrderById(long lastId, int scanSize);
+
+    List<ArticleTag> listTagsByArticleId(Long articleId);
+
+    List<Article> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, CommonPageParam page);
 }

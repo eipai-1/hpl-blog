@@ -1,10 +1,10 @@
 package com.hpl.statistic.service.impl;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.hpl.article.entity.ReadCount;
-import com.hpl.article.enums.DocumentTypeEnum;
-import com.hpl.article.mapper.ArticleMapper;
+import com.hpl.article.pojo.entity.ReadCount;
+import com.hpl.article.pojo.enums.DocumentTypeEnum;
 import com.hpl.article.mapper.ReadCountMapper;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.statistic.pojo.constant.CountConstant;
@@ -34,8 +34,8 @@ public class CountServiceImpl implements CountService {
     @Resource
     private UserRelationService userRelationService;
 
-    @Resource
-    private ArticleReadService articleReadService;
+//    @Resource
+//    private ArticleReadService articleReadService;
 
     @Resource
     private ReadCountMapper readCountMapper;
@@ -169,6 +169,7 @@ public class CountServiceImpl implements CountService {
         Long fansCount = userRelationService.queryUserFansCount(userId);
 
         // 查询用户发布的文章数
+        ArticleReadService articleReadService = SpringUtil.getBean(ArticleReadService.class);
         Long articleNum = articleReadService.getCountByAuthorId(userId);
 
         String key = CountConstant.USER_STATISTIC_INFO + userId;

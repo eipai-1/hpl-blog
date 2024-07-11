@@ -4,8 +4,11 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.hpl.annotation.permission.Permission;
 import com.hpl.annotation.permission.UserRole;
+import com.hpl.enums.StatusEnum;
 import com.hpl.global.comtext.ReqInfoContext;
 import com.hpl.global.service.GlobalInitService;
+import com.hpl.pojo.CommonResVo;
+import com.hpl.util.JsonUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +65,7 @@ public class GlobalViewInterceptor implements AsyncHandlerInterceptor {
 //                        || handlerMethod.getMethod().getDeclaringClass().getAnnotation(RestController.class) != null) {
 //                    // 访问需要登录的rest接口
 //                    response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-//                    response.getWriter().println(JsonUtil.toStr(ResVo.fail(StatusEnum.FORBID_NOTLOGIN)));
+//                    response.getWriter().println(JsonUtil.objToStr(CommonResVo.fail(StatusEnum.FORBID_NOTLOGIN)));
 //                    response.getWriter().flush();
 //                    return false;
 //                } else if (request.getRequestURI().startsWith("/api/admin/") || request.getRequestURI().startsWith("/admin/")) {
@@ -114,6 +117,7 @@ public class GlobalViewInterceptor implements AsyncHandlerInterceptor {
                     ReqInfoContext.addReqInfo(reqInfo);
                     // 在模型中添加全局属性
                     modelAndView.getModel().put("global", globalInitService.globalAttr());
+                    log.warn("global   :{}",globalInitService.globalAttr());
                 } finally {
                     // 无论成功与否，清理请求信息上下文
                     ReqInfoContext.clear();
@@ -121,6 +125,7 @@ public class GlobalViewInterceptor implements AsyncHandlerInterceptor {
             } else {
                 // 如果响应状态为HTTP OK，直接在模型中添加全局属性
                 modelAndView.getModel().put("global", globalInitService.globalAttr());
+                log.warn("global   :{}",globalInitService.globalAttr());
             }
         }
 

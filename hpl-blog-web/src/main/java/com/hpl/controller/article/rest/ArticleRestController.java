@@ -1,34 +1,24 @@
 package com.hpl.controller.article.rest;
 
-import com.github.paicoding.forum.api.model.context.ReqInfoContext;
-import com.github.paicoding.forum.api.model.enums.DocumentTypeEnum;
-import com.github.paicoding.forum.api.model.enums.NotifyTypeEnum;
-import com.github.paicoding.forum.api.model.enums.OperateTypeEnum;
-import com.github.paicoding.forum.api.model.vo.*;
-import com.github.paicoding.forum.api.model.vo.article.ArticlePostReq;
-import com.github.paicoding.forum.api.model.vo.article.ContentPostReq;
-import com.github.paicoding.forum.api.model.vo.article.dto.ArticleDTO;
-import com.github.paicoding.forum.api.model.vo.article.dto.CategoryDTO;
-import com.github.paicoding.forum.api.model.vo.article.dto.TagDTO;
-import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
-import com.github.paicoding.forum.api.model.vo.notify.NotifyMsgEvent;
-import com.github.paicoding.forum.api.model.vo.user.dto.BaseUserInfoDTO;
-import com.github.paicoding.forum.core.common.CommonConstants;
-import com.github.paicoding.forum.core.mdc.MdcDot;
-import com.github.paicoding.forum.core.permission.Permission;
-import com.github.paicoding.forum.core.permission.UserRole;
-import com.github.paicoding.forum.core.util.JsonUtil;
-import com.github.paicoding.forum.core.util.MarkdownConverter;
-import com.github.paicoding.forum.core.util.SpringUtil;
-import com.github.paicoding.forum.service.article.repository.entity.ArticleDO;
-import com.github.paicoding.forum.service.article.service.*;
-import com.github.paicoding.forum.service.notify.service.RabbitmqService;
-import com.github.paicoding.forum.service.user.repository.entity.UserFootDO;
-import com.github.paicoding.forum.service.user.service.UserFootService;
-import com.github.paicoding.forum.service.user.service.UserService;
-import com.github.paicoding.forum.web.component.TemplateEngineHelper;
-import com.github.paicoding.forum.web.front.article.vo.ArticleDetailVo;
-import com.rabbitmq.client.BuiltinExchangeType;
+
+import com.hpl.annotation.permission.Permission;
+import com.hpl.annotation.permission.UserRole;
+import com.hpl.article.pojo.entity.Article;
+import com.hpl.article.pojo.dto.*;
+import com.hpl.article.pojo.enums.DocumentTypeEnum;
+import com.hpl.article.pojo.enums.OperateTypeEnum;
+import com.hpl.article.pojo.vo.ArticleDetailVo;
+import com.hpl.article.service.*;
+import com.hpl.converter.MarkdownConverter;
+import com.hpl.enums.StatusEnum;
+import com.hpl.global.component.TemplateEngineHelper;
+import com.hpl.global.comtext.ReqInfoContext;
+import com.hpl.notify.pojo.enums.NotifyTypeEnum;
+import com.hpl.pojo.*;
+import com.hpl.user.pojo.entity.UserFoot;
+import com.hpl.user.pojo.entity.UserInfo;
+import com.hpl.user.service.UserFootService;
+import com.hpl.user.service.UserInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -51,18 +41,24 @@ import java.util.concurrent.TimeoutException;
 @RequestMapping(path = "article/api")
 @RestController
 public class ArticleRestController {
+
     @Autowired
     private ArticleReadService articleReadService;
+
     @Autowired
     private UserFootService userFootService;
+
     @Autowired
     private CategoryService categoryService;
+
     @Autowired
     private TagService tagService;
-    @Autowired
-    private ArticleReadService articleService;
+
     @Autowired
     private ArticleWriteService articleWriteService;
+
+    @Autowired
+    private UserInfoService userInfoService;
 
     @Autowired
     private TemplateEngineHelper templateEngineHelper;
@@ -70,11 +66,10 @@ public class ArticleRestController {
     @Autowired
     private ArticleRecommendService articleRecommendService;
 
-    @Autowired
-    private RabbitmqService rabbitmqService;
+//    @Autowired
+//    private RabbitmqService rabbitmqService;
 
-    @Autowired
-    private UserService userService;
+
 
     /**
      * 文章详情页
@@ -85,20 +80,20 @@ public class ArticleRestController {
      * @return
      */
     @GetMapping("/data/detail/{articleId}")
-    public ResVo<ArticleDetailVo> detail(@PathVariable(name = "articleId") Long articleId) throws IOException {
+    public CommonResVo<ArticleDetailVo> detail(@PathVariable(name = "articleId") Long articleId) throws IOException {
         ArticleDetailVo vo = new ArticleDetailVo();
 
         // 文章相关信息
-        ArticleDTO articleDTO = articleService.queryFullArticleInfo(articleId, ReqInfoContext.getReqInfo().getUserId());
+        ArticleDTO articleDTO = articleReadService.getFullArticleInfo(articleId, ReqInfoContext.getReqInfo().getUserId());
         // 返回给前端页面时，转换为html格式
         articleDTO.setContent(MarkdownConverter.markdownToHtml(articleDTO.getContent()));
         vo.setArticle(articleDTO);
 
         // 作者信息
-        BaseUserInfoDTO user = userService.queryBasicUserInfo(articleDTO.getAuthor());
-        articleDTO.setAuthorName(user.getUserName());
+        UserInfo user = userInfoService.getByUserId(articleDTO.getAuthorId());
+        articleDTO.setAuthorName(user.getNickName());
         articleDTO.setAuthorAvatar(user.getPhoto());
-        return ResVo.ok(vo);
+        return CommonResVo.success(vo);
     }
 
     /**
@@ -110,15 +105,15 @@ public class ArticleRestController {
      * @return
      */
     @RequestMapping(path = "recommend")
-    @MdcDot(bizCode = "#articleId")
-    public ResVo<NextPageHtmlVo> recommend(@RequestParam(value = "articleId") Long articleId,
+//    @MdcDot(bizCode = "#articleId")
+    public CommonResVo<NextPageHtmlVo> recommend(@RequestParam(value = "articleId") Long articleId,
                                            @RequestParam(name = "page") Long page,
                                            @RequestParam(name = "size", required = false) Long size) {
-        size = Optional.ofNullable(size).orElse(PageParam.DEFAULT_PAGE_SIZE);
-        size = Math.min(size, PageParam.DEFAULT_PAGE_SIZE);
-        PageListVo<ArticleDTO> articles = articleRecommendService.relatedRecommend(articleId, PageParam.newPageInstance(page, size));
+        size = Optional.ofNullable(size).orElse(CommonPageParam.DEFAULT_PAGE_SIZE);
+        size = Math.min(size, CommonPageParam.DEFAULT_PAGE_SIZE);
+        CommonPageListVo<ArticleDTO> articles = articleRecommendService.relatedRecommend(articleId, CommonPageParam.newInstance(page, size));
         String html = templateEngineHelper.renderToVo("views/article-detail/article/list", "articles", articles);
-        return ResVo.ok(new NextPageHtmlVo(html, articles.getHasMore()));
+        return CommonResVo.success(new NextPageHtmlVo(html, articles.getHasMore()));
     }
 
     /**
@@ -127,8 +122,8 @@ public class ArticleRestController {
      * @return
      */
     @PostMapping(path = "generateSummary")
-    public ResVo<String> generateSummary(@RequestBody ContentPostReq req) {
-        return ResVo.ok(articleService.generateSummary(req.getContent()));
+    public CommonResVo<String> generateSummary(@RequestBody ContentPostDTO req) {
+        return CommonResVo.success(articleReadService.pickSummary(req.getContent()));
     }
 
     /**
@@ -137,11 +132,11 @@ public class ArticleRestController {
      * @return
      */
     @GetMapping(path = "tag/list")
-    public ResVo<PageVo<TagDTO>> queryTags(@RequestParam(name = "key", required = false) String key,
-                                           @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
-                                           @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
-        PageVo<TagDTO> tagDTOPageVo = tagService.queryTags(key, PageParam.newPageInstance(pageNumber, pageSize));
-        return ResVo.ok(tagDTOPageVo);
+    public CommonResVo<CommonPageVo<TagDTO>> queryTags(@RequestParam(name = "key", required = false) String key,
+                                                 @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
+                                                 @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
+        CommonPageVo<TagDTO> tagDTOPageVo = tagService.queryTags(key, CommonPageParam.newInstance(pageNumber, pageSize));
+        return CommonResVo.success(tagDTOPageVo);
     }
 
     /**
@@ -150,17 +145,17 @@ public class ArticleRestController {
      * @return
      */
     @GetMapping(path = "category/list")
-    public ResVo<List<CategoryDTO>> getCategoryList(@RequestParam(name = "categoryId", required = false) Long categoryId,
+    public CommonResVo<List<CategoryDTO>> getCategoryList(@RequestParam(name = "categoryId", required = false) Long categoryId,
                                                     @RequestParam(name = "ignoreNoArticles", required = false) Boolean ignoreNoArticles) {
         List<CategoryDTO> list = categoryService.loadAllCategories();
         if (Objects.equals(Boolean.TRUE, ignoreNoArticles)) {
             // 查询所有分类的对应的文章数
-            Map<Long, Long> articleCnt = articleService.queryArticleCountsByCategory();
+            Map<Long, Long> articleCnt = articleReadService.queryArticleCountsAndCategory();
             // 过滤掉文章数为0的分类
             list.removeIf(c -> articleCnt.getOrDefault(c.getCategoryId(), 0L) <= 0L);
         }
         list.forEach(c -> c.setSelected(c.getCategoryId().equals(categoryId)));
-        return ResVo.ok(list);
+        return CommonResVo.success(list);
     }
 
 
@@ -171,46 +166,47 @@ public class ArticleRestController {
      * @param type      取值来自于 OperateTypeEnum#code
      * @return
      */
-    @Permission(role = UserRole.LOGIN)
+//    @Permission(role = UserRole.LOGIN)
     @GetMapping(path = "favor")
-    @MdcDot(bizCode = "#articleId")
-    public ResVo<Boolean> favor(@RequestParam(name = "articleId") Long articleId,
+//    @MdcDot(bizCode = "#articleId")
+    public CommonResVo<Boolean> favor(@RequestParam(name = "articleId") Long articleId,
                                 @RequestParam(name = "type") Integer type) throws IOException, TimeoutException {
         if (log.isDebugEnabled()) {
             log.debug("开始点赞: {}", type);
         }
         OperateTypeEnum operate = OperateTypeEnum.fromCode(type);
         if (operate == OperateTypeEnum.EMPTY) {
-            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, type + "非法");
+            return CommonResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, type + "非法");
         }
 
         // 要求文章必须存在
-        ArticleDO article = articleReadService.queryBasicArticle(articleId);
+        Article article = articleReadService.getById(articleId);
         if (article == null) {
-            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "文章不存在!");
+            return CommonResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "文章不存在!");
         }
 
-        UserFootDO foot = userFootService.saveOrUpdateUserFoot(DocumentTypeEnum.ARTICLE, articleId, article.getUserId(),
+        UserFoot foot = userFootService.saveOrUpdateUserFoot(DocumentTypeEnum.ARTICLE, articleId, article.getAuthorId(),
                 ReqInfoContext.getReqInfo().getUserId(),
                 operate);
         // 点赞、收藏消息
         NotifyTypeEnum notifyType = OperateTypeEnum.getNotifyType(operate);
 
         // 点赞消息走 RabbitMQ，其它走 Java 内置消息机制
-        if (notifyType.equals(NotifyTypeEnum.PRAISE) && rabbitmqService.enabled()) {
-            rabbitmqService.publishMsg(
-                    CommonConstants.EXCHANGE_NAME_DIRECT,
-                    BuiltinExchangeType.DIRECT,
-                    CommonConstants.QUERE_KEY_PRAISE,
-                    JsonUtil.toStr(foot));
-        } else {
-            Optional.ofNullable(notifyType).ifPresent(notify -> SpringUtil.publishEvent(new NotifyMsgEvent<>(this, notify, foot)));
-        }
+        //todo
+//        if (notifyType.equals(NotifyTypeEnum.PRAISE) && rabbitmqService.enabled()) {
+//            rabbitmqService.publishMsg(
+//                    CommonConstants.EXCHANGE_NAME_DIRECT,
+//                    BuiltinExchangeType.DIRECT,
+//                    CommonConstants.QUERE_KEY_PRAISE,
+//                    JsonUtil.toStr(foot));
+//        } else {
+//            Optional.ofNullable(notifyType).ifPresent(notify -> SpringUtil.publishEvent(new NotifyMsgEvent<>(this, notify, foot)));
+//        }
 
         if (log.isDebugEnabled()) {
             log.info("点赞结束: {}", type);
         }
-        return ResVo.ok(true);
+        return CommonResVo.success(true);
     }
 
 
@@ -223,14 +219,14 @@ public class ArticleRestController {
      */
     @Permission(role = UserRole.LOGIN)
     @PostMapping(path = "post")
-    @MdcDot(bizCode = "#req.articleId")
-    public ResVo<Long> post(@RequestBody ArticlePostReq req, HttpServletResponse response) throws IOException {
+//    @MdcDot(bizCode = "#req.articleId")
+    public CommonResVo<Long> post(@RequestBody ArticlePostDTO req, HttpServletResponse response) throws IOException {
         Long id = articleWriteService.saveArticle(req, ReqInfoContext.getReqInfo().getUserId());
         // 如果使用后端重定向，可以使用下面两种策略
 //        return "redirect:/article/detail/" + id;
 //        response.sendRedirect("/article/detail/" + id);
         // 这里采用前端重定向策略
-        return ResVo.ok(id);
+        return CommonResVo.success(id);
     }
 
 
@@ -242,9 +238,9 @@ public class ArticleRestController {
      */
     @Permission(role = UserRole.LOGIN)
     @RequestMapping(path = "delete")
-    @MdcDot(bizCode = "#articleId")
-    public ResVo<Boolean> delete(@RequestParam(value = "articleId") Long articleId) {
+//    @MdcDot(bizCode = "#articleId")
+    public CommonResVo<Boolean> delete(@RequestParam(value = "articleId") Long articleId) {
         articleWriteService.deleteArticle(articleId, ReqInfoContext.getReqInfo().getUserId());
-        return ResVo.ok(true);
+        return CommonResVo.success(true);
     }
 }

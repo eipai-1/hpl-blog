@@ -1,13 +1,13 @@
 package com.hpl.util;
 
-import org.springframework.http.server.ServerHttpRequest;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+
+import jakarta.servlet.http.Cookie;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
-import java.util.List;
+
 
 /**
  * @author : rbe

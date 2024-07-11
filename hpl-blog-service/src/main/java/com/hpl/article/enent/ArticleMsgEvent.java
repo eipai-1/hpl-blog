@@ -1,6 +1,6 @@
 package com.hpl.article.enent;
 
-import com.hpl.article.enums.ArticleEventEnum;
+import com.hpl.article.pojo.enums.ArticleEventEnum;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

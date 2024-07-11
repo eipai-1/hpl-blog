@@ -1,7 +1,8 @@
 package com.hpl.article.service;
 
 
-import com.hpl.article.dto.*;
+
+import com.hpl.article.pojo.dto.*;
 import com.hpl.pojo.CommonPageVo;
 
 import java.util.List;

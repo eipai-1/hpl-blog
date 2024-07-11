@@ -1,13 +1,14 @@
 package com.hpl.controller.article.rest;
 
-import com.github.paicoding.forum.api.model.vo.NextPageHtmlVo;
-import com.github.paicoding.forum.api.model.vo.PageListVo;
-import com.github.paicoding.forum.api.model.vo.PageParam;
-import com.github.paicoding.forum.api.model.vo.ResVo;
-import com.github.paicoding.forum.api.model.vo.article.dto.ColumnDTO;
-import com.github.paicoding.forum.api.model.vo.article.dto.SimpleArticleDTO;
-import com.github.paicoding.forum.service.article.service.ColumnService;
-import com.github.paicoding.forum.web.component.TemplateEngineHelper;
+
+import com.hpl.article.pojo.dto.ColumnDTO;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.service.ColumnService;
+import com.hpl.global.component.TemplateEngineHelper;
+import com.hpl.pojo.CommonPageListVo;
+import com.hpl.pojo.CommonPageParam;
+import com.hpl.pojo.CommonResVo;
+import com.hpl.pojo.NextPageHtmlVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = "column/api")
 public class ColumnRestController {
+
     @Autowired
     private ColumnService columnService;
 
@@ -35,17 +37,17 @@ public class ColumnRestController {
      * @return
      */
     @GetMapping(path = "list")
-    public ResVo<NextPageHtmlVo> list(@RequestParam(name = "page") Long page,
-                                      @RequestParam(name = "size", required = false) Long size) {
+    public CommonResVo<NextPageHtmlVo> list(@RequestParam(name = "page") Long page,
+                                            @RequestParam(name = "size", required = false) Long size) {
         if (page <= 0) {
             page = 1L;
         }
-        size = Optional.ofNullable(size).orElse(PageParam.DEFAULT_PAGE_SIZE);
-        size = Math.min(size, PageParam.DEFAULT_PAGE_SIZE);
-        PageListVo<ColumnDTO> list = columnService.listColumn(PageParam.newPageInstance(page, size));
+        size = Optional.ofNullable(size).orElse(CommonPageParam.DEFAULT_PAGE_SIZE);
+        size = Math.min(size, CommonPageParam.DEFAULT_PAGE_SIZE);
+        CommonPageListVo<ColumnDTO> list = columnService.listColumn(CommonPageParam.newInstance(page, size));
 
         String html = templateEngineHelper.renderToVo("biz/column/list", "columns", list);
-        return ResVo.ok(new NextPageHtmlVo(html, list.getHasMore()));
+        return CommonResVo.success(new NextPageHtmlVo(html, list.getHasMore()));
     }
 
     /**
@@ -55,9 +57,9 @@ public class ColumnRestController {
      * @return
      */
     @GetMapping(path = "menu/{column}")
-    public ResVo<NextPageHtmlVo> columnMenus(@PathVariable("column") Long columnId) {
+    public CommonResVo<NextPageHtmlVo> columnMenus(@PathVariable("column") Long columnId) {
         List<SimpleArticleDTO> articleList = columnService.queryColumnArticles(columnId);
         String html = templateEngineHelper.renderToVo("biz/column/menus", "menu", articleList);
-        return ResVo.ok(new NextPageHtmlVo(html, false));
+        return CommonResVo.success(new NextPageHtmlVo(html, false));
     }
 }

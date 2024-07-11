@@ -1,8 +1,7 @@
 package com.hpl.article.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hpl.article.entity.Article;
-import com.hpl.article.entity.ArticleDetail;
+import com.hpl.article.pojo.entity.ArticleDetail;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Update;
 

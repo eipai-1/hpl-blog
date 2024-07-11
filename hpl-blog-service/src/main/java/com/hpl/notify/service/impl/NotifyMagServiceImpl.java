@@ -88,7 +88,7 @@ public class NotifyMagServiceImpl extends ServiceImpl<NotifyMsgMapper,NotifyMsg>
         // 筛选出未读通知的ID
         // 设置消息为已读状态
         List<Long> ids = list.stream()
-                .filter(s -> s.getState() == NotifyStateEnum.UNREAD.getState())
+                .filter(s -> s.getState().equals(NotifyStateEnum.UNREAD.getState()) )
                 .map(NotifyMsgDTO::getMsgId)
                 .collect(Collectors.toList());
 

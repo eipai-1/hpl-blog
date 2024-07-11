@@ -1,13 +1,14 @@
 package com.hpl.util;
 
 import com.github.hui.quick.plugin.base.file.FileWriteUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.lionsoul.ip2region.xdb.Searcher;
 
-import javax.servlet.http.HttpServletRequest;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.*;

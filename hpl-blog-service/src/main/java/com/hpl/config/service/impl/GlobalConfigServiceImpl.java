@@ -173,7 +173,9 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
      */
     @Override
     public void addSensitiveWhiteWord(String word) {
-        String key = SensitiveProperty.SENSITIVE_KEY_PREFIX + ".allow";
+//        String key = SensitiveProperty.SENSITIVE_KEY_PREFIX + ".allow";
+        //todo
+        String key = "mg.allow";
         GlobalConfigDTO globalConfigDTO = new GlobalConfigDTO();
         globalConfigDTO.setKeywords(key);
 
@@ -195,7 +197,8 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         // 更新敏感词白名单
         save(globalConfigDTO);
 
-        // 移除敏感词记录
-        SpringUtil.getBean(SensitiveService.class).removeSensitiveWord(word);
+//        // 移除敏感词记录
+        //todo
+//        SpringUtil.getBean(SensitiveService.class).removeSensitiveWord(word);
     }
 }

@@ -2,7 +2,7 @@ package com.hpl.config.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
-import com.hpl.article.dto.CategoryDTO;
+import com.hpl.article.pojo.dto.CategoryDTO;
 import com.hpl.article.service.CategoryService;
 import com.hpl.config.mapper.DictCommonMapper;
 import com.hpl.config.pojo.dto.DictCommonDTO;

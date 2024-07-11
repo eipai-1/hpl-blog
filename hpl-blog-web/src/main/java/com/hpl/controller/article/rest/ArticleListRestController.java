@@ -1,15 +1,11 @@
 
 package com.hpl.controller.article.rest;
 
-import com.github.paicoding.forum.api.model.vo.NextPageHtmlVo;
-import com.github.paicoding.forum.api.model.vo.PageListVo;
-import com.github.paicoding.forum.api.model.vo.PageParam;
-import com.github.paicoding.forum.api.model.vo.ResVo;
-import com.github.paicoding.forum.api.model.vo.article.dto.ArticleDTO;
-import com.github.paicoding.forum.service.article.service.ArticleReadService;
-import com.github.paicoding.forum.web.component.TemplateEngineHelper;
-import com.github.paicoding.forum.web.global.BaseViewController;
-import com.hpl.pojo.CommonController;
+
+import com.hpl.article.pojo.dto.ArticleDTO;
+import com.hpl.article.service.ArticleReadService;
+import com.hpl.global.component.TemplateEngineHelper;
+import com.hpl.pojo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,12 +33,12 @@ public class ArticleListRestController extends CommonController {
      * @return 文章列表
      */
     @GetMapping(path = "data/category/{category}")
-    public ResVo<PageListVo<ArticleDTO>> categoryDataList(@PathVariable("category") Long categoryId,
-                                                          @RequestParam(name = "page") Long page,
-                                                          @RequestParam(name = "size", required = false) Long size) {
-        PageParam pageParam = buildPageParam(page, size);
-        PageListVo<ArticleDTO> list = articleService.queryArticlesByCategory(categoryId, pageParam);
-        return ResVo.ok(list);
+    public CommonResVo<CommonPageListVo<ArticleDTO>> categoryDataList(@PathVariable("category") Long categoryId,
+                                                                       @RequestParam(name = "page") Long page,
+                                                                       @RequestParam(name = "size", required = false) Long size) {
+        CommonPageParam pageParam = buildPageParam(page, size);
+        CommonPageListVo<ArticleDTO> list = articleService.listArticlesByCategory(categoryId, pageParam);
+        return CommonResVo.success(list);
     }
 
 
@@ -53,13 +49,13 @@ public class ArticleListRestController extends CommonController {
      * @return
      */
     @GetMapping(path = "category/{category}")
-    public ResVo<NextPageHtmlVo> categoryList(@PathVariable("category") Long categoryId,
+    public CommonResVo<NextPageHtmlVo> categoryList(@PathVariable("category") Long categoryId,
                                               @RequestParam(name = "page") Long page,
                                               @RequestParam(name = "size", required = false) Long size) {
-        PageParam pageParam = buildPageParam(page, size);
-        PageListVo<ArticleDTO> list = articleService.queryArticlesByCategory(categoryId, pageParam);
+        CommonPageParam pageParam = buildPageParam(page, size);
+        CommonPageListVo<ArticleDTO> list = articleService.listArticlesByCategory(categoryId, pageParam);
         String html = templateEngineHelper.renderToVo("views/article-category-list/article/list", "articles", list);
-        return ResVo.ok(new NextPageHtmlVo(html, list.getHasMore()));
+        return CommonResVo.success(new NextPageHtmlVo(html, list.getHasMore()));
     }
 
     /**
@@ -71,12 +67,12 @@ public class ArticleListRestController extends CommonController {
      * @return
      */
     @GetMapping(path = "tag/{tag}")
-    public ResVo<NextPageHtmlVo> tagList(@PathVariable("tag") Long tagId,
+    public CommonResVo<NextPageHtmlVo> tagList(@PathVariable("tag") Long tagId,
                                          @RequestParam(name = "page") Long page,
                                          @RequestParam(name = "size", required = false) Long size) {
-        PageParam pageParam = buildPageParam(page, size);
-        PageListVo<ArticleDTO> list = articleService.queryArticlesByTag(tagId, pageParam);
+        CommonPageParam pageParam = buildPageParam(page, size);
+        CommonPageListVo<ArticleDTO> list = articleService.listArticlesByTag(tagId, pageParam);
         String html = templateEngineHelper.renderToVo("views/article-tag-list/article/list", "articles", list);
-        return ResVo.ok(new NextPageHtmlVo(html, list.getHasMore()));
+        return CommonResVo.success(new NextPageHtmlVo(html, list.getHasMore()));
     }
 }

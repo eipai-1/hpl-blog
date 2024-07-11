@@ -1,11 +1,11 @@
 package com.hpl.article.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hpl.article.dto.ArticleAdminDTO;
-import com.hpl.article.dto.SearchArticleDTO;
-import com.hpl.article.dto.SimpleArticleDTO;
-import com.hpl.article.entity.Article;
-import com.hpl.article.entity.ReadCount;
+import com.hpl.article.pojo.dto.ArticleAdminDTO;
+import com.hpl.article.pojo.dto.SearchArticleDTO;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.entity.Article;
+import com.hpl.article.pojo.entity.ReadCount;
 import com.hpl.pojo.CommonPageParam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

@@ -4,15 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Maps;
-import com.hpl.article.dto.ArticleDTO;
-import com.hpl.article.dto.CategoryDTO;
-import com.hpl.article.dto.SimpleArticleDTO;
-import com.hpl.article.dto.TagDTO;
-import com.hpl.article.entity.*;
-import com.hpl.article.enums.*;
+import com.hpl.article.pojo.dto.ArticleDTO;
+import com.hpl.article.pojo.dto.CategoryDTO;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto.TagDTO;
 import com.hpl.article.mapper.ArticleDetailMapper;
 import com.hpl.article.mapper.ArticleMapper;
 import com.hpl.article.mapper.ArticleTagMapper;
+import com.hpl.article.pojo.entity.*;
+import com.hpl.article.pojo.enums.*;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.CategoryService;
 import com.hpl.article.service.TagService;
@@ -693,20 +693,27 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         return this.buildArticleListVo(recommendArticles, page.getPageSize());
     }
 
-    /**
-     * 根据类别ID和标签ID列表，排序后推荐相关文章。
-     * 通过阅读量对相关文章进行排序，确保推荐的文章是基于用户可能感兴趣的内容。
-     *
-     * @param categoryId 类别ID，用于筛选文章。
-     * @param tagIds 标签ID列表，用于进一步筛选文章。
-     * @param pageParam 分页参数，用于指定查询的页码和每页数量。
-     * @return 返回排序后的相关文章列表。
-     */
-    private List<Article> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, CommonPageParam pageParam) {
+
+    @Override
+    public List<SimpleArticleDTO> listArticlesOrderById(long lastId, int scanSize){
+        return articleMapper.listArticlesOrderById(lastId, scanSize);
+    }
+
+    @Override
+    public List<ArticleTag> listTagsByArticleId(Long articleId){
+        LambdaQueryWrapper<ArticleTag> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ArticleTag::getArticleId, articleId)
+                .eq(ArticleTag::getDeleted, CommonDeletedEnum.NO.getCode());
+
+        return articleTagMapper.selectList(wrapper);
+    }
+
+    @Override
+    public List<Article> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, CommonPageParam pageParam){
         // 根据类别ID和标签ID列表查询文章的阅读量信息
         List<ReadCount> list = articleMapper.listArticleByCategoryAndTags(categoryId, tagIds, pageParam);
         // 如果查询结果为空，则直接返回空列表
-        if (CollectionUtils.isEmpty(list)) {
+        if (com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
         }
 
@@ -723,11 +730,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
             return Integer.compare(i1, i2);
         });
         return result;
-    }
-
-    @Override
-    public List<SimpleArticleDTO> listArticlesOrderById(long lastId, int scanSize){
-        return articleMapper.listArticlesOrderById(lastId, scanSize);
     }
 
 }

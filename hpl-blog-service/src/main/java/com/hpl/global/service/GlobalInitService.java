@@ -15,7 +15,7 @@ import com.hpl.user.service.UserService;
 import com.hpl.util.NumUtil;
 import com.hpl.util.SessionUtil;
 import jakarta.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -128,7 +128,7 @@ public class GlobalInitService {
      * 以进一步处理登录用户的初始化，同时传入原始的请求信息。
      */
     public void initLoginUser(ReqInfoContext.ReqInfo reqInfo) {
-        HttpServletRequest request = (HttpServletRequest) ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                 .getRequest();
 
         // 如果请求的Cookies为空，方法直接返回
