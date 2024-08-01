@@ -1,24 +1,14 @@
 package com.hpl.global.interceptor;
 
-import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
-import com.hpl.annotation.permission.Permission;
-import com.hpl.annotation.permission.UserRole;
-import com.hpl.enums.StatusEnum;
-import com.hpl.global.comtext.ReqInfoContext;
+import com.hpl.global.context.ReqInfoContext;
 import com.hpl.global.service.GlobalInitService;
-import com.hpl.pojo.CommonResVo;
-import com.hpl.util.JsonUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 

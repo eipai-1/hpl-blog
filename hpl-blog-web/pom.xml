@@ -23,11 +23,6 @@
             <artifactId>hpl-blog-service</artifactId>
         </dependency>
 
-        <!-- hpl-blog-ui -->
-        <dependency>
-            <groupId>hpl-blog</groupId>
-            <artifactId>hpl-blog-ui</artifactId>
-        </dependency>
 
         <!-- spring-boot-starter -->
         <dependency>
@@ -45,6 +40,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- knife4j -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
         </dependency>
 
 

@@ -5,7 +5,7 @@ import com.hpl.article.pojo.dto.ColumnDTO;
 import com.hpl.article.pojo.dto.TagDTO;
 import com.hpl.article.pojo.vo.ArticleDetailVo;
 import com.hpl.global.component.GlobalViewConfig;
-import com.hpl.global.comtext.ReqInfoContext;
+import com.hpl.global.context.ReqInfoContext;
 import com.hpl.global.pojo.entity.Seo;
 import com.hpl.global.pojo.vo.SeoTagVo;
 import com.hpl.util.DateUtil;

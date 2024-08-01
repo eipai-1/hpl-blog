@@ -31,18 +31,18 @@ public class TagServiceImpl implements TagService {
     private TagMapper tagMapper;
 
     /**
-     * 根据id查询标签列表
+     * 根据id查询标签
+     *
      * @param tagId
      * @return
      */
     @Override
-    public List<Tag> getListById(Long tagId){
+    public Tag getById(Long tagId){
         LambdaQueryWrapper<Tag> queryWrapper=new LambdaQueryWrapper<>();
 
         queryWrapper.eq(Tag::getId,tagId)
-                .eq(Tag::getDeleted,0);     //todo 表结构有个发布状态，这里不处理
-
-        return tagMapper.selectList(queryWrapper);
+                .eq(Tag::getDeleted,CommonDeletedEnum.NO.getCode());
+        return tagMapper.selectOne(queryWrapper);
     }
 
     /**

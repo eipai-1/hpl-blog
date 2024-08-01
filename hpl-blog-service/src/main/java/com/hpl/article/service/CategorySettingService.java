@@ -4,6 +4,7 @@ package com.hpl.article.service;
 import com.hpl.article.pojo.dto.CategoryDTO;
 import com.hpl.article.pojo.dto.CategoryPostDTO;
 import com.hpl.article.pojo.dto.SearchCategoryDTO;
+import com.hpl.article.pojo.vo.CategoryVo;
 import com.hpl.pojo.CommonPageVo;
 
 /**
@@ -22,8 +23,9 @@ public interface CategorySettingService {
 
     /**
      * 获取category列表
+     *
      * @param searchCategoryDTO
      * @return
      */
-    CommonPageVo<CategoryDTO> getCategoryList(SearchCategoryDTO searchCategoryDTO);
+    CommonPageVo<CategoryVo> getCategoryList(SearchCategoryDTO searchCategoryDTO);
 }

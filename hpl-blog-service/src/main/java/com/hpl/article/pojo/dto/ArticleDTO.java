@@ -63,8 +63,6 @@ public class ArticleDTO implements Serializable {
 
     /**
      * 文章来源
-     *
-     * @see SourceTypeEnum
      */
     private String sourceType;
 

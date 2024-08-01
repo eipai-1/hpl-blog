@@ -16,7 +16,7 @@ import com.hpl.article.mapper.ArticleTagMapper;
 import com.hpl.article.pojo.enums.*;
 import com.hpl.article.service.ArticleWriteService;
 import com.hpl.enums.StatusEnum;
-import com.hpl.global.comtext.ReqInfoContext;
+import com.hpl.global.context.ReqInfoContext;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserFootService;
@@ -184,7 +184,7 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
             article.setStatus(PushStatusEnum.REVIEW.getCode());
         }
         // 更新文章
-        article.setUpdateTime(new Date());
+//        article.setUpdateTime(new Date());
         articleMapper.updateById(article);
 
         // 更新内容

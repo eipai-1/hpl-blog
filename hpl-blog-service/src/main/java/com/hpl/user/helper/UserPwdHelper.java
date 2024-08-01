@@ -20,7 +20,7 @@ public class UserPwdHelper {
     private final Random RANDOM = new Random();
 
     public boolean match(String plainPwd, String encPwd) {
-        return Objects.equals(encodePwd(plainPwd), encPwd);
+        return BCrypt.checkpw(plainPwd, encPwd);
     }
 
     /**
@@ -33,7 +33,8 @@ public class UserPwdHelper {
      */
     public String encodePwd(String plainPwd) {
         // 提供了强大的Bcrypt加密功能，这里使用默认强度进行加密
-        return BCrypt.hashpw(plainPwd, BCrypt.gensalt());
+        System.out.println(plainPwd);
+        return BCrypt.hashpw(plainPwd);
     }
 
     public String genSalt(){

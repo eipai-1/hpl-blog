@@ -17,7 +17,7 @@ import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.CategoryService;
 import com.hpl.article.service.TagService;
 import com.hpl.enums.StatusEnum;
-import com.hpl.global.comtext.ReqInfoContext;
+import com.hpl.global.context.ReqInfoContext;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonPageListVo;
@@ -127,13 +127,14 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
     /**
+     * 已处理
      * 根据文章ID查询关联的标签信息。
      *
      * @param articleId 文章的唯一标识ID。
      * @return 返回包含标签信息的CommonPageVo对象，其中标签信息以TagDTO形式呈现。
      *         CommonPageVo封装了分页信息和数据列表，这里只用到了数据列表部分。
      */
-    private List<TagDTO> getTagsById(Long articleId) {
+    private List<TagDTO> getTagsByAId(Long articleId) {
         // 初始化用于存储标签DTO的列表
         List<TagDTO> tagDTOS = new ArrayList<>();
 
@@ -145,26 +146,31 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         ArticleTag articleTag = articleTagMapper.selectOne(queryWrapper);
 
         // 如果找到了文章标签信息，则进一步查询对应的标签详情
-        if(articleTag!=null){
-            // 根据标签ID，获取标签列表
-            List<Tag> tags= tagService.getListById(articleTag.getTagId());
-
-            // 遍历标签列表，将每个标签的信息转换为TagDTO，并添加到tagDTOS列表中
-            for(Tag tag : tags){
-                TagDTO tagDTO = new TagDTO();
-                tagDTO.setTag(tag.getTagName());
-                tagDTO.setTagId(tag.getId());
-                tagDTO.setStatus(tag.getStatus());
-                tagDTOS.add(tagDTO);
-            }
-        }
+//        if(articleTag!=null){
+//            // 根据标签ID，获取标签列表
+//            List<Tag> tags= tagService.getById(articleTag.getTagId());
+//
+//            // 遍历标签列表，将每个标签的信息转换为TagDTO，并添加到tagDTOS列表中
+//            for(Tag tag : tags){
+//                TagDTO tagDTO = new TagDTO();
+//                tagDTO.setTag(tag.getTagName());
+//                tagDTO.setTagId(tag.getId());
+//                tagDTO.setStatus(tag.getStatus());
+//                tagDTOS.add(tagDTO);
+//            }
+//        }
 
         return tagDTOS;
     }
 
+    /**
+     * 已处理
+     * @param articleId
+     * @return
+     */
     @Override
     public CommonPageVo<TagDTO> listTagsById(Long articleId) {
-        List<TagDTO> tagDTOS=this.getTagsById(articleId);
+        List<TagDTO> tagDTOS=this.getTagsByAId(articleId);
         // 根据tagDTOS列表内容，构建并返回CommonPageVo对象，用于分页展示标签信息
         return CommonPageVo.build(tagDTOS, 1, 10, tagDTOS.size());
     }
@@ -183,8 +189,8 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         BeanUtils.copyProperties(article,articleDTO);
         articleDTO.setArticleId(articleId);
         articleDTO.setCover(article.getPicture());
-        articleDTO.setCreateTime(article.getCreateTime().getTime());
-        articleDTO.setLastUpdateTime(article.getUpdateTime().getTime());
+//        articleDTO.setCreateTime(article.getCreateTime());
+//        articleDTO.setLastUpdateTime(article.getUpdateTime());
         articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
         articleDTO.setCategory(new CategoryDTO((article.getCategoryId()),null));
 
@@ -198,10 +204,10 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
         // 更新分类相关信息
         CategoryDTO category = articleDTO.getCategory();
-        category.setCategory(categoryService.queryCategoryName(category.getCategoryId()));
+        category.setCategory(categoryService.getNameById(category.getCategoryId()));
 
         // 更新标签信息
-        articleDTO.setTags(this.getTagsById(articleId));
+        articleDTO.setTags(this.getTagsByAId(articleId));
         return articleDTO;
     }
 
@@ -271,6 +277,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
 
     /**
+     * 已处理
      * 查询文章列表
      *
      * @param categoryId
@@ -313,6 +320,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
     /**
+     * 已处理
      * 根据文章数据对象列表和分页大小，构建文章列表视图对象。
      * 此方法将内部文章数据对象转换为外部使用的文章DTO（数据传输对象），并根据分页大小准备分页信息。
      *
@@ -345,25 +353,28 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         BeanUtils.copyProperties(article,articleDTO);
         articleDTO.setArticleId(article.getId());
         articleDTO.setCover(article.getPicture());
-        articleDTO.setCreateTime(article.getCreateTime().getTime());
-        articleDTO.setLastUpdateTime(article.getUpdateTime().getTime());
+//        articleDTO.setCreateTime(article.getCreateTime().getTime());
+//        articleDTO.setLastUpdateTime(article.getUpdateTime().getTime());
         articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
-        if (showReviewContent(article)) {
-            ArticleDetail detail = this.getArticleDetailById(article.getId());
-            articleDTO.setContent(detail.getContent());
-        } else {
-            // 对于审核中的文章，只有作者本人才能看到原文
-            articleDTO.setContent("### 文章审核中，请稍后再看");
-        }
+
+        //todo 不用传detail吧 展示的话用不到，点进去才要
+//        if (showReviewContent(article)) {
+//            ArticleDetail detail = this.getArticleDetailById(article.getId());
+//            articleDTO.setContent(detail.getContent());
+//        } else {
+//            // 对于审核中的文章，只有作者本人才能看到原文
+//            articleDTO.setContent("### 文章审核中，请稍后再看");
+//        }
+
         // 设置类目id
         articleDTO.setCategory(new CategoryDTO(article.getCategoryId(), null));
 
 
         // 分类信息
-        articleDTO.getCategory().setCategory(categoryService.queryCategoryName(article.getCategoryId()));
+        articleDTO.getCategory().setCategory(categoryService.getNameById(article.getCategoryId()));
 
         // 标签列表
-        articleDTO.setTags(this.getTagsById(article.getId()));
+        articleDTO.setTags(this.getTagsByAId(article.getId()));
 
         // 阅读计数统计
         articleDTO.setCount(countService.getArticleStatisticInfo(article.getId()));

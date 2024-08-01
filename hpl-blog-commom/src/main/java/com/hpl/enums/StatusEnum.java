@@ -31,6 +31,7 @@ import lombok.Getter;
 public enum StatusEnum {
 
     // 成功
+    //todo 这个好像永远用不上，成功了根本不走这层封装，
     SUCCESS(0, "OK"),
 
     /**************************************************

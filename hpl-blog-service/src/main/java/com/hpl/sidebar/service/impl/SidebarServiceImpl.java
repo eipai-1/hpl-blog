@@ -86,7 +86,7 @@ public class SidebarServiceImpl implements SidebarService {
                     .setName(configDTO.getName())
                     .setTitle(configDTO.getContent())
                     .setUrl(configDTO.getJumpUrl())
-                    .setTime(configDTO.getCreateTime().getTime())
+//                    .setTime(configDTO.getCreateTime().getTime())
                     .setTags(configTags)
             );
         });

@@ -1,5 +1,7 @@
 package com.hpl.user.pojo.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -18,13 +20,18 @@ public class RegisterPwdDto implements Serializable {
 //    /** 用户id */
 //    private Long userId;
 
-    /** 注册用户名 */
+    @Schema(description = "注册用户名",requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "注册用户名不能为空")
     private String username;
 
     /** 注册密码 */
+    @Schema(description = "注册密码",requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "注册密码不能为空")
     private String password;
 
     /** 二次密码 */
+    @Schema(description = "二次密码",requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "二次密码不能为空")
     private String twicePwd;
 
 }

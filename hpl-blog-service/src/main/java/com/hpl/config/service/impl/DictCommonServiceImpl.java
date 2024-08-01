@@ -3,6 +3,7 @@ package com.hpl.config.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
 import com.hpl.article.pojo.dto.CategoryDTO;
+import com.hpl.article.pojo.vo.CategoryVo;
 import com.hpl.article.service.CategoryService;
 import com.hpl.config.mapper.DictCommonMapper;
 import com.hpl.config.pojo.dto.DictCommonDTO;
@@ -30,41 +31,41 @@ public class DictCommonServiceImpl extends ServiceImpl<DictCommonMapper, DictCom
     @Autowired
     private CategoryService categoryService;
 
-    @Override
-    public Map<String, Object> getDict() {
-        Map<String, Object> result = Maps.newLinkedHashMap();
-
-        List<DictCommonDTO> dictCommonList = new ArrayList<>();
-
-        List<DictCommon> list = lambdaQuery().list();
-
-        if (!CollectionUtils.isEmpty(list)) {
-            dictCommonList = list.stream()
-                    .map(this::toDTO)
-                    .collect(Collectors.toList());
-        }
-
-
-
-        Map<String, Map<String, String>> dictCommonMap = Maps.newLinkedHashMap();
-        for (DictCommonDTO dictCommon : dictCommonList) {
-            Map<String, String> codeMap = dictCommonMap.get(dictCommon.getTypeCode());
-            if (codeMap == null || codeMap.isEmpty()) {
-                codeMap = Maps.newLinkedHashMap();
-                dictCommonMap.put(dictCommon.getTypeCode(), codeMap);
-            }
-            codeMap.put(dictCommon.getDictCode(), dictCommon.getDictDesc());
-        }
-
-        // 获取分类的字典信息
-        List<CategoryDTO> categoryDTOS = categoryService.loadAllCategories();
-        Map<String, String> codeMap = new HashMap<>();
-        categoryDTOS.forEach(categoryDTO -> codeMap.put(categoryDTO.getCategoryId().toString(), categoryDTO.getCategory()));
-        dictCommonMap.put("CategoryType", codeMap);
-
-        result.putAll(dictCommonMap);
-        return result;
-    }
+//    @Override
+//    public Map<String, Object> getDict() {
+//        Map<String, Object> result = Maps.newLinkedHashMap();
+//
+//        List<DictCommonDTO> dictCommonList = new ArrayList<>();
+//
+//        List<DictCommon> list = lambdaQuery().list();
+//
+//        if (!CollectionUtils.isEmpty(list)) {
+//            dictCommonList = list.stream()
+//                    .map(this::toDTO)
+//                    .collect(Collectors.toList());
+//        }
+//
+//
+//
+//        Map<String, Map<String, String>> dictCommonMap = Maps.newLinkedHashMap();
+//        for (DictCommonDTO dictCommon : dictCommonList) {
+//            Map<String, String> codeMap = dictCommonMap.get(dictCommon.getTypeCode());
+//            if (codeMap == null || codeMap.isEmpty()) {
+//                codeMap = Maps.newLinkedHashMap();
+//                dictCommonMap.put(dictCommon.getTypeCode(), codeMap);
+//            }
+//            codeMap.put(dictCommon.getDictCode(), dictCommon.getDictDesc());
+//        }
+//
+//        // 获取分类的字典信息
+//        List<CategoryVo> categoryDTOS = categoryService.getAllCategories();
+//        Map<String, String> codeMap = new HashMap<>();
+//        categoryDTOS.forEach(categoryDTO -> codeMap.put(categoryDTO.getCategoryId().toString(), categoryDTO.getCategory()));
+//        dictCommonMap.put("CategoryType", codeMap);
+//
+//        result.putAll(dictCommonMap);
+//        return result;
+//    }
 
     private DictCommonDTO toDTO(DictCommon dictCommon) {
         if (dictCommon == null) {

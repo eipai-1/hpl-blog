@@ -40,7 +40,7 @@ public class Application implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         String index="http://127.0.0.1:" + webPort;
-        log.info("启动成功，点击访问首页：{}",index);
+        log.info("后端启动成功，点击访问首页：{}",index);
         log.info("template：{}",template);
     }
 

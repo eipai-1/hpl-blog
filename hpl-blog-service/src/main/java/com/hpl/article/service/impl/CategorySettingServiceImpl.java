@@ -2,11 +2,11 @@ package com.hpl.article.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.hpl.article.pojo.dto.CategoryDTO;
 import com.hpl.article.pojo.dto.CategoryPostDTO;
 import com.hpl.article.pojo.dto.SearchCategoryDTO;
 import com.hpl.article.pojo.entity.Category;
 import com.hpl.article.mapper.CategoryMapper;
+import com.hpl.article.pojo.vo.CategoryVo;
 import com.hpl.article.service.CategoryService;
 import com.hpl.article.service.CategorySettingService;
 import com.hpl.pojo.CommonDeletedEnum;
@@ -111,7 +111,7 @@ public class CategorySettingServiceImpl implements CategorySettingService {
      * @return 返回分类的分页结果，包含分类DTO列表和总记录数等信息。
      */
     @Override
-    public CommonPageVo<CategoryDTO> getCategoryList(SearchCategoryDTO searchCategoryDTO) {
+    public CommonPageVo<CategoryVo> getCategoryList(SearchCategoryDTO searchCategoryDTO) {
         // 检查搜索条件是否为空，为空则直接返回null
         if (searchCategoryDTO == null) {
             return null;
@@ -131,8 +131,8 @@ public class CategorySettingServiceImpl implements CategorySettingService {
 
         // 将分类实体转换为分类DTO列表
         // 将查询到的分类数据转换为DTO格式
-        List<CategoryDTO> categoryDTOS = new ArrayList<>();
-        list.forEach(s -> categoryDTOS.add(categoryService.categoryToDto(s)));
+        List<CategoryVo> categoriesVo = new ArrayList<>();
+        list.forEach(s -> categoriesVo.add(categoryService.categoryToVo(s)));
 
         // 构建查询条件，用于计算总记录数（与获取列表的查询条件相同）
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
@@ -143,7 +143,7 @@ public class CategorySettingServiceImpl implements CategorySettingService {
         Long totalCount = categoryMapper.selectCount(queryWrapper);
 
         // 构建并返回分类的分页结果
-        return CommonPageVo.build(categoryDTOS, searchCategoryDTO.getPageSize(), searchCategoryDTO.getPageNumber(), totalCount);
+        return CommonPageVo.build(categoriesVo, searchCategoryDTO.getPageSize(), searchCategoryDTO.getPageNumber(), totalCount);
     }
 
 }

@@ -15,5 +15,5 @@ public interface DictCommonService extends IService<DictCommon> {
      * 获取字典值
      * @return
      */
-    Map<String, Object> getDict();
+//    Map<String, Object> getDict();
 }

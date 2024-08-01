@@ -83,6 +83,10 @@ public class CommonResult<T> implements Serializable {
         return new CommonResult<>(CORE_ERROR,msg,null);
     }
 
+    public static <T> CommonResult<T> error(int code,String msg){
+        return new CommonResult<>(code,msg,null);
+    }
+
     // 构建指定状态码
     public static <T> CommonResult<T> code(int code, String msg, T data){
         return new CommonResult<>(code,msg,data);

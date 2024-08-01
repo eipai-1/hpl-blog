@@ -4,24 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.enums.StatusEnum;
-import com.hpl.global.comtext.ReqInfoContext;
+import com.hpl.global.context.ReqInfoContext;
+import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.user.helper.UserPwdHelper;
 import com.hpl.user.helper.UserSessionHelper;
 import com.hpl.user.pojo.dto.RegisterPwdDto;
 import com.hpl.user.pojo.entity.User;
 import com.hpl.user.mapper.UserMapper;
-import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
 import com.hpl.user.service.UserService;
 import com.hpl.util.ExceptionUtil;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 /**
  * @author : rbe
@@ -69,7 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
 //        User user =getUserByUserName(username);
         LambdaQueryWrapper<User> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(User::getUserName, username)
-                .eq(User::getDeleted,0);    //todo 待优化 0 可以改为枚举或常量
+                .eq(User::getDeleted, CommonDeletedEnum.NO.getCode());
         User user=userMapper.selectOne(queryWrapper);
 
 
@@ -81,15 +78,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         String salt=user.getSalt();
         password+=salt;
 
+        log.warn(userPwdHelper.encodePwd(password));
+        log.warn(user.getPassword());
+
         if (!userPwdHelper.match(password, user.getPassword())) {
             throw ExceptionUtil.of(StatusEnum.USER_PWD_ERROR);
         }
 
         Long userId = user.getId();
-        // 1. 为了兼容历史数据，对于首次登录成功的用户，初始化ai信息
-//        userAiService.initOrUpdateAiInfo(new UserPwdLoginReq().setUserId(userId).setUsername(username).setPassword(password));
 
         // 登录成功，返回对应的session
+
+        //todo 暂时这样处理 ，但只有reqinfo信息，应该写个拦截器，补全相关信息
+        ReqInfoContext.ReqInfo reqInfo = new ReqInfoContext.ReqInfo();
+        ReqInfoContext.addReqInfo(reqInfo);
+
         ReqInfoContext.getReqInfo().setUserId(userId);
         return userSessionHelper.genSession(userId);
     }
@@ -113,7 +116,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
 
 
         // 2. 判断当前用户是否登录，若已经登录，则直接走绑定流程 (就是已经第三方登录的用户）
-        Long userId = ReqInfoContext.getReqInfo().getUserId();
+
+        //todo 因为这里是注册，也还没弄第三方登录，所以没登录，所以直接走id为空流程
+//        Long userId = ReqInfoContext.getReqInfo().getUserId();
+
+        Long userId = null;
+
         if (userId != null) {
             // 已登录用户绑定新用户名和密码
             // 2.1 如果用户已经登录，则走绑定用户信息流程
@@ -142,7 +150,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         userInfoService.initUserInfo(user.getId());
 
         // 设置用户ID和生成用户会话
-        ReqInfoContext.getReqInfo().setUserId(user.getId());
+
+        //todo 暂时这样跳过处理 ，应该写个拦截器，补全相关信息
+//        ReqInfoContext.getReqInfo().setUserId(user.getId());
+
         return userSessionHelper.genSession(user.getId());
     }
 

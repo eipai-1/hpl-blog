@@ -73,7 +73,7 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
             setUserFootState(readUserFoot, operateTypeEnum);
             userFootMapper.insert(readUserFoot);
         } else if (setUserFootState(readUserFoot, operateTypeEnum)) {
-            readUserFoot.setUpdateTime(new Date());
+//            readUserFoot.setUpdateTime(new Date());
             userFootMapper.updateById(readUserFoot);
         }
         return readUserFoot;

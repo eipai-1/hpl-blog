@@ -9,6 +9,7 @@ import com.hpl.article.pojo.dto.CategoryDTO;
 import com.hpl.article.pojo.entity.Category;
 import com.hpl.article.pojo.enums.PushStatusEnum;
 import com.hpl.article.mapper.CategoryMapper;
+import com.hpl.article.pojo.vo.CategoryVo;
 import com.hpl.article.service.CategoryService;
 import com.hpl.pojo.CommonDeletedEnum;
 import jakarta.annotation.PostConstruct;
@@ -28,18 +29,18 @@ import java.util.List;
  */
 @Service
 public class CategoryServiceImpl implements CategoryService {
+
     /**
      * 分类数一般不会特别多，如编程领域可以预期的分类将不会超过30，所以可以做一个全量的内存缓存
      * todo 后续可改为Guava -> Redis
      */
-    private LoadingCache<Long, CategoryDTO> categoryCaches;
+    private LoadingCache<Long, CategoryVo> categoryCaches;
 
-    private CategoryMapper categoryMapper;
+    private final CategoryMapper categoryMapper;
 
     public CategoryServiceImpl(CategoryMapper categoryDao) {
         this.categoryMapper = categoryDao;
     }
-
 
     /**
      * 初始化分类缓存。
@@ -50,37 +51,33 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @PostConstruct
     public void init() {
-        categoryCaches = CacheBuilder.newBuilder().maximumSize(300).build(new CacheLoader<Long, CategoryDTO>() {
+        categoryCaches = CacheBuilder.newBuilder().maximumSize(300).build(new CacheLoader<Long, CategoryVo>() {
             /**
              * 当缓存中不存在指定的分类ID时，该方法被调用以加载数据。
              * 它通过查询数据库来获取分类信息，并将其转换为CategoryDTO对象存储在缓存中。
              * 如果分类不存在或已被标记为删除，则返回一个空的CategoryDTO对象。
              */
             @Override
-            public CategoryDTO load(@NotNull Long categoryId) throws Exception {
+            public @NotNull CategoryVo load(@NotNull Long categoryId) throws Exception {
                 LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
                 wrapper.eq(Category::getId, categoryId)
                         .eq(Category::getDeleted, CommonDeletedEnum.NO.getCode());
                 Category category = categoryMapper.selectOne(wrapper);
                 if (category == null || category.getDeleted() == CommonDeletedEnum.YES.getCode()) {
-                    return CategoryDTO.EMPTY;
+//                    return CategoryDTO.EMPTY;
+                    return CategoryVo.builder()
+                            .categoryId(-1L)
+                            .categoryName("illegal")
+                            .build();
                 }
-                return new CategoryDTO(categoryId, category.getCategoryName(), category.getRank());
+//                return new CategoryVo(categoryId, category.getCategoryName(), category.getRank());
+                return CategoryVo.builder()
+                        .categoryId(category.getId())
+                        .categoryName(category.getCategoryName())
+                        .rank(category.getRank())
+                        .build();
             }
         });
-    }
-
-
-    /**
-     * 通过类目ID查询类目名称。
-     *
-     * @param categoryId 类目ID，用于唯一标识一个类目。
-     * @return 类目名称，根据给定的类目ID从缓存中检索。
-     */
-    @Override
-    public String queryCategoryName(Long categoryId) {
-        // 从缓存中获取类目对象，并返回其名称
-        return categoryCaches.getUnchecked(categoryId).getCategory();
     }
 
 
@@ -93,23 +90,58 @@ public class CategoryServiceImpl implements CategoryService {
      * @return 包含所有有效分类的列表，列表中的分类按排名升序排列。
      */
     @Override
-    public List<CategoryDTO> loadAllCategories() {
+    public List<CategoryVo> getAllCategories() {
         // 检查缓存中的分类数量，如果不足，则刷新缓存
         if (categoryCaches.size() <= 5) {
             refreshCache();
         }
 
         // 从缓存中获取所有分类，并转换为List形式
-        List<CategoryDTO> list = new ArrayList<>(categoryCaches.asMap().values());
+        List<CategoryVo> list = new ArrayList<>(categoryCaches.asMap().values());
 
         // 移除无效的分类（分类ID小于等于0）
         list.removeIf(s -> s.getCategoryId() <= 0);
 
         // 根据分类的排名进行排序
-        list.sort(Comparator.comparingInt(CategoryDTO::getRank));
+        list.sort(Comparator.comparingInt(CategoryVo::getRank));
 
         return list;
     }
+
+
+    /**
+     * 通过类目ID查询类目名称。
+     *
+     * @param categoryId 类目ID，用于唯一标识一个类目。
+     * @return 类目名称，根据给定的类目ID从缓存中检索。
+     */
+    @Override
+    public String getNameById(Long categoryId) {
+        // 从缓存中获取类目对象，并返回其名称
+        return categoryCaches.getUnchecked(categoryId).getCategoryName();
+    }
+
+    /**
+     * 根据类别名称查询类别ID。
+     * 该方法通过遍历缓存中的所有CategoryDTO对象，找到与给定类别名称匹配的CategoryDTO，
+     * 并返回其类别ID。如果找不到匹配的CategoryDTO，则返回null。
+     *
+     * @param category 类别名称，不区分大小写。
+     * @return 匹配类别名称的CategoryDTO的类别ID，如果找不到则为null。
+     */
+    @Override
+    public Long getIdByName(String category) {
+        // 从categoryCaches的值流中过滤出类别名称与输入参数category忽略大小写相等的CategoryDTO
+        return categoryCaches.asMap().values().stream()
+                .filter(s -> s.getCategoryName().equalsIgnoreCase(category))
+                // 找到第一个匹配的CategoryDTO
+                .findFirst()
+                // 提取匹配CategoryDTO的类别ID
+                .map(CategoryVo::getCategoryId)
+                // 如果没有找到匹配的CategoryDTO，则返回null
+                .orElse(null);
+    }
+
 
 
     /**
@@ -133,8 +165,8 @@ public class CategoryServiceImpl implements CategoryService {
         categoryCaches.invalidateAll();
         // 进一步清理缓存，确保缓存数据的准确性
         categoryCaches.cleanUp();
-        // 将查询到的分类数据转换为DTO格式，并存入缓存
-        list.forEach(s -> categoryCaches.put(s.getId(), categoryToDto(s)));
+        // 将查询到的分类数据转换为Vo格式，并存入缓存
+        list.forEach(s -> categoryCaches.put(s.getId(), categoryToVo(s)));
     }
 
 
@@ -142,35 +174,15 @@ public class CategoryServiceImpl implements CategoryService {
      * 将Category实体转换为CategoryDTO数据传输对象。
      */
     @Override
-    public CategoryDTO categoryToDto(Category category) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setCategory(category.getCategoryName());
-        dto.setCategoryId(category.getId());
-        dto.setRank(category.getRank());
-        dto.setStatus(category.getStatus());
-        dto.setSelected(false);
-        return dto;
+    public CategoryVo categoryToVo(Category category) {
+        CategoryVo vo = new CategoryVo();
+        vo.setCategoryName(category.getCategoryName());
+        vo.setCategoryId(category.getId());
+        vo.setRank(category.getRank());
+        vo.setStatus(category.getStatus());
+        return vo;
     }
 
-    /**
-     * 根据类别名称查询类别ID。
-     * 该方法通过遍历缓存中的所有CategoryDTO对象，找到与给定类别名称匹配的CategoryDTO，
-     * 并返回其类别ID。如果找不到匹配的CategoryDTO，则返回null。
-     *
-     * @param category 类别名称，不区分大小写。
-     * @return 匹配类别名称的CategoryDTO的类别ID，如果找不到则为null。
-     */
-    @Override
-    public Long queryCategoryId(String category) {
-        // 从categoryCaches的值流中过滤出类别名称与输入参数category忽略大小写相等的CategoryDTO
-        return categoryCaches.asMap().values().stream()
-                .filter(s -> s.getCategory().equalsIgnoreCase(category))
-                // 找到第一个匹配的CategoryDTO
-                .findFirst()
-                // 提取匹配CategoryDTO的类别ID
-                .map(CategoryDTO::getCategoryId)
-                // 如果没有找到匹配的CategoryDTO，则返回null
-                .orElse(null);
-    }
+
 
 }

@@ -64,6 +64,7 @@ public interface ArticleReadService {
     ArticleDTO getFullArticleInfo(Long articleId, Long currentUser);
 
     /**
+     * 已处理
      * 查询某个分类下的文章，支持翻页
      *
      * @param categoryId
@@ -73,6 +74,7 @@ public interface ArticleReadService {
     CommonPageListVo<ArticleDTO> listArticlesByCategory(Long categoryId, CommonPageParam pageParam);
 
     /**
+     * 已处理
      * 文章实体补齐统计、作者、分类标签等信息
      *
      * @param records

@@ -3,7 +3,7 @@ package com.hpl.notify.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hpl.global.comtext.ReqInfoContext;
+import com.hpl.global.context.ReqInfoContext;
 import com.hpl.notify.pojo.dtos.NotifyMsgDTO;
 import com.hpl.notify.pojo.entity.NotifyMsg;
 import com.hpl.notify.pojo.enums.NotifyStateEnum;
