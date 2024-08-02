@@ -1,4 +1,4 @@
-package com.hpl.article.pojo.dto;
+package com.hpl.article.pojo.dto1;
 
 import com.hpl.article.pojo.enums.PushStatusEnum;
 import lombok.AllArgsConstructor;

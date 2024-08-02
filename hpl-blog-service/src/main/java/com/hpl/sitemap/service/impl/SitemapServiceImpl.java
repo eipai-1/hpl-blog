@@ -1,7 +1,7 @@
 package com.hpl.sitemap.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto1.SimpleArticleDTO;
 import com.hpl.article.enent.ArticleMsgEvent;
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.enums.ArticleEventEnum;
@@ -11,7 +11,7 @@ import com.hpl.sitemap.pojo.vo.SiteCntVo;
 import com.hpl.sitemap.pojo.vo.SiteMapVo;
 import com.hpl.sitemap.pojo.vo.SiteUrlVo;
 import com.hpl.sitemap.service.SitemapService;
-import com.hpl.statistic.service.CountService;
+import com.hpl.statistic.service.ReadCountService;
 import com.hpl.util.DateUtil;
 import com.hpl.util.RedisUtil;
 import jakarta.annotation.Resource;
@@ -44,7 +44,7 @@ public class SitemapServiceImpl implements SitemapService {
     @Resource
     private ArticleReadService articleReadService;
     @Resource
-    private CountService countService;
+    private ReadCountService readCountService;
 
     /**
      * 查询站点地图
@@ -79,7 +79,7 @@ public class SitemapServiceImpl implements SitemapService {
         while (true) {
             List<SimpleArticleDTO> list = articleReadService.listArticlesOrderById(lastId, SCAN_SIZE);
             // 刷新文章的统计信息
-            list.forEach(s -> countService.refreshArticleStatisticInfo(s.getId()));
+            list.forEach(s -> readCountService.refreshArticleStatisticInfo(s.getId()));
 
             // 刷新站点地图信息
             Map<String, Long> map = list.stream().collect(Collectors.toMap(s -> String.valueOf(s.getId()), s -> s.getCreateTime().getTime(), (a, b) -> a));

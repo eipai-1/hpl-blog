@@ -1,6 +1,6 @@
 package com.hpl.article.service;
 
-import com.hpl.article.pojo.dto.ArticleDTO;
+import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
 

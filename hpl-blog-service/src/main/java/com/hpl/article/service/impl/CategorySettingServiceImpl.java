@@ -2,8 +2,8 @@ package com.hpl.article.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.hpl.article.pojo.dto.CategoryPostDTO;
-import com.hpl.article.pojo.dto.SearchCategoryDTO;
+import com.hpl.article.pojo.dto1.CategoryPostDTO;
+import com.hpl.article.pojo.dto1.SearchCategoryDTO;
 import com.hpl.article.pojo.entity.Category;
 import com.hpl.article.mapper.CategoryMapper;
 import com.hpl.article.pojo.vo.CategoryVo;

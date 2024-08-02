@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Maps;
-import com.hpl.article.pojo.dto.ArticleDTO;
-import com.hpl.article.pojo.dto.CategoryDTO;
-import com.hpl.article.pojo.dto.SimpleArticleDTO;
-import com.hpl.article.pojo.dto.TagDTO;
+import com.hpl.article.pojo.dto1.ArticleDTO;
+import com.hpl.article.pojo.dto1.CategoryDTO;
+import com.hpl.article.pojo.dto1.SimpleArticleDTO;
+import com.hpl.article.pojo.dto1.TagDTO;
 import com.hpl.article.mapper.ArticleDetailMapper;
 import com.hpl.article.mapper.ArticleMapper;
 import com.hpl.article.mapper.ArticleTagMapper;
@@ -22,7 +22,9 @@ import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageVo;
-import com.hpl.statistic.service.CountService;
+import com.hpl.statistic.pojo.entity.ReadCount;
+import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
+import com.hpl.statistic.service.ReadCountService;
 import com.hpl.user.pojo.entity.UserFoot;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserFootService;
@@ -73,7 +75,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     private UserInfoService userInfoService;
 
     @Autowired
-    private CountService countService;
+    private ReadCountService readCountService;
 
 
 
@@ -250,7 +252,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         ArticleDTO articleDTO = getArticleInfoById(articleId);
 
         // 文章阅读计数+1
-        countService.incrArticleReadCount(articleDTO.getAuthorId(), articleId);
+        readCountService.incrArticleReadCount(articleDTO.getAuthorId(), articleId);
 
         // 文章的操作标记
         if (readUser != null) {
@@ -268,7 +270,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         }
 
         // 更新文章统计计数
-        articleDTO.setCount(countService.getArticleStatisticInfo(articleId));
+        articleDTO.setCount(readCountService.getArticleStatisticInfo(articleId));
 
         // 设置文章的点赞列表
         articleDTO.setPraisedUsers(userFootService.getArticlePraisedUsers(articleId));
@@ -377,7 +379,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         articleDTO.setTags(this.getTagsByAId(article.getId()));
 
         // 阅读计数统计
-        articleDTO.setCount(countService.getArticleStatisticInfo(article.getId()));
+        articleDTO.setCount(readCountService.getArticleStatisticInfo(article.getId()));
 
         // 查询文章作者的基本信息
         UserInfo author = userInfoService.getByUserId(articleDTO.getAuthorId());

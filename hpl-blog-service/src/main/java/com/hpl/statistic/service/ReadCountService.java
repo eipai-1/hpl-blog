@@ -1,12 +1,27 @@
 package com.hpl.statistic.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
+import com.hpl.statistic.pojo.entity.ReadCount;
+
+import java.util.List;
 
 /**
  * @author : rbe
  * @date : 2024/7/3 18:29
  */
-public interface CountService {
+public interface ReadCountService extends IService<ReadCount> {
+
+    /**
+     * 文章计数+1
+     *
+     * @param authorUserId 作者
+     * @param articleId    文章
+     * @return 计数器
+     */
+    void incrArticleReadCount(Long authorUserId, Long articleId);
+
+    List<ReadCount> getTopCountByCategoryId();
 
     /**
      * 根据文章ID查询文章计数
@@ -54,15 +69,7 @@ public interface CountService {
      */
     ArticleFootCountDTO getArticleStatisticInfo(Long articleId);
 
-
-    /**
-     * 文章计数+1
-     *
-     * @param authorUserId 作者
-     * @param articleId    文章
-     * @return 计数器
-     */
-    void incrArticleReadCount(Long authorUserId, Long articleId);
+    
 
     /**
      * 刷新用户的统计信息
@@ -77,4 +84,6 @@ public interface CountService {
      * @param articleId
      */
     void refreshArticleStatisticInfo(Long articleId);
+
+
 }

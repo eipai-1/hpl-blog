@@ -3,7 +3,7 @@
 <mapper namespace="com.hpl.user.mapper.UserFootMapper">
 
     <select id="listSimpleUserInfosByArticleId"
-            resultType="com.hpl.article.pojo.dto.SimpleUserInfoDTO">
+            resultType="com.hpl.article.pojo.dto1.SimpleUserInfoDTO">
         SELECT ui.user_id as userId,
                ui.nick_name as name,
                ui.photo as avatar,

@@ -1,12 +1,17 @@
 package com.hpl.user.service.impl;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hpl.article.pojo.dto.SimpleAuthorCountDTO;
+import com.hpl.article.pojo.dto.TopAuthorDTO;
+import com.hpl.article.service.ArticleService;
 import com.hpl.enums.StatusEnum;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.user.helper.UserRandomGenHelper;
 import com.hpl.user.helper.UserSessionHelper;
+import com.hpl.user.pojo.dto.AuthorDTO;
 import com.hpl.user.pojo.entity.IpInfo;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.mapper.UserInfoMapper;
@@ -18,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -145,4 +152,32 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .eq(UserInfo::getDeleted, CommonDeletedEnum.NO.getCode())
                 .count();
     }
+
+
+    @Override
+    public AuthorDTO getAuthorByArticleId(Long articleId){
+
+        // 先根据文章id查询作者id
+        Long authorId = SpringUtil.getBean(ArticleService.class).getAuthorIdById(articleId);
+
+        // 根据作者id查询作者信息
+        UserInfo userInfo = getByUserId(authorId);
+
+        AuthorDTO authorDTO = new AuthorDTO();
+        authorDTO.setUserId(userInfo.getUserId());
+        authorDTO.setNickName(userInfo.getNickName());
+        authorDTO.setAvatar(userInfo.getPhoto());
+        authorDTO.setProfile(userInfo.getProfile());
+        authorDTO.setCreateTime(userInfo.getCreateTime());
+
+        // 后面再看看还有什么要加的
+
+
+        return authorDTO;
+
+
+    }
+
+
+
 }

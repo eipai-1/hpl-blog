@@ -8,13 +8,25 @@
 <!--        </if>-->
 <!--    </sql>-->
 
+    <select id="getTopFourAuthor" resultType="com.hpl.article.pojo.dto.SimpleAuthorCountDTO">
+        select author_id ,count(1) as article_count
+        from article
+        where deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code}
+        <if test="categoryId != null">
+            and category_id = #{categoryId}
+        </if>
+        group by author_id
+        order by article_count desc
+        limit 4
+    </select>
+
     <select id="listArticleByCategoryAndTags"
-            resultType="com.hpl.article.pojo.entity.ReadCount">
+            resultType="com.hpl.statistic.pojo.entity.ReadCount">
         select DISTINCT(a.id) as documentId, rc.cnt as cnt
         from article a
         left join article_tag as t on a.id = t.article_id
         left join read_count rc on rc.document_id  = a.id
-        where rc.document_type = ${@com.hpl.article.pojo.enums.DocumentTypeEnum@ARTICLE.code}
+        where rc.document_type = ${@com.hpl.statistic.pojo.enums.DocumentTypeEnum@ARTICLE.code}
         and a.status = ${@com.hpl.article.pojo.enums.PushStatusEnum@ONLINE.code}
         and a.deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code}
         <if test="categoryId != null">
@@ -34,10 +46,10 @@
 
 
     <select id="listArticlesByReadCounts"
-            resultType="com.hpl.article.pojo.dto.SimpleArticleDTO">
+            resultType="com.hpl.article.pojo.dto1.SimpleArticleDTO">
         select rc.document_id as id, a.title as title, a.create_time as createTime
         from read_count as rc left join article as a on rc.document_id = a.id
-        where rc.document_type = ${@com.hpl.article.pojo.enums.DocumentTypeEnum@ARTICLE.code}
+        where rc.document_type = ${@com.hpl.statistic.pojo.enums.DocumentTypeEnum@ARTICLE.code}
         and a.status = ${@com.hpl.article.pojo.enums.PushStatusEnum@ONLINE.code}
         and a.deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code} order by rc.cnt desc
 <!--        <if test="pageParam != null">-->
@@ -47,7 +59,7 @@
 
 
     <select id="listArticlesByParams"
-            resultType="com.hpl.article.pojo.dto.ArticleAdminDTO">
+            resultType="com.hpl.article.pojo.dto1.ArticleAdminDTO">
         select a.id as article_id, a.title, a.short_title, a.offical_state,
         a.topping_state, a.status, a.cream_state, a.picture as cover,
         a.update_time,
@@ -102,7 +114,7 @@
     </select>
 
 
-    <select id="listArticlesOrderById" resultType="com.hpl.article.pojo.dto.SimpleArticleDTO">
+    <select id="listArticlesOrderById" resultType="com.hpl.article.pojo.dto1.SimpleArticleDTO">
         select id, title, update_time as createTime from article
         where id > #{lastId}
           and status =${@com.hpl.article.pojo.enums.PushStatusEnum@ONLINE.code}

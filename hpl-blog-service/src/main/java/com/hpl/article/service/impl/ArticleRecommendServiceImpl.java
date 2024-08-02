@@ -2,7 +2,7 @@ package com.hpl.article.service.impl;
 
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.entity.ArticleTag;
-import com.hpl.article.pojo.dto.ArticleDTO;
+import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.ArticleRecommendService;
 import com.hpl.pojo.CommonPageListVo;

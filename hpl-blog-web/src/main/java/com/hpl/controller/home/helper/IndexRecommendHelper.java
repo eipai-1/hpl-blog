@@ -1,7 +1,7 @@
 package com.hpl.controller.home.helper;
 
-import com.hpl.article.pojo.dto.ArticleDTO;
-import com.hpl.article.pojo.dto.CategoryDTO;
+import com.hpl.article.pojo.dto1.ArticleDTO;
+import com.hpl.article.pojo.dto1.CategoryDTO;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.CategoryService;
 import com.hpl.config.pojo.dto.ConfigDTO;

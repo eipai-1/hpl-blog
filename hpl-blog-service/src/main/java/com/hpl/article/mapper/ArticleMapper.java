@@ -1,12 +1,13 @@
 package com.hpl.article.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hpl.article.pojo.dto.ArticleAdminDTO;
-import com.hpl.article.pojo.dto.SearchArticleDTO;
-import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto.SimpleAuthorCountDTO;
+import com.hpl.article.pojo.dto1.ArticleAdminDTO;
+import com.hpl.article.pojo.dto1.SearchArticleDTO;
+import com.hpl.article.pojo.dto1.SimpleArticleDTO;
 import com.hpl.article.pojo.entity.Article;
-import com.hpl.article.pojo.entity.ReadCount;
 import com.hpl.pojo.CommonPageParam;
+import com.hpl.statistic.pojo.entity.ReadCount;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -19,6 +20,11 @@ import java.util.List;
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
 
+    /**
+     * 获取当前分类下前四位作者的id和文章数
+     * @param categoryId
+     */
+    List<SimpleAuthorCountDTO> getTopFourAuthor(Long categoryId);
 
 
     /**
@@ -55,5 +61,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return
      */
     List<SimpleArticleDTO> listArticlesOrderById(@Param("lastId") Long lastId, @Param("size") int size);
+
 
 }

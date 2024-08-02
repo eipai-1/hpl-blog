@@ -11,7 +11,7 @@ import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.entity.ColumnArticle;
 import com.hpl.article.pojo.entity.ColumnInfo;
 import com.hpl.article.mapper.ColumnInfoMapper;
-import com.hpl.article.pojo.dto.*;
+import com.hpl.article.pojo.dto1.*;
 import com.hpl.article.service.*;
 import com.hpl.enums.StatusEnum;
 import com.hpl.pojo.CommonPageParam;

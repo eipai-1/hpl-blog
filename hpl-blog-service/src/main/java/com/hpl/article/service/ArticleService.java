@@ -1,12 +1,14 @@
 package com.hpl.article.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hpl.article.pojo.dto.ArticleDTO;
+import com.hpl.article.pojo.dto.TopArticleDTO;
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.vo.ArticleListVo;
-import com.hpl.article.pojo.vo.TopAuthorVO;
+import com.hpl.article.pojo.dto.TopAuthorDTO;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
+
+import java.util.List;
 
 /**
  * @author : rbe
@@ -23,5 +25,15 @@ public interface ArticleService extends IService<Article> {
      */
     CommonPageListVo<ArticleListVo> listArticlesByCategory(Long categoryId, CommonPageParam pageParam);
 
-//    TopAuthorVO getTopAuthor();
+    List<TopAuthorDTO> getTopFourAuthor(Long categoryId);
+
+    List<TopArticleDTO> getTopEight();
+
+
+    /**
+     * 根据文章id获取作者id
+     * @param articleId
+     * @return
+     */
+    Long getAuthorIdById(Long articleId);
 }

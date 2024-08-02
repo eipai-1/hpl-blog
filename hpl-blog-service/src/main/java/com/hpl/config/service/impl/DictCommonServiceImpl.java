@@ -1,9 +1,6 @@
 package com.hpl.config.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.google.common.collect.Maps;
-import com.hpl.article.pojo.dto.CategoryDTO;
-import com.hpl.article.pojo.vo.CategoryVo;
 import com.hpl.article.service.CategoryService;
 import com.hpl.config.mapper.DictCommonMapper;
 import com.hpl.config.pojo.dto.DictCommonDTO;
@@ -12,11 +9,6 @@ import com.hpl.config.service.DictCommonService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.util.*;
-
-import java.util.stream.Collectors;
 
 /**
  * @author : rbe

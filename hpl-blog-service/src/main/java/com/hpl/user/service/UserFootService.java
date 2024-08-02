@@ -1,8 +1,8 @@
 package com.hpl.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hpl.article.pojo.dto.SimpleUserInfoDTO;
-import com.hpl.article.pojo.enums.DocumentTypeEnum;
+import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
+import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
 import com.hpl.article.pojo.enums.OperateTypeEnum;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;

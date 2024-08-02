@@ -1,6 +1,7 @@
 package com.hpl.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hpl.user.pojo.dto.AuthorDTO;
 import com.hpl.user.pojo.entity.UserInfo;
 
 /**
@@ -14,6 +15,8 @@ public interface UserInfoService extends IService<UserInfo> {
      * @param userId
      */
     void initUserInfo(Long userId);
+    
+    
 
     /**
      * 根据session获取用户信息
@@ -36,4 +39,7 @@ public interface UserInfoService extends IService<UserInfo> {
      * @return
      */
     Long getCount();
+
+
+    AuthorDTO getAuthorByArticleId(Long articleId);
 }

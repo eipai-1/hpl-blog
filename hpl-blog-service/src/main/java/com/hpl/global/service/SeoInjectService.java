@@ -1,8 +1,8 @@
 package com.hpl.global.service;
 
-import com.hpl.article.pojo.dto.ColumnArticlesDTO;
-import com.hpl.article.pojo.dto.ColumnDTO;
-import com.hpl.article.pojo.dto.TagDTO;
+import com.hpl.article.pojo.dto1.ColumnArticlesDTO;
+import com.hpl.article.pojo.dto1.ColumnDTO;
+import com.hpl.article.pojo.dto1.TagDTO;
 import com.hpl.article.pojo.vo.ArticleDetailVo;
 import com.hpl.global.component.GlobalViewConfig;
 import com.hpl.global.context.ReqInfoContext;

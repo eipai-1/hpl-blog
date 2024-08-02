@@ -1,7 +1,7 @@
 package com.hpl.article.pojo.vo;
 
-import com.hpl.article.pojo.dto.ArticleDTO;
-import com.hpl.article.pojo.dto.ArticleOtherDTO;
+import com.hpl.article.pojo.dto1.ArticleDTO;
+import com.hpl.article.pojo.dto1.ArticleOtherDTO;
 import com.hpl.comment.pojo.dto.TopCommentDTO;
 import com.hpl.sidebar.pojo.dto.SideBarDTO;
 import com.hpl.user.pojo.entity.UserInfo;

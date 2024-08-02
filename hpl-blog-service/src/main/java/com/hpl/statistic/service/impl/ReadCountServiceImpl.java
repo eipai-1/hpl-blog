@@ -3,13 +3,14 @@ package com.hpl.statistic.service.impl;
 import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.hpl.article.pojo.entity.ReadCount;
-import com.hpl.article.pojo.enums.DocumentTypeEnum;
-import com.hpl.article.mapper.ReadCountMapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
 import com.hpl.article.service.ArticleReadService;
+import com.hpl.statistic.mapper.ReadCountMapper;
 import com.hpl.statistic.pojo.constant.CountConstant;
 import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
-import com.hpl.statistic.service.CountService;
+import com.hpl.statistic.pojo.entity.ReadCount;
+import com.hpl.statistic.service.ReadCountService;
 import com.hpl.user.service.UserFootService;
 import com.hpl.user.service.UserRelationService;
 import com.hpl.util.MapUtil;
@@ -18,6 +19,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +28,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class CountServiceImpl implements CountService {
+public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount> implements ReadCountService {
 
     @Resource
     private UserFootService userFootService;
@@ -99,6 +101,8 @@ public class CountServiceImpl implements CountService {
 
     @Override
     public void incrArticleReadCount(Long authorUserId, Long articleId) {
+        //todo
+
         // db层-MySQL的计数+1
         LambdaQueryWrapper<ReadCount> query = Wrappers.lambdaQuery();
         query.eq(ReadCount::getDocumentId, articleId)
@@ -106,10 +110,10 @@ public class CountServiceImpl implements CountService {
         ReadCount record = readCountMapper.selectOne(query);
 
         if (record == null) {
-            record = new ReadCount()
-                    .setDocumentId(articleId)
-                    .setDocumentType(DocumentTypeEnum.ARTICLE.getCode())
-                    .setCnt(1);
+            record = new ReadCount();
+            record.setDocumentId(articleId);
+            record.setDocumentType(DocumentTypeEnum.ARTICLE.getCode());
+            record.setCnt(1);
 
             readCountMapper.insert(record);
         } else {
@@ -148,6 +152,19 @@ public class CountServiceImpl implements CountService {
 //        }
 //        log.info("结束自动刷新用户统计信息，共耗时: {}ms, maxUserId: {}", System.currentTimeMillis() - now, userId);
 //    }
+
+
+    /**
+     * 获取阅读数最多的文章
+     * @return
+     */
+    @Override
+    public List<ReadCount> getTopCountByCategoryId(){
+        return lambdaQuery()
+                .eq(ReadCount::getDocumentType, DocumentTypeEnum.ARTICLE.getCode())
+                .orderByDesc(ReadCount::getCnt)
+                .list();
+    }
 
 
     /**
@@ -201,4 +218,7 @@ public class CountServiceImpl implements CountService {
                 )
         );
     }
+
+
+
 }

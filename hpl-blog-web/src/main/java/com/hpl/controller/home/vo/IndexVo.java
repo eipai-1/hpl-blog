@@ -1,7 +1,7 @@
 package com.hpl.controller.home.vo;
 
-import com.hpl.article.pojo.dto.ArticleDTO;
-import com.hpl.article.pojo.dto.CategoryDTO;
+import com.hpl.article.pojo.dto1.ArticleDTO;
+import com.hpl.article.pojo.dto1.CategoryDTO;
 import com.hpl.controller.home.dto.CarouseDTO;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.sidebar.pojo.dto.SideBarDTO;

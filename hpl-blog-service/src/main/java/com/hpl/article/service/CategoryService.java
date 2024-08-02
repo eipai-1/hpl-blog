@@ -1,6 +1,7 @@
 package com.hpl.article.service;
 
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.article.pojo.entity.Category;
 import com.hpl.article.pojo.vo.CategoryVo;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * @author louzai
  * @date 2022-07-20
  */
-public interface CategoryService {
+public interface CategoryService extends IService<Category> {
 
     /**
      * 查询所有的分类

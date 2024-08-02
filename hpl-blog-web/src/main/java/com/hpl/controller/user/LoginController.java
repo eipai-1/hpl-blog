@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/user")
-@Tag(name = "用户相关基本接口")
-public class UserController {
+@Tag(name = "登录相关接口")
+public class LoginController {
 
     @Autowired
     UserService userService;

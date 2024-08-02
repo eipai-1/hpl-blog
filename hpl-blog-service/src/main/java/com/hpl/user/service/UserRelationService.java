@@ -16,6 +16,15 @@ import java.util.Set;
 public interface UserRelationService extends IService<UserRelation> {
 
     /**
+     * 根据登录用户从给定用户列表中，找出已关注的用户id
+     *
+     * @param userIds
+     * @param loginUserId
+     * @return
+     */
+    Set<Long> getFollowedUserId(List<Long> userIds, Long loginUserId);
+
+    /**
      * 我关注的用户
      *
      * @param userId
@@ -25,21 +34,28 @@ public interface UserRelationService extends IService<UserRelation> {
     CommonPageListVo<FollowUserInfoDTO> getUserFollowList(Long userId, CommonPageParam pageParam);
 
 
-
     /**
-     * 根据登录用户从给定用户列表中，找出已关注的用户id
-     *
-     * @param userIds
-     * @param loginUserId
+     * 获取当前用户关注人数
+     * @param userId
      * @return
      */
-    Set<Long> getFollowedUserId(List<Long> userIds, Long loginUserId);
-
-
     Long queryUserFollowCount(Long userId);
 
 
+    /**
+     * 获取用户关注数
+     * @param userId
+     * @return
+     */
     Long queryUserFansCount(Long userId);
+
+    /**
+     * 根据fanId判断是否关注userId
+     * @param userId
+     * @param fansUserId
+     * @return
+     */
+    Boolean isFollow(Long userId, Long fansUserId);
 
 
 }

@@ -5,7 +5,7 @@
 //import com.hpl.annotation.permission.UserRole;
 //import com.hpl.article.pojo.entity.Article;
 //import com.hpl.article.pojo.dto.*;
-//import com.hpl.article.pojo.enums.DocumentTypeEnum;
+//import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
 //import com.hpl.article.pojo.enums.OperateTypeEnum;
 //import com.hpl.article.pojo.vo.ArticleDetailVo;
 //import com.hpl.article.service.*;

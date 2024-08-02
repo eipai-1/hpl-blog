@@ -1,9 +1,8 @@
 package com.hpl.article.service;
 
 
-import com.hpl.article.pojo.dto.CategoryDTO;
-import com.hpl.article.pojo.dto.CategoryPostDTO;
-import com.hpl.article.pojo.dto.SearchCategoryDTO;
+import com.hpl.article.pojo.dto1.CategoryPostDTO;
+import com.hpl.article.pojo.dto1.SearchCategoryDTO;
 import com.hpl.article.pojo.vo.CategoryVo;
 import com.hpl.pojo.CommonPageVo;
 

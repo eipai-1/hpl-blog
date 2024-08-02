@@ -1,4 +1,4 @@
-package com.hpl.article.pojo.dto;
+package com.hpl.article.pojo.dto1;
 
 import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
 import lombok.Data;

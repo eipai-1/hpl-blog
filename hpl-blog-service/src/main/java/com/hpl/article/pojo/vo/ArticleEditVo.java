@@ -1,8 +1,8 @@
 package com.hpl.article.pojo.vo;
 
-import com.hpl.article.pojo.dto.ArticleDTO;
-import com.hpl.article.pojo.dto.CategoryDTO;
-import com.hpl.article.pojo.dto.TagDTO;
+import com.hpl.article.pojo.dto1.ArticleDTO;
+import com.hpl.article.pojo.dto1.CategoryDTO;
+import com.hpl.article.pojo.dto1.TagDTO;
 import lombok.Data;
 
 import java.util.List;

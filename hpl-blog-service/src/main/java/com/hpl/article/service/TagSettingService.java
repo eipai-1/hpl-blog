@@ -1,9 +1,9 @@
 package com.hpl.article.service;
 
 
-import com.hpl.article.pojo.dto.SearchTagDTO;
-import com.hpl.article.pojo.dto.TagDTO;
-import com.hpl.article.pojo.dto.TagPostDTO;
+import com.hpl.article.pojo.dto1.SearchTagDTO;
+import com.hpl.article.pojo.dto1.TagDTO;
+import com.hpl.article.pojo.dto1.TagPostDTO;
 import com.hpl.pojo.CommonPageVo;
 
 /**

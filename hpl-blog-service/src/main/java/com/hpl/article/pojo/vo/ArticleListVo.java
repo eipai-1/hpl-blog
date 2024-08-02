@@ -1,13 +1,10 @@
 package com.hpl.article.pojo.vo;
 
-import com.hpl.article.pojo.dto.ArticleDTO;
 import com.hpl.article.pojo.entity.Tag;
-import com.hpl.pojo.CommonPageListVo;
 import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 /**

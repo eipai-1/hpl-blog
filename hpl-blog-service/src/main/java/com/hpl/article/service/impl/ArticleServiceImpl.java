@@ -4,23 +4,30 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.mapper.ArticleMapper;
+import com.hpl.article.pojo.dto.SimpleAuthorCountDTO;
+import com.hpl.article.pojo.dto.TopArticleDTO;
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.enums.OfficalStateEnum;
 import com.hpl.article.pojo.enums.PushStatusEnum;
 import com.hpl.article.pojo.vo.ArticleListVo;
+import com.hpl.article.pojo.dto.TopAuthorDTO;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.ArticleTagService;
 import com.hpl.article.service.CategoryService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
-import com.hpl.statistic.service.CountService;
+import com.hpl.statistic.pojo.entity.ReadCount;
+import com.hpl.statistic.service.ReadCountService;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
+import com.hpl.user.service.UserRelationService;
 import jakarta.annotation.Resource;
 
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +39,8 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
+    private final Integer TOP_SIZE = 8 ;
+
     @Resource
     ArticleMapper articleMapper;
 
@@ -42,10 +51,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     ArticleTagService articleTagService;
 
     @Resource
-    CountService countService;
+    ReadCountService readCountService;
 
     @Resource
     UserInfoService userInfoService;
+
+    @Resource
+    UserRelationService userRelationService;
 
     /**
      * 查询文章列表
@@ -138,7 +150,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleListVo.setTags(articleTagService.getTagsByAId(article.getId()));
 
         // 3、文章阅读统计信息拼接
-        articleListVo.setCountInfo(countService.getArticleStatisticInfo(article.getId()));
+        articleListVo.setCountInfo(readCountService.getArticleStatisticInfo(article.getId()));
 
 
         // 4、文章作者信息拼接
@@ -152,15 +164,114 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return articleListVo;
     }
 
-//    /**
-//     * 返回 优质作者信息的创作文章数
-//     */
-//    public TopAuthorVO getTopAuthor(){
-//        //获取作者的id和文章数
-//        articleMapper.selectCount();
-//        //查询作者的info信息
-//
-//        //拼接返回
-//    }
+    /**
+     * 返回 优质作者信息
+     */
+    @Override
+    public List<TopAuthorDTO> getTopFourAuthor(Long categoryId){
+
+        List<TopAuthorDTO> res = new ArrayList<>();
+
+        //获取前四位作者的id和文章数
+        List<SimpleAuthorCountDTO> simpleAuthorCountsDTO=articleMapper.getTopFourAuthor(categoryId);
+
+        for(SimpleAuthorCountDTO simpleAuthorCountDTO :simpleAuthorCountsDTO){
+            // 查询作者的info信息
+            UserInfo userInfo = userInfoService.getByUserId(simpleAuthorCountDTO.getAuthorId());
+
+            // 查user_relation 粉丝数量
+            Long fansCount = userRelationService.queryUserFansCount(simpleAuthorCountDTO.getAuthorId());
+
+            //todo
+            // 我的关注情况 注意处理 用户没登入的情况
+
+            Boolean isFollow = false;
+            //todo 如果用户登入了 替换false 和 固定 1L
+            if(false){
+                isFollow = userRelationService.isFollow(simpleAuthorCountDTO.getAuthorId(),1L);
+            }
+
+
+
+            //拼接返回
+            TopAuthorDTO topAuthorDTO = new TopAuthorDTO();
+            topAuthorDTO.setAuthorId(simpleAuthorCountDTO.getAuthorId());
+            topAuthorDTO.setAuthorName(userInfo.getNickName());
+            topAuthorDTO.setAuthorAvatar(userInfo.getPhoto());
+            topAuthorDTO.setAuthorProfile(userInfo.getProfile());
+            topAuthorDTO.setCreateTime(userInfo.getCreateTime());
+
+            topAuthorDTO.setArticleCount(simpleAuthorCountDTO.getArticleCount());
+
+            topAuthorDTO.setFansCount(fansCount);
+            topAuthorDTO.setIsFollow(isFollow);
+
+
+
+            res.add(topAuthorDTO);
+        }
+
+        return res;
+    }
+
+
+    @Override
+    public List<TopArticleDTO> getTopEight(){
+
+        //先查redis是否存在
+        //todo 配置redis后处理
+//        if(redisTemplate.hasKey("topEight")){
+//            return (List<TopAuthorDTO>) redisTemplate.opsForValue().get("topEight");
+//        }
+
+
+        List<ReadCount> readCounts =readCountService.getTopCountByCategoryId();
+
+        List<TopArticleDTO> res=new ArrayList<>();
+
+        //循环遍历top 拼接信息
+        for(int i = 0; i <TOP_SIZE;i++){
+            ReadCount readCount = readCounts.get(i);
+
+            // 查article
+            Article article = getById(readCount.getDocumentId());
+
+            // 拼接信息
+            TopArticleDTO topArticleDTO = new TopArticleDTO();
+            topArticleDTO.setArticleId(article.getId());
+
+            //只取前8个字符
+            if(article.getTitle().length()>10){
+                topArticleDTO.setTitle(article.getTitle().substring(0,10)+"...");
+            }else{
+                topArticleDTO.setTitle(article.getTitle());
+            }
+
+
+
+            topArticleDTO.setCnt(readCount.getCnt());
+
+            res.add(topArticleDTO);
+        }
+
+        //todo 添加至缓存
+
+        return res;
+    }
+
+    /**
+     * 根据文章id获取作者id
+     * @param articleId
+     * @return
+     */
+    @Override
+    public Long getAuthorIdById(Long articleId){
+        return lambdaQuery()
+                .eq(Article::getId, articleId)
+                .eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
+                .one()
+                .getAuthorId();
+
+    }
 
 }

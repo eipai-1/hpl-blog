@@ -1,8 +1,8 @@
 package com.hpl.article.service;
 
 
-import com.hpl.article.pojo.dto.ColumnDTO;
-import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto1.ColumnDTO;
+import com.hpl.article.pojo.dto1.SimpleArticleDTO;
 import com.hpl.article.pojo.entity.ColumnArticle;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;

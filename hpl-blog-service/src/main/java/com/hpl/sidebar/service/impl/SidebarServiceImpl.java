@@ -2,7 +2,7 @@ package com.hpl.sidebar.service.impl;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.google.common.base.Splitter;
-import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto1.SimpleArticleDTO;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.config.pojo.dto.ConfigDTO;
 import com.hpl.config.pojo.enums.ConfigTypeEnum;

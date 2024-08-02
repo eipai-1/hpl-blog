@@ -87,4 +87,19 @@ public class UserRelationServiceImpl extends ServiceImpl<UserRelationMapper, Use
                 .eq(UserRelation::getFollowState, FollowStateEnum.FOLLOW.getCode())
                 .count();
     }
+
+    /**
+     * 根据fanId判断是否关注userId
+     * @param userId
+     * @param fansUserId
+     * @return
+     */
+    @Override
+    public Boolean isFollow(Long userId, Long fansUserId){
+        return lambdaQuery()
+                .eq(UserRelation::getUserId, userId)
+                .eq(UserRelation::getFollowUserId, fansUserId)
+                .eq(UserRelation::getFollowState, FollowStateEnum.FOLLOW.getCode())
+                .count() > 0;
+    }
 }

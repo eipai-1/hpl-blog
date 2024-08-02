@@ -1,12 +1,13 @@
 package com.hpl.controller.article;
 
-import com.hpl.article.pojo.dto.ArticleDTO;
+import com.hpl.article.pojo.dto.TopArticleDTO;
+import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.article.pojo.vo.ArticleListVo;
 import com.hpl.article.pojo.vo.CategoryVo;
+import com.hpl.article.pojo.dto.TopAuthorDTO;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.CategoryService;
-import com.hpl.article.service.TagService;
 import com.hpl.converter.MarkdownConverter;
 import com.hpl.pojo.CommonController;
 import com.hpl.pojo.CommonPageListVo;
@@ -17,10 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -90,11 +88,26 @@ public class ArticleController extends CommonController {
         return CommonResult.data(article);
     }
 
-//    @GetMapping(path = "/top/author")
-//    @Operation(summary = "获取作者排行")
-//    public CommonResult<?> getTopAuthor() {
-//        TopAuthorVO topAuthorVo = articleService.getTopAuthor();
-//        return CommonResult.data();
-//    }
+    @GetMapping(path = "/top-four/author")
+    @Operation(summary = "获取作者排行")
+    public CommonResult<?> getTopAuthor(@RequestParam(required = true) String categoryName) {
+
+        //根据名称获取分类id
+        Long categoryId = categoryService.getIdByName(categoryName);
+        log.warn("categoryId:{}", categoryId);
+        log.warn("作者前四呢");
+
+        List<TopAuthorDTO> topAuthorsDTO = articleService.getTopFourAuthor(categoryId);
+        return CommonResult.data(topAuthorsDTO);
+    }
+
+    @GetMapping(path = "/top-eight/")
+    @Operation(summary = "获取文章排行")
+    public CommonResult<?> getTopEight() {
+        log.warn("文章前八呢");
+        
+        List<TopArticleDTO> topEight = articleService.getTopEight();
+        return CommonResult.data(topEight);
+    }
 
 }

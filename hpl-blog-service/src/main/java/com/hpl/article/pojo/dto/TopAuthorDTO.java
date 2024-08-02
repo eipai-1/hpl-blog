@@ -1,4 +1,4 @@
-package com.hpl.article.pojo.vo;
+package com.hpl.article.pojo.dto;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @date : 2024/7/28 11:35
  */
 @Data
-public class TopAuthorVO implements Serializable {
+public class TopAuthorDTO implements Serializable {
 
     private Long authorId;
 

@@ -2,10 +2,10 @@ package com.hpl.article.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.hpl.article.pojo.dto.CategoryDTO;
 import com.hpl.article.pojo.entity.Category;
 import com.hpl.article.pojo.enums.PushStatusEnum;
 import com.hpl.article.mapper.CategoryMapper;
@@ -28,7 +28,7 @@ import java.util.List;
  * @date 2022-07-20
  */
 @Service
-public class CategoryServiceImpl implements CategoryService {
+public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
 
     /**
      * 分类数一般不会特别多，如编程领域可以预期的分类将不会超过30，所以可以做一个全量的内存缓存
@@ -131,15 +131,27 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public Long getIdByName(String category) {
+        //todo 还没有配置redis 先用mysql找
         // 从categoryCaches的值流中过滤出类别名称与输入参数category忽略大小写相等的CategoryDTO
-        return categoryCaches.asMap().values().stream()
-                .filter(s -> s.getCategoryName().equalsIgnoreCase(category))
-                // 找到第一个匹配的CategoryDTO
-                .findFirst()
-                // 提取匹配CategoryDTO的类别ID
-                .map(CategoryVo::getCategoryId)
-                // 如果没有找到匹配的CategoryDTO，则返回null
-                .orElse(null);
+//        return categoryCaches.asMap().values().stream()
+//                .filter(s -> s.getCategoryName().equalsIgnoreCase(category))
+//                // 找到第一个匹配的CategoryDTO
+//                .findFirst()
+//                // 提取匹配CategoryDTO的类别ID
+//                .map(CategoryVo::getCategoryId)
+//                // 如果没有找到匹配的CategoryDTO，则返回null
+//                .orElse(null);
+
+
+       Category categoryOne  = lambdaQuery().eq(Category::getCategoryName, category)
+                .eq(Category::getDeleted, CommonDeletedEnum.NO.getCode())
+                .eq(Category::getStatus, PushStatusEnum.ONLINE.getCode())
+                .one();
+       if (categoryOne!=null) {
+           return categoryOne.getId();
+       }
+
+        return null;
     }
 
 

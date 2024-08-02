@@ -1,7 +1,7 @@
 package com.hpl.article.service;
 
 
-import com.hpl.article.pojo.dto.TagDTO;
+import com.hpl.article.pojo.dto1.TagDTO;
 import com.hpl.article.pojo.entity.Tag;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonPageVo;

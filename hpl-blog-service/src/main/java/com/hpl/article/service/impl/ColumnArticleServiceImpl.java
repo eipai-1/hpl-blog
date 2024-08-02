@@ -2,9 +2,9 @@ package com.hpl.article.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hpl.article.pojo.dto.ColumnArticleDTO;
-import com.hpl.article.pojo.dto.SearchColumnArticleDTO;
-import com.hpl.article.pojo.dto.SimpleArticleDTO;
+import com.hpl.article.pojo.dto1.ColumnArticleDTO;
+import com.hpl.article.pojo.dto1.SearchColumnArticleDTO;
+import com.hpl.article.pojo.dto1.SimpleArticleDTO;
 import com.hpl.article.pojo.entity.ColumnArticle;
 import com.hpl.article.mapper.ColumnArticleMapper;
 import com.hpl.article.service.ColumnArticleService;
