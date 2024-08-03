@@ -1,5 +1,8 @@
-package com.hpl.article.pojo.dto1;
+package com.hpl.column.pojo.dto;
 
+import com.hpl.article.pojo.dto1.ArticleDTO;
+import com.hpl.article.pojo.dto1.ArticleOtherDTO;
+import com.hpl.article.pojo.dto1.SimpleArticleDTO;
 import com.hpl.comment.pojo.dto.TopCommentDTO;
 import lombok.Data;
 

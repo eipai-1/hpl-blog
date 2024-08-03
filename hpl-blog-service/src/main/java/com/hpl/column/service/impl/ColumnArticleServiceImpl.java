@@ -1,13 +1,13 @@
-package com.hpl.article.service.impl;
+package com.hpl.column.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hpl.article.pojo.dto1.ColumnArticleDTO;
+import com.hpl.column.pojo.dto.ColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SearchColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
-import com.hpl.article.pojo.entity.ColumnArticle;
-import com.hpl.article.mapper.ColumnArticleMapper;
-import com.hpl.article.service.ColumnArticleService;
+import com.hpl.column.pojo.entity.ColumnArticle;
+import com.hpl.column.mapper.ColumnArticleMapper;
+import com.hpl.column.service.ColumnArticleService;
 import com.hpl.pojo.CommonPageParam;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -26,6 +26,11 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
     @Resource
     private ColumnArticleMapper columnArticleMapper;
 
+    @Override
+    public List<Long> getArticleIds(Long columnId){
+        // 1.查询该专栏下的所有文章id
+        return columnArticleMapper.getArticleIds(columnId);
+    }
 
     @Override
     public ColumnArticle getById(Long articleId){

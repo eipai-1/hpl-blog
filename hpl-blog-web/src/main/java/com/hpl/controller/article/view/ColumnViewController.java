@@ -2,13 +2,13 @@
 //
 //
 //import cn.hutool.extra.spring.SpringUtil;
-//import com.hpl.article.pojo.entity.ColumnArticle;
+//import com.hpl.column.pojo.entity.ColumnArticle;
 //import com.hpl.article.pojo.dto.*;
 //import com.hpl.article.pojo.enums.ColumnArticleReadEnum;
 //import com.hpl.article.pojo.enums.ColumnTypeEnum;
 //import com.hpl.article.pojo.vo.ColumnVo;
 //import com.hpl.article.service.ArticleReadService;
-//import com.hpl.article.service.ColumnService;
+//import com.hpl.column.service.ColumnService;
 //import com.hpl.comment.pojo.dto.TopCommentDTO;
 //import com.hpl.converter.MarkdownConverter;
 //import com.hpl.global.component.GlobalViewConfig;

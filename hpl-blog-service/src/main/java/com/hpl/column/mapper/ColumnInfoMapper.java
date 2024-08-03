@@ -1,7 +1,8 @@
-package com.hpl.article.mapper;
+package com.hpl.column.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hpl.article.pojo.entity.ColumnInfo;
+
+import com.hpl.column.pojo.entity.ColumnInfo;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

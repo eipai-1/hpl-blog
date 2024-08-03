@@ -1,4 +1,4 @@
-package com.hpl.article.pojo.dto1;
+package com.hpl.column.pojo.dto;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

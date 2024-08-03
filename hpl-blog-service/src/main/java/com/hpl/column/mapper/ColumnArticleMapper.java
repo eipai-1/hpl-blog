@@ -1,9 +1,9 @@
-package com.hpl.article.mapper;
+package com.hpl.column.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hpl.article.pojo.dto1.ColumnArticleDTO;
+import com.hpl.column.pojo.dto.ColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
-import com.hpl.article.pojo.entity.ColumnArticle;
+import com.hpl.column.pojo.entity.ColumnArticle;
 import com.hpl.pojo.CommonPageParam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -18,6 +18,12 @@ import java.util.List;
 @Mapper
 public interface ColumnArticleMapper extends BaseMapper<ColumnArticle> {
 
+    /**
+     * 查询专栏下所有的文章id
+     * @param columnId
+     * @return
+     */
+    List<Long> getArticleIds(Long columnId);
 
     /**
      * 根据教程 ID 查询当前教程中最大的 section
@@ -67,4 +73,5 @@ public interface ColumnArticleMapper extends BaseMapper<ColumnArticle> {
                                                                    @Param("pageParam") CommonPageParam pageParam);
 
     Long countColumnArticlesByColumnIdArticleName(Long columnId, String articleTitle);
+
 }

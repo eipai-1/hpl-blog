@@ -1,11 +1,11 @@
-package com.hpl.article.service;
+package com.hpl.column.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hpl.article.pojo.dto1.ColumnArticleDTO;
+import com.hpl.column.pojo.dto.ColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SearchColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
-import com.hpl.article.pojo.entity.ColumnArticle;
+import com.hpl.column.pojo.entity.ColumnArticle;
 import com.hpl.pojo.CommonPageParam;
 
 import java.util.List;
@@ -15,6 +15,8 @@ import java.util.List;
  * @date : 2024/7/6 11:28
  */
 public interface ColumnArticleService {
+
+    List<Long> getArticleIds(Long columnId);
 
 
     /**

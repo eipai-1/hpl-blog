@@ -1,5 +1,6 @@
 package com.hpl.article.pojo.dto1;
 
+import com.hpl.column.pojo.dto.ColumnArticleFlipDTO;
 import lombok.Data;
 
 /**

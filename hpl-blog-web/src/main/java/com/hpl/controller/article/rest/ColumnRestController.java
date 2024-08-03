@@ -3,7 +3,7 @@
 //
 //import com.hpl.article.pojo.dto.ColumnDTO;
 //import com.hpl.article.pojo.dto.SimpleArticleDTO;
-//import com.hpl.article.service.ColumnService;
+//import com.hpl.column.service.ColumnService;
 //import com.hpl.global.component.TemplateEngineHelper;
 //import com.hpl.pojo.CommonPageListVo;
 //import com.hpl.pojo.CommonPageParam;

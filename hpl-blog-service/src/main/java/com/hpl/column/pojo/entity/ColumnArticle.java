@@ -1,4 +1,4 @@
-package com.hpl.article.pojo.entity;
+package com.hpl.column.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hpl.pojo.CommonEntity;
@@ -28,4 +28,7 @@ public class ColumnArticle extends CommonEntity {
 
     /** 专栏类型：免费、登录阅读、收费阅读等 */
     private Integer readType;
+
+    /** 是否删除 */
+    private Integer deleted;
 }

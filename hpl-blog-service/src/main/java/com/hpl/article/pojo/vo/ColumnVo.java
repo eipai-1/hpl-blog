@@ -1,6 +1,6 @@
 package com.hpl.article.pojo.vo;
 
-import com.hpl.article.pojo.dto1.ColumnDTO;
+import com.hpl.column.pojo.dto.ColumnDTO;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.sidebar.pojo.dto.SideBarDTO;
 import lombok.Data;

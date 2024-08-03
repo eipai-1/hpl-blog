@@ -1,5 +1,6 @@
-package com.hpl.article.pojo.entity;
+package com.hpl.column.pojo.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hpl.pojo.CommonEntity;
 import lombok.Data;
@@ -7,10 +8,6 @@ import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
-/**
- * @author YiHui
- * @date 2022/9/14
- */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("column_info")
@@ -19,35 +16,26 @@ public class ColumnInfo extends CommonEntity {
     private static final long serialVersionUID = 1920830534262012026L;
 
     /** 专栏名 */
+    @TableField("column_name")
     private String columnName;
 
     /** 作者id */
+    @TableField("author_id")
     private Long authorId;
 
     /** 简介 */
+    @TableField("introduction")
     private String introduction;
 
     /** 封面 */
+    @TableField("cover")
     private String cover;
 
-    /** 状态 */
-    private Integer state;
-
     /** 排序 */
+    @TableField("section")
     private Integer section;
 
-    /** 上线时间 */
-    private Date publishTime;
+    /** 是否删除 */
+    private Integer deleted;
 
-    /** 专栏预计的文章数 */
-    private Integer nums;
-
-    /** 专栏类型：免费、登录阅读、收费阅读等 */
-    private Integer type;
-
-    /** 免费开始时间 */
-    private Date freeStartTime;
-
-    /** 免费结束时间 */
-    private Date freeEndTime;
 }

@@ -4,7 +4,7 @@
 //import cn.hutool.extra.spring.SpringUtil;
 //import com.hpl.annotation.permission.Permission;
 //import com.hpl.annotation.permission.UserRole;
-//import com.hpl.article.pojo.entity.ColumnArticle;
+//import com.hpl.column.pojo.entity.ColumnArticle;
 //import com.hpl.article.pojo.dto.ArticleDTO;
 //import com.hpl.article.pojo.dto.ArticleOtherDTO;
 //import com.hpl.article.pojo.dto.CategoryDTO;
@@ -12,7 +12,7 @@
 //import com.hpl.article.pojo.vo.ArticleEditVo;
 //import com.hpl.article.service.ArticleReadService;
 //import com.hpl.article.service.CategoryService;
-//import com.hpl.article.service.ColumnService;
+//import com.hpl.column.service.ColumnService;
 //import com.hpl.article.service.TagService;
 //import com.hpl.converter.MarkdownConverter;
 //import com.hpl.global.comtext.ReqInfoContext;

@@ -166,6 +166,22 @@ public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount
                 .list();
     }
 
+    /**
+     * 根据文章ID获取阅读数量
+     * 本方法通过查询数据库中与特定文章ID相关的阅读计数记录来获取文章的阅读数量
+     * 使用了MP Lambda查询构造器来构建查询条件，提高了查询的可读性和简便性
+     *
+     * @param articleId 文章ID，用于指定特定的文章
+     * @return 返回文章的阅读数量如果不存在，则返回null
+     */
+    @Override
+    public Integer getArticleReadCount(Long articleId){
+        return lambdaQuery()
+                .eq(ReadCount::getDocumentId, articleId)
+                .eq(ReadCount::getDocumentType, DocumentTypeEnum.ARTICLE.getCode())
+                .one().getCnt();
+    }
+
 
     /**
      * 更新用户的统计信息

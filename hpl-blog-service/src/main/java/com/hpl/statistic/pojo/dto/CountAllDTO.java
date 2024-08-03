@@ -9,9 +9,9 @@ import lombok.Data;
 @Data
 public class CountAllDTO {
 
-    private Long praiseCount;
+    private Integer praiseCount;
 
-    private Long commentCount;
+    private Integer commentCount;
 
-    private Long collectionCount;
+    private Integer collectionCount;
 }
