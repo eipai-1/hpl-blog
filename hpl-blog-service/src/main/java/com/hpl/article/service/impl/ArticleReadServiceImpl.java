@@ -191,8 +191,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         BeanUtils.copyProperties(article,articleDTO);
         articleDTO.setArticleId(articleId);
         articleDTO.setCover(article.getPicture());
-//        articleDTO.setCreateTime(article.getCreateTime());
-//        articleDTO.setLastUpdateTime(article.getUpdateTime());
         articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
         articleDTO.setCategory(new CategoryDTO((article.getCategoryId()),null));
 

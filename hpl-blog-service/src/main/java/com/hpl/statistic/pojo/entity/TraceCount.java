@@ -7,19 +7,23 @@ import lombok.EqualsAndHashCode;
 
 /**
  * @author : rbe
- * @date : 2024/8/2 8:07
+ * @date : 2024/8/2 18:07
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("read_count")
-public class ReadCount extends CommonEntity {
+@TableName("trace_count")
+public class TraceCount extends CommonEntity {
+
     private static final long serialVersionUID = 1L;
 
-    private Long documentId;
+    private Long userId;
 
-    private Integer documentType;
+    private Long articleId;
 
-    private Integer cnt;
+    private Integer collectionState;
 
+    private Integer commentState;
+
+    private Integer praiseState;
 
 }
