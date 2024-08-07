@@ -4,7 +4,7 @@
 //import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 //
 //import com.hpl.article.pojo.dto1.ArticleAdminDTO;
-//import com.hpl.article.pojo.dto1.ArticlePostDTO;
+//import com.hpl.article.pojo.dto.ArticlePostDTO;
 //import com.hpl.article.pojo.dto1.SearchArticleDTO;
 //import com.hpl.article.enent.ArticleMsgEvent;
 //import com.hpl.article.pojo.entity.Article;

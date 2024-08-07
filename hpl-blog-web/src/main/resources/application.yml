@@ -51,6 +51,7 @@ minio:
     image: test1-image
     video: test1-video
     audio: test1-audio
+    mdImage: test1-md-image
 
 #  thymeleaf:
 #    prefix: classpath:/templates/   # 页面模板位置

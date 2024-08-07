@@ -138,31 +138,30 @@ public class ArticleReadServiceImpl implements ArticleReadService {
      */
     private List<TagDTO> getTagsByAId(Long articleId) {
         // 初始化用于存储标签DTO的列表
-        List<TagDTO> tagDTOS = new ArrayList<>();
+        List<TagDTO> tagsDTO = new ArrayList<>();
 
         // 构建查询条件，查询与文章ID匹配且未被删除的文章标签信息
         LambdaQueryWrapper<ArticleTag> queryWrapper=new LambdaQueryWrapper<>();
         queryWrapper.eq(ArticleTag::getArticleId, articleId)
                 .eq(ArticleTag::getDeleted,0);
         // 根据查询条件，获取第一篇匹配的文章标签信息
-        ArticleTag articleTag = articleTagMapper.selectOne(queryWrapper);
+        List<ArticleTag> tags = articleTagMapper.selectList(queryWrapper);
 
         // 如果找到了文章标签信息，则进一步查询对应的标签详情
-//        if(articleTag!=null){
-//            // 根据标签ID，获取标签列表
-//            List<Tag> tags= tagService.getById(articleTag.getTagId());
-//
-//            // 遍历标签列表，将每个标签的信息转换为TagDTO，并添加到tagDTOS列表中
-//            for(Tag tag : tags){
-//                TagDTO tagDTO = new TagDTO();
-//                tagDTO.setTag(tag.getTagName());
-//                tagDTO.setTagId(tag.getId());
-//                tagDTO.setStatus(tag.getStatus());
-//                tagDTOS.add(tagDTO);
-//            }
-//        }
+        if(tags!=null){
+            tags.forEach(t -> {
+                // 根据标签ID，获取标签列表
+                Tag tag = tagService.getById(t.getTagId());
 
-        return tagDTOS;
+                TagDTO tagDTO = new TagDTO();
+                tagDTO.setTag(tag.getTagName());
+                tagDTO.setTagId(tag.getId());
+                tagDTO.setStatus(tag.getStatus());
+                tagsDTO.add(tagDTO);
+            });
+        }
+
+        return tagsDTO;
     }
 
     /**
@@ -194,13 +193,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
         articleDTO.setCategory(new CategoryDTO((article.getCategoryId()),null));
 
-        if (showReviewContent(article)) {
-            ArticleDetail detail = this.getArticleDetailById(articleId);
-            articleDTO.setContent(detail.getContent());
-        } else {
-            // 对于审核中的文章，只有作者本人才能看到原文
-            articleDTO.setContent("### 文章审核中，请稍后再看");
-        }
+        articleDTO.setContent(this.getArticleDetailById(articleId).getContent());
 
         // 更新分类相关信息
         CategoryDTO category = articleDTO.getCategory();
@@ -211,20 +204,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         return articleDTO;
     }
 
-    private boolean showReviewContent(Article article) {
-        if (article.getStatus() != PushStatusEnum.REVIEW.getCode()) {
-            return true;
-        }
 
-        UserInfo user = ReqInfoContext.getReqInfo().getUserInfo();
-        if (user == null) {
-            return false;
-        }
-
-        // 作者本人和admin超管可以看到审核内容
-        return user.getUserId().equals(article.getAuthorId()) ||
-                (user.getUserRole() != null && user.getUserRole()==1);
-    }
 
     private ArticleDetail getArticleDetailById(long articleId) {
         // 查询文章内容
@@ -296,7 +276,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         // 创建查询Wrapper，设置文章未删除且状态为在线
         LambdaQueryWrapper<Article> wrapper =  Wrappers.lambdaQuery();
         wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Article::getStatus, PushStatusEnum.ONLINE.getCode());
+                .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode());
 
         // 如果是查询首页的置顶文章，且没有指定分类，则只查询官方文章
         // 如果分页中置顶的四条数据，需要加上官方的查询条件
@@ -408,7 +388,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         // 创建查询Wrapper，设置文章未删除且状态为在线
         LambdaQueryWrapper<Article> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Article::getStatus, PushStatusEnum.ONLINE.getCode());
+                .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode());
 
         // 如果是查询首页的置顶文章，且没有指定分类，则只查询官方文章
         // 如果分页中置顶的四条数据，需要加上官方的查询条件
@@ -436,7 +416,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     public Long getCountByCategoryId(Long categoryId) {
         LambdaQueryWrapper<Article> warpper = Wrappers.lambdaQuery();
         warpper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Article::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .eq(Article::getCategoryId, categoryId);
         return articleMapper.selectCount(warpper);
     }
@@ -454,7 +434,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         QueryWrapper<Article> query = Wrappers.query();
         query.select("category_id, count(*) as cnt")
                 .eq("deleted", CommonDeletedEnum.NO.getCode())
-                .eq("status", PushStatusEnum.ONLINE.getCode())
+                .eq("status", PublishStatusEnum.PUBLISHED.getCode())
                 .groupBy("category_id");
 
         // 执行查询，获取结果列表，每个元素包含分类ID和该分类下的文章数量
@@ -551,7 +531,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
         LambdaQueryWrapper<Article> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Article::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .and(!StringUtils.isEmpty(key),
                         v -> v.like(Article::getTitle, key)
                                 .or()
@@ -598,7 +578,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
                 .orderByDesc(Article::getId);
         if (!Objects.equals(ReqInfoContext.getReqInfo().getUserId(), userId)) {
             // 作者本人，可以查看草稿、审核、上线文章；其他用户，只能查看上线的文章
-            wrapper.eq(Article::getStatus, PushStatusEnum.ONLINE.getCode());
+            wrapper.eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode());
         }
         return articleMapper.selectList(wrapper);
     }
@@ -652,7 +632,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         // 创建Lambda查询包装器，用于构建查询条件。
         LambdaQueryWrapper<Article> wrapper = Wrappers.lambdaQuery();
         // 设置查询条件：文章状态为在线，且未被删除。
-        wrapper.eq(Article::getStatus, PushStatusEnum.ONLINE.getCode())
+        wrapper.eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .eq(Article::getDeleted, CommonDeletedEnum.NO.getCode());
 
         // 如果提供了作者ID，则进一步筛选该作者的文章。

@@ -7,7 +7,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.hpl.article.pojo.entity.Category;
-import com.hpl.article.pojo.enums.PushStatusEnum;
+import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.mapper.CategoryMapper;
 import com.hpl.article.pojo.vo.CategoryVo;
 import com.hpl.article.service.CategoryService;
@@ -92,6 +92,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<CategoryVo> getAllCategories() {
         // 检查缓存中的分类数量，如果不足，则刷新缓存
+
         if (categoryCaches.size() <= 5) {
             refreshCache();
         }
@@ -145,7 +146,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
        Category categoryOne  = lambdaQuery().eq(Category::getCategoryName, category)
                 .eq(Category::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Category::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(Category::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .one();
        if (categoryOne!=null) {
            return categoryOne.getId();
@@ -168,7 +169,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         // 构建查询条件，只查询未删除且在线状态的分类
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Category::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Category::getStatus, PushStatusEnum.ONLINE.getCode());
+                .eq(Category::getStatus, PublishStatusEnum.PUBLISHED.getCode());
 
         // 根据查询条件查询符合条件的分类列表
         List<Category> list = categoryMapper.selectList(wrapper);

@@ -3,6 +3,7 @@ package com.hpl.column.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hpl.column.pojo.dto.ColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
+import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
 import com.hpl.column.pojo.entity.ColumnArticle;
 import com.hpl.pojo.CommonPageParam;
 import org.apache.ibatis.annotations.Mapper;
@@ -73,5 +74,6 @@ public interface ColumnArticleMapper extends BaseMapper<ColumnArticle> {
                                                                    @Param("pageParam") CommonPageParam pageParam);
 
     Long countColumnArticlesByColumnIdArticleName(Long columnId, String articleTitle);
+
 
 }

@@ -2,9 +2,11 @@ package com.hpl.column.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.hpl.article.service.ArticleService;
 import com.hpl.column.pojo.dto.ColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SearchColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
+import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
 import com.hpl.column.pojo.entity.ColumnArticle;
 import com.hpl.column.mapper.ColumnArticleMapper;
 import com.hpl.column.service.ColumnArticleService;
@@ -13,6 +15,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,11 +29,38 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
     @Resource
     private ColumnArticleMapper columnArticleMapper;
 
+    @Resource
+    private ArticleService articleService;
+
+    /**
+     * 根据专栏id，查询该专栏下的所有文章id
+     * @param columnId
+     * @return
+     */
     @Override
     public List<Long> getArticleIds(Long columnId){
         // 1.查询该专栏下的所有文章id
         return columnArticleMapper.getArticleIds(columnId);
     }
+
+    @Override
+    public List<ColumnDirectoryDTO> getDirectoryById(Long columnId){
+        // 1.查询该专栏下的所有文章id
+        List<Long> articleIds = columnArticleMapper.getArticleIds(columnId);
+
+        List<ColumnDirectoryDTO> res = new ArrayList<>();
+
+        // 2.根据文章id，查询该文章id，短标题、更新时间
+        articleIds.forEach(articleId -> {
+            ColumnDirectoryDTO columnDirectoryDTO = articleService.getDirectoryById(articleId);
+
+            res.add(columnDirectoryDTO);
+        });
+
+        // 3.返回信息
+        return res;
+    }
+
 
     @Override
     public ColumnArticle getById(Long articleId){

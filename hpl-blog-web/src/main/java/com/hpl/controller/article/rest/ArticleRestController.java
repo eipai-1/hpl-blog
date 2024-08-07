@@ -221,7 +221,7 @@
 //    @PostMapping(path = "post")
 ////    @MdcDot(bizCode = "#req.articleId")
 //    public CommonResVo<Long> post(@RequestBody ArticlePostDTO req, HttpServletResponse response) throws IOException {
-//        Long id = articleWriteService.saveArticle(req, ReqInfoContext.getReqInfo().getUserId());
+//        Long id = articleWriteService.saveOrUpdate(req, ReqInfoContext.getReqInfo().getUserId());
 //        // 如果使用后端重定向，可以使用下面两种策略
 ////        return "redirect:/article/detail/" + id;
 ////        response.sendRedirect("/article/detail/" + id);

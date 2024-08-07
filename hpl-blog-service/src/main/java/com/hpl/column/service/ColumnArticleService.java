@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.hpl.column.pojo.dto.ColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SearchColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
+import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
 import com.hpl.column.pojo.entity.ColumnArticle;
 import com.hpl.pojo.CommonPageParam;
 
@@ -16,8 +17,14 @@ import java.util.List;
  */
 public interface ColumnArticleService {
 
+    /**
+     * 根据专栏id，查询该专栏下的所有文章id
+     * @param columnId
+     * @return
+     */
     List<Long> getArticleIds(Long columnId);
 
+    List<ColumnDirectoryDTO> getDirectoryById(Long columnId);
 
     /**
      * 根据文章id，查询该文章所属专栏的文章数量
@@ -90,4 +97,6 @@ public interface ColumnArticleService {
     List<ColumnArticleDTO> listColumnArticlesDetail(SearchColumnArticleDTO searchColumnArticleDTO, CommonPageParam commonPageParam);
 
     Integer countColumnArticles(SearchColumnArticleDTO searchColumnArticleDTO);
+
+
 }

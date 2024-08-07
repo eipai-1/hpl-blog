@@ -2,7 +2,6 @@ package com.hpl.controller.column;
 
 import com.hpl.column.pojo.dto.ColumnListDTO;
 import com.hpl.column.pojo.dto.ColumnPostDTO;
-import com.hpl.column.pojo.entity.ColumnInfo;
 import com.hpl.column.service.ColumnInfoService;
 import com.hpl.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,7 +1,7 @@
 package com.hpl.config.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hpl.article.pojo.enums.PushStatusEnum;
+import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.config.mapper.ConfigMapper;
 import com.hpl.config.pojo.dto.ConfigDTO;
 import com.hpl.config.pojo.entity.Config;
@@ -42,7 +42,7 @@ public class ConfigServiceImpl extends ServiceImpl<ConfigMapper,Config> implemen
         // 根据类型、状态和删除状态查询配置信息，并按照排名升序排序
         List<Config> configs = lambdaQuery()
                 .eq(Config::getType, configTypeEnum.getCode())
-                .eq(Config::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(Config::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .eq(Config::getDeleted, CommonDeletedEnum.NO.getCode())
                 .orderByAsc(Config::getRank)
                 .list();

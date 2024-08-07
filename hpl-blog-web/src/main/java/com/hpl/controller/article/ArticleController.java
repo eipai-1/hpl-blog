@@ -1,10 +1,11 @@
 package com.hpl.controller.article;
 
-import com.hpl.article.pojo.dto.TopArticleDTO;
+import com.hpl.article.pojo.dto.*;
 import com.hpl.article.pojo.dto1.ArticleDTO;
+import com.hpl.article.pojo.entity.Article;
+import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.pojo.vo.ArticleListVo;
 import com.hpl.article.pojo.vo.CategoryVo;
-import com.hpl.article.pojo.dto.TopAuthorDTO;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.CategoryService;
@@ -48,6 +49,26 @@ public class ArticleController extends CommonController {
 
 //    @Autowired
 //    private TagService tagService;
+
+    @Operation(summary = "列表查询我的文章")
+    @GetMapping(path = "myself-list")
+    public CommonResult<?> myselfList(@RequestBody(required = false) SearchMyArticleDTO searchMyArticleDTO) {
+        //todo
+        Long userId = 1L;
+        List<MyArticleListDTO> list =articleService.listMyArticles(searchMyArticleDTO,userId);
+
+        return CommonResult.data(list);
+    }
+
+    @Operation(summary = "新增或更新文章")
+    @PostMapping
+    public CommonResult<?> addArticle(@RequestBody ArticlePostDTO articlePostDTO) {
+        // todo
+        Long userId = 1L;
+
+        Long articleId =articleService.saveOrUpdate(articlePostDTO,userId);
+        return CommonResult.data(articleId);
+    }
 
 
     @GetMapping(path = "categories")
@@ -108,6 +129,38 @@ public class ArticleController extends CommonController {
         
         List<TopArticleDTO> topEight = articleService.getTopEight();
         return CommonResult.data(topEight);
+    }
+
+    @Operation(summary = "发布文章")
+    @PutMapping("/publish/{articleId}")
+    public CommonResult<?> publishArticle(@PathVariable("articleId") Long articleId) {
+        //todo
+        Long userId = 1L;
+        Article article = articleService.getById(articleId);
+
+        if(article.getAuthorId().equals(userId)){
+            article.setStatus(PublishStatusEnum.PUBLISHED.getCode());
+            articleService.updateById(article);
+            return CommonResult.success("发布成功");
+        }else{
+            return CommonResult.error("您没有权限发布该文章");
+        }
+    }
+
+    @Operation(summary = "取消发布文章")
+    @PutMapping("/un-publish/{articleId}")
+    public CommonResult<?> unPublishArticle(@PathVariable("articleId") Long articleId) {
+        //todo
+        Long userId = 1L;
+        Article article = articleService.getById(articleId);
+
+        if(article.getAuthorId().equals(userId)){
+            article.setStatus(PublishStatusEnum.UN_PUBLISHED.getCode());
+            articleService.updateById(article);
+            return CommonResult.success("取消发布成功");
+        }else{
+            return CommonResult.error("您没有权限取消发布该文章");
+        }
     }
 
 

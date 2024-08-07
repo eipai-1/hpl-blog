@@ -2,7 +2,7 @@ package com.hpl.article.service;
 
 
 import com.hpl.article.pojo.dto1.ArticleAdminDTO;
-import com.hpl.article.pojo.dto1.ArticlePostDTO;
+import com.hpl.article.pojo.dto.ArticlePostDTO;
 import com.hpl.article.pojo.dto1.SearchArticleDTO;
 import com.hpl.article.pojo.enums.OperateArticleEnum;
 import com.hpl.pojo.CommonPageVo;

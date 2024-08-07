@@ -1,6 +1,6 @@
 package com.hpl.article.pojo.dto1;
 
-import com.hpl.article.pojo.enums.PushStatusEnum;
+import com.hpl.article.pojo.enums.PublishStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,7 +41,7 @@ public class CategoryDTO implements Serializable {
     public CategoryDTO(Long categoryId, String category, Integer rank) {
         this.categoryId = categoryId;
         this.category = category;
-        this.status = PushStatusEnum.ONLINE.getCode();
+        this.status = PublishStatusEnum.PUBLISHED.getCode();
         this.rank = rank;
         this.selected = false;
     }

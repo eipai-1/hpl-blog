@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hpl.article.pojo.dto1.TagDTO;
 import com.hpl.article.pojo.entity.Tag;
-import com.hpl.article.pojo.enums.PushStatusEnum;
+import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.mapper.TagMapper;
 import com.hpl.article.service.TagService;
 import com.hpl.pojo.CommonDeletedEnum;
@@ -56,7 +56,7 @@ public class TagServiceImpl implements TagService {
     public CommonPageVo<TagDTO> queryTags(String key, CommonPageParam pageParam) {
         // 构建查询条件，查询在线且未被删除的标签，支持按关键词搜索和按标签ID降序排序
         LambdaQueryWrapper<Tag> query = Wrappers.lambdaQuery();
-        query.eq(Tag::getStatus, PushStatusEnum.ONLINE.getCode())
+        query.eq(Tag::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
                 .and(StringUtils.isNotBlank(key), v -> v.like(Tag::getTagName, key))
                 .orderByDesc(Tag::getId);
@@ -74,7 +74,7 @@ public class TagServiceImpl implements TagService {
 
         // 计算总记录数，用于分页
         LambdaQueryWrapper<Tag> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Tag::getStatus, PushStatusEnum.ONLINE.getCode())
+        wrapper.eq(Tag::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
                 .and(StringUtils.isNotBlank(key), v -> v.like(Tag::getTagName, key));
         Long totalCount = tagMapper.selectCount(wrapper);
