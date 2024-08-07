@@ -1,8 +1,7 @@
 package com.hpl.column.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hpl.column.pojo.dto.ColumnListDTO;
-import com.hpl.column.pojo.dto.ColumnPostDTO;
+import com.hpl.column.pojo.dto.*;
 import com.hpl.column.mapper.ColumnInfoMapper;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.column.pojo.entity.ColumnInfo;
@@ -19,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,6 +126,112 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
         });
 
         return res;
+    }
+
+    @Override
+    public List<MyColumnListDTO> listMyColumns(SearchMyColumnDTO searchMyColumnDTO, Long userId){
+        List<MyColumnListDTO> res = new ArrayList<>();
+
+        // 1、处理专栏信息
+        // 1.1 查询所有专栏信息并排序
+        List<ColumnInfo> columnList = lambdaQuery()
+                .eq(ColumnInfo::getDeleted, CommonDeletedEnum.NO.getCode())
+                .orderByDesc(ColumnInfo::getSection)
+                .list();
+
+        // 1.2 遍历专栏信息
+        columnList.forEach(columnInfo -> {
+
+            // 1.3 填充专栏信息
+            MyColumnListDTO dto = new MyColumnListDTO();
+            dto.setColumnId(columnInfo.getId());
+            dto.setIntroduction(columnInfo.getIntroduction());
+            dto.setColumnName(columnInfo.getColumnName());
+            dto.setCover(columnInfo.getCover());
+            dto.setCreateTime(columnInfo.getCreateTime());
+
+
+            // 2、处理统计信息
+            // 2.1 查询专栏中的文章id集合
+            List<Long> articleIds = columnArticleService.getArticleIds(columnInfo.getId());
+
+            // 2.2 填充文章数量
+            dto.setArticleCount(articleIds.size());
+
+            // 2.3 遍历文章id集合，获取阅读次数总和
+            Integer readCountTotal = 0;
+            for (Long articleId : articleIds) {
+                readCountTotal += readCountService.getArticleReadCount(articleId);
+            }
+            dto.setReadCount(readCountTotal);
+
+
+            // 2.4 遍历文章id集合，获取收藏、点赞、评论次数总和
+            Integer collectedCountTotal = 0;
+            Integer commentedCountTotal = 0;
+            Integer praisedCountTotal = 0;
+
+            for (Long articleId : articleIds) {
+                CountAllDTO countAllDTO = traceCountService.getAllCountByArticleId(null,articleId);
+
+                collectedCountTotal += countAllDTO.getCollectionCount();
+                commentedCountTotal += countAllDTO.getCommentCount();
+                praisedCountTotal += countAllDTO.getPraiseCount();
+
+            }
+
+            dto.setCollectionCount(collectedCountTotal);
+            dto.setCommentCount(commentedCountTotal);
+            dto.setPraiseCount(praisedCountTotal);
+
+            res.add(dto);
+        });
+
+        return res;
+    }
+
+    /**
+     * 编辑栏目信息
+     * 该方法将传入的ColumnEditDTO对象转换为ColumnInfo对象，并更新数据库中的相应栏目信息
+     * 主要用于处理对栏目信息的修改需求
+     *
+     * @param columnEditDTO 包含需要更新的栏目信息的DTO，包括栏目ID、名称、简介、封面和分区等
+     */
+    @Override
+    public void editColumn(ColumnEditDTO columnEditDTO){
+        // 初始化ColumnInfo对象，用于存储将要更新的栏目信息
+        ColumnInfo columnInfo = new ColumnInfo();
+
+        // 从DTO中提取栏目信息，并设置到ColumnInfo对象中
+        columnInfo.setId(columnEditDTO.getColumnId());
+        columnInfo.setColumnName(columnEditDTO.getColumnName());
+        columnInfo.setIntroduction(columnEditDTO.getIntroduction());
+        columnInfo.setCover(columnEditDTO.getCover());
+        columnInfo.setSection(columnEditDTO.getSection());
+
+        // 设置更新时间为当前时间，确保时间的准确性
+        columnInfo.setUpdateTime(LocalDateTime.now());
+
+        // 调用updateById方法，根据ID更新数据库中的栏目信息
+        this.updateById(columnInfo);
+    }
+
+    /**
+     * 根据ID删除列信息
+     * 此方法不直接删除数据，而是通过逻辑删除的方式更新数据状态
+     */
+    @Override
+    public void deleteByid(Long columnId){
+        // 使用lambdaUpdate方法启动更新操作
+        lambdaUpdate()
+                // 设置逻辑删除状态为“是”
+                .set(ColumnInfo::getDeleted, CommonDeletedEnum.YES.getCode())
+                // 设置更新时间为当前时间
+                .set(ColumnInfo::getUpdateTime, LocalDateTime.now())
+                // 指定要操作的列ID
+                .eq(ColumnInfo::getId, columnId)
+                // 执行更新操作
+                .update();
     }
 
 

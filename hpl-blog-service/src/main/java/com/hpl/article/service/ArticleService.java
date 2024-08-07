@@ -70,5 +70,5 @@ public interface ArticleService extends IService<Article> {
     void deleteArticle(Long articleId, Long loginUserId);
 
 
-    List<MyArticleListDTO> listMyArticles(SearchMyArticleDTO searchMyArticleDTO, Long userId);
+    List<MyArticleListDTO> listMyArticles(SearchMyArticleDTO searchMyselfDTO, Long userId);
 }

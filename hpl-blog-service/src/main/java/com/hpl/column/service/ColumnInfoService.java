@@ -2,8 +2,7 @@ package com.hpl.column.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hpl.column.pojo.dto.ColumnListDTO;
-import com.hpl.column.pojo.dto.ColumnPostDTO;
+import com.hpl.column.pojo.dto.*;
 import com.hpl.column.pojo.entity.ColumnInfo;
 import com.hpl.pojo.CommonPageParam;
 
@@ -18,6 +17,21 @@ public interface ColumnInfoService extends IService<ColumnInfo> {
     void publishColumn(ColumnPostDTO columnPostDTO);
 
     List<ColumnListDTO> listColumns();
+
+    List<MyColumnListDTO> listMyColumns(SearchMyColumnDTO searchMyColumnDTO, Long userId);
+
+    /**
+     * 编辑栏目信息
+     * 该方法将传入的ColumnEditDTO对象转换为ColumnInfo对象，并更新数据库中的相应栏目信息
+     * 主要用于处理对栏目信息的修改需求
+     */
+    void editColumn(ColumnEditDTO columnEditDTO);
+
+    /**
+     * 根据ID删除列信息
+     * 此方法不直接删除数据，而是通过逻辑删除的方式更新数据状态
+     */
+    void deleteByid(Long columnId);
 
 
 //    /**

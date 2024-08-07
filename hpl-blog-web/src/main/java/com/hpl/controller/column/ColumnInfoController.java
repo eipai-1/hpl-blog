@@ -1,7 +1,6 @@
 package com.hpl.controller.column;
 
-import com.hpl.column.pojo.dto.ColumnListDTO;
-import com.hpl.column.pojo.dto.ColumnPostDTO;
+import com.hpl.column.pojo.dto.*;
 import com.hpl.column.service.ColumnInfoService;
 import com.hpl.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +24,25 @@ public class ColumnInfoController {
     @Resource
     private ColumnInfoService columnInfoService;
 
+
+    @Operation(summary = "获取专栏列表")
+    @GetMapping("/list")
+    public CommonResult<?> listColumns() {
+        List<ColumnListDTO> res =  columnInfoService.listColumns();
+        return CommonResult.data(res);
+    }
+
+    @Operation(summary = "我的专栏")
+    @GetMapping("myself-list")
+    public CommonResult<?> listMyColumns(@RequestBody(required = false) SearchMyColumnDTO searchMyColumnDTO) {
+
+        //todo
+        Long userId = 1L;
+
+        List<MyColumnListDTO> res =  columnInfoService.listMyColumns(searchMyColumnDTO,userId);
+        return CommonResult.data(res);
+    }
+
     @Operation(summary = "发布专栏")
     @PostMapping
     public CommonResult<?> publishColumn(@RequestBody ColumnPostDTO columnPostDTO) {
@@ -33,10 +51,19 @@ public class ColumnInfoController {
         return CommonResult.success();
     }
 
-    @Operation(summary = "获取专栏列表")
-    @GetMapping("/list")
-    public CommonResult<?> listColumns() {
-        List<ColumnListDTO> res =  columnInfoService.listColumns();
-        return CommonResult.data(res);
+    @Operation(summary = "编辑专栏")
+    @PutMapping()
+    public CommonResult<?> editColumn(@RequestBody ColumnEditDTO columnEditDTO) {
+        columnInfoService.editColumn(columnEditDTO);
+
+        return CommonResult.success();
+    }
+
+    @Operation(summary = "删除专栏")
+    @DeleteMapping("/{columnId}")
+    public CommonResult<?> deleteColumn(@PathVariable("columnId") Long columnId) {
+        columnInfoService.deleteByid(columnId);
+
+        return CommonResult.success();
     }
 }
