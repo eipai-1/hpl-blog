@@ -4,10 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.media.mapper.ImageMapper;
 import com.hpl.media.pojo.dto.ImagePostDTO;
-import com.hpl.media.pojo.dto.SearchImageDTO;
 import com.hpl.media.pojo.entity.Image;
 import com.hpl.media.pojo.enums.ImageStatusEnum;
 import com.hpl.media.service.ImageService;
+import com.hpl.pojo.CommonDeletedEnum;
+import com.hpl.pojo.CommonPageParam;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import io.minio.MinioClient;
@@ -46,39 +47,45 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
     private String END_POINT;
 
     @Override
-    public List<Image> listImages(SearchImageDTO searchImageDTO){
+    public List<Image> listImages(String searchName, CommonPageParam pageParam){
 
         //todo
         Long userId = 1L;
+
         LambdaQueryWrapper<Image> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Image::getUserId, userId)
                 .eq(Image::getStatus, ImageStatusEnum.SHOW.getCode())
-                //todo
-                .eq(Image::getDeleted,0);
+                .eq(Image::getDeleted, CommonDeletedEnum.NO.getCode());
 
-        if (searchImageDTO!=null){
-            if (StringUtils.hasText(searchImageDTO.getImageName())){
-                queryWrapper.like(Image::getImageName, searchImageDTO.getImageName());
-            }
-
+        if (StringUtils.hasText(searchName)){
+            log.warn(searchName);
+            queryWrapper.like(Image::getImageName, searchName);
         }
 
         queryWrapper.orderByAsc(Image::getUpdateTime);
+        queryWrapper.last(CommonPageParam.getLimitSql(pageParam));
+
 
         return imageMapper.selectList(queryWrapper);
 
     }
 
     @Override
-    public List<Image> listHiddenImages(){
+    public List<Image> listHiddenImages(String searchName, CommonPageParam pageParam){
         //todo
         Long userId = 1L;
 
         LambdaQueryWrapper<Image> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Image::getUserId, userId)
                 .eq(Image::getStatus, ImageStatusEnum.NOT_SHOW.getCode())
-                //todo
-                .eq(Image::getDeleted,0);
+                .eq(Image::getDeleted,CommonDeletedEnum.NO.getCode());
+
+        if (StringUtils.hasText(searchName)){
+            log.warn(searchName);
+            queryWrapper.like(Image::getImageName, searchName);
+        }
+        queryWrapper.orderByAsc(Image::getUpdateTime);
+        queryWrapper.last(CommonPageParam.getLimitSql(pageParam));
 
         return imageMapper.selectList(queryWrapper);
     }
@@ -255,6 +262,13 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
         lambdaUpdate().set(Image::getStatus,ImageStatusEnum.SHOW.getCode())
                 .eq(Image::getId,id)
                 .update();
+    }
+
+    @Override
+    public void editRemarkById(String id, String newRemark){
+       lambdaUpdate().set(Image::getRemark,newRemark)
+               .eq(Image::getId,id)
+               .update();
     }
 
 }

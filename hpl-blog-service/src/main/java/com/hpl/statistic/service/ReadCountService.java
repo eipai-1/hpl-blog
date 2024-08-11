@@ -1,7 +1,7 @@
 package com.hpl.statistic.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.statistic.pojo.entity.ReadCount;
 
 import java.util.List;
@@ -11,6 +11,12 @@ import java.util.List;
  * @date : 2024/7/3 18:29
  */
 public interface ReadCountService extends IService<ReadCount> {
+
+    /**
+     * 初始化文章阅读计数
+     * @param articleId
+     */
+    void InitArticleReadCount(Long articleId);
 
     /**
      * 文章计数+1
@@ -41,7 +47,7 @@ public interface ReadCountService extends IService<ReadCount> {
      * @return
      */
     @Deprecated
-    ArticleFootCountDTO queryArticleCountInfoByArticleId(Long articleId);
+    ArticleCountInfoDTO queryArticleCountInfoByArticleId(Long articleId);
 
 
     /**
@@ -52,7 +58,7 @@ public interface ReadCountService extends IService<ReadCount> {
      * @return
      */
     @Deprecated
-    ArticleFootCountDTO queryArticleCountInfoByUserId(Long userId);
+    ArticleCountInfoDTO queryArticleCountInfoByUserId(Long userId);
 
     /**
      * 获取评论点赞数量
@@ -77,7 +83,7 @@ public interface ReadCountService extends IService<ReadCount> {
      * @param articleId
      * @return 返回文章的 收藏、点赞、评论、阅读数
      */
-    ArticleFootCountDTO getArticleStatisticInfo(Long articleId);
+    ArticleCountInfoDTO getArticleStatisticInfo(Long articleId);
 
     
 

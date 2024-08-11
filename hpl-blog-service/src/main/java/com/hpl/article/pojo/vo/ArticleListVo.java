@@ -1,7 +1,8 @@
 package com.hpl.article.pojo.vo;
 
+import com.hpl.article.pojo.dto.TagDTO;
 import com.hpl.article.pojo.entity.Tag;
-import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -43,12 +44,12 @@ public class ArticleListVo {
     /**
      * 文章的标签列表
      */
-    private List<Tag> tags;
+    private List<TagDTO> tags;
 
     /**
      * 文章的底部计数信息，包括阅读数、点赞数等
      */
-    private ArticleFootCountDTO countInfo;
+    private ArticleCountInfoDTO countInfo;
 
     /**
      * 文章作者的ID

@@ -9,6 +9,7 @@ import com.hpl.article.pojo.vo.CategoryVo;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.CategoryService;
+import com.hpl.article.service.TagService;
 import com.hpl.converter.MarkdownConverter;
 import com.hpl.pojo.CommonController;
 import com.hpl.pojo.CommonPageListVo;
@@ -47,8 +48,10 @@ public class ArticleController extends CommonController {
     @Autowired
     private CategoryService categoryService;
 
-//    @Autowired
-//    private TagService tagService;
+    @Resource
+    private TagService tagService;
+
+
 
     @Operation(summary = "列表查询我的文章")
     @GetMapping(path = "myself-list")
@@ -162,6 +165,25 @@ public class ArticleController extends CommonController {
             return CommonResult.error("您没有权限取消发布该文章");
         }
     }
+
+    @Operation(summary = "删除文章")
+    @DeleteMapping("/delete/{articleId}")
+    public CommonResult<?> deleteArticle(@PathVariable("articleId") Long articleId) {
+        //todo
+        Long userId = 1L;
+        articleService.deleteArticle(articleId, userId);
+
+        return CommonResult.success("删除成功");
+    }
+
+    @Operation(summary = "获取所有标签")
+    @GetMapping("/tags")
+    public CommonResult<?> getTags() {
+        List<TagDTO> tags = tagService.getTags();
+
+        return CommonResult.data(tags);
+    }
+
 
 
 

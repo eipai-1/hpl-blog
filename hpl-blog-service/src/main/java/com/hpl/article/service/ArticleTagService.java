@@ -1,10 +1,11 @@
 package com.hpl.article.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hpl.article.pojo.dto.TagDTO;
 import com.hpl.article.pojo.entity.ArticleTag;
-import com.hpl.article.pojo.entity.Tag;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author : rbe
@@ -19,7 +20,10 @@ public interface ArticleTagService extends IService<ArticleTag> {
      * @return 返回包含标签信息的CommonPageVo对象，其中标签信息以TagDTO形式呈现。
      * CommonPageVo封装了分页信息和数据列表，这里只用到了数据列表部分。
      */
-    List<Tag> getTagsByAId(Long articleId);
+    List<TagDTO> getTagsByAId(Long articleId);
 
+    void deleteTagByAId(Long articleId);
+
+    void saveTagByAId(Set<Long> tagIds, Long articleId);
 
 }

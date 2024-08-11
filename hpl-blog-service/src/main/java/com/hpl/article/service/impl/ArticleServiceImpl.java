@@ -22,8 +22,11 @@ import com.hpl.media.service.ImageMdService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
+import com.hpl.statistic.pojo.dto.CountAllDTO;
 import com.hpl.statistic.pojo.entity.ReadCount;
 import com.hpl.statistic.service.ReadCountService;
+import com.hpl.statistic.service.TraceCountService;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
 import com.hpl.user.service.UserRelationService;
@@ -33,12 +36,15 @@ import com.hpl.util.NumUtil;
 import jakarta.annotation.Resource;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -77,6 +83,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Resource
     private ImageMdService imageMdService;
+
+    @Resource
+    private TraceCountService traceCountService;
 
 
     /**
@@ -170,7 +179,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleListVo.setTags(articleTagService.getTagsByAId(article.getId()));
 
         // 3、文章阅读统计信息拼接
-        articleListVo.setCountInfo(readCountService.getArticleStatisticInfo(article.getId()));
+        ArticleCountInfoDTO countInfo = new ArticleCountInfoDTO();
+        // 3.1 获取阅读次数总和
+        countInfo.setReadCount(readCountService.getArticleReadCount(article.getId()));
+        // 3.2 遍历文章id集合，获取收藏、点赞、评论次数总和
+        CountAllDTO countAllDTO = traceCountService.getAllCountByArticleId(null,article.getId());
+
+        countInfo.setCollectionCount(countAllDTO.getCollectionCount());
+        countInfo.setCommentCount(countAllDTO.getCommentCount());
+        countInfo.setPraiseCount(countAllDTO.getPraiseCount());
+
+        // 3.3 内容拼接
+        articleListVo.setCountInfo(countInfo);
 
 
         // 4、文章作者信息拼接
@@ -354,9 +374,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         article.setAuthorId(authorId);
         article.setId(articlePostDTO.getArticleId());
         article.setTitle(articlePostDTO.getTitle());
-        article.setShortTitle(articlePostDTO.getShortTitle());
+//        article.setShortTitle(articlePostDTO.getShortTitle());
         article.setCategoryId(articlePostDTO.getCategoryId());
-        article.setSummary(articlePostDTO.getSummary());
+
+        article.setSummary(this.pickSummary(articlePostDTO.getContent()));
+        log.warn(article.getSummary());
         article.setStatus(articlePostDTO.getStatus());
 
         //todo
@@ -390,6 +412,39 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         });
     }
 
+    private String pickSummary(String content) {
+
+        final Integer MAX_SUMMARY_CHECK_TXT_LEN = 2000;
+        final Integer SUMMARY_LEN = 256;
+        Pattern LINK_IMG_PATTERN = Pattern.compile("!?\\[(.*?)\\]\\((.*?)\\)");
+        Pattern CONTENT_PATTERN = Pattern.compile("[0-9a-zA-Z\u4e00-\u9fa5:;\"'<>,.?/·~！：；“”‘’《》，。？、（）]");
+
+        Pattern HTML_TAG_PATTERN = Pattern.compile("<[^>]+>");
+
+
+        if (StringUtils.isBlank(content)) {
+            return StringUtils.EMPTY;
+        }
+
+        // 首先移除所有的图片，链接
+        content = content.substring(0, Math.min(content.length(), MAX_SUMMARY_CHECK_TXT_LEN)).trim();
+        // 移除md的图片、超链
+        content = content.replaceAll(LINK_IMG_PATTERN.pattern(), "");
+        // 移除html标签
+        content = HTML_TAG_PATTERN.matcher(content).replaceAll("");
+
+        // 匹配对应字符
+        StringBuilder result = new StringBuilder();
+        Matcher matcher = CONTENT_PATTERN.matcher(content);
+        while (matcher.find()) {
+            result.append(content, matcher.start(), matcher.end());
+            if (result.length() >= SUMMARY_LEN) {
+                return result.substring(0, SUMMARY_LEN).trim();
+            }
+        }
+        return result.toString().trim();
+    }
+
     /**
      * 新建文章
      *
@@ -408,14 +463,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         article.setId(articleId);
         articleMapper.insert(article);
 
-
         // 2. 保存文章内容
         ArticleDetail detail = new ArticleDetail();
         detail.setArticleId(articleId);
         detail.setContent(content);
         detail.setVersion(1L);
         articleDetailMapper.insert(detail);
-
 
         // 3. 保存文章标签
         tags.forEach(tagId -> {
@@ -425,6 +478,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             tag.setDeleted(CommonDeletedEnum.NO.getCode());
             articleTagService.save(tag);
         });
+
+        // 4、文章阅读次数初始化 1
+        readCountService.InitArticleReadCount(articleId);
 
 
 
@@ -456,7 +512,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         // 2、更新article_detail表
         // 更新内容 和 版本号
-
         LambdaQueryWrapper<ArticleDetail> contentQuery = Wrappers.lambdaQuery();
         contentQuery.eq(ArticleDetail::getDeleted, CommonDeletedEnum.NO.getCode())
                 .eq(ArticleDetail::getArticleId, article.getId())
@@ -474,36 +529,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         // 3、标签更新
         if (tags != null && tags.size() > 0) {
-            LambdaQueryWrapper<ArticleTag> query = Wrappers.lambdaQuery();
-            query.eq(ArticleTag::getArticleId, article.getId())
-                    .eq(ArticleTag::getDeleted, CommonDeletedEnum.NO.getCode());
-            List<ArticleTag> dbTags = articleTagService.listObjs(query);
-
-            // 在旧的里面，不在新的里面的标签，设置为删除
-            List<Long> toDeleted = new ArrayList<>();
-            dbTags.forEach(tag -> {
-                if (!tags.contains(tag.getTagId())) {
-                    toDeleted.add(tag.getId());
-                } else {
-                    // 移除已经存在的记录
-                    tags.remove(tag.getTagId());
-                }
-            });
-            if (!toDeleted.isEmpty()) {
-                articleTagService.removeBatchByIds(toDeleted);
-            }
-
-            if (!tags.isEmpty()) {
-                List<ArticleTag> insertList = new ArrayList<>(tags.size());
-                tags.forEach(s -> {
-                    ArticleTag tag = new ArticleTag();
-                    tag.setTagId(s);
-                    tag.setArticleId(article.getId());
-                    tag.setDeleted(CommonDeletedEnum.NO.getCode());
-                    articleTagService.save(tag);
-                });
-
-            }
+            // 3.1、先删除原先所有关联标签
+            articleTagService.deleteTagByAId(article.getId());
+            // 3.2、再关联新标签
+            articleTagService.saveTagByAId(tags,article.getId());
         }
 
         return article.getId();
@@ -557,20 +586,34 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         List<MyArticleListDTO> res = new ArrayList<>();
 
         articles.forEach(article -> {
+            // 1、文章基本信息拼接
             MyArticleListDTO dto = new MyArticleListDTO();
             dto.setArticleId(article.getId());
             dto.setAuthorId(article.getAuthorId());
-
             dto.setTitle(article.getTitle());
             dto.setShortTitle(article.getShortTitle());
             dto.setSummary(article.getSummary());
-            dto.setPicture(article.getPicture());
-
-            dto.setCategory(categoryService.getNameById(article.getCategoryId()));
-
+            dto.setCategoryName(categoryService.getNameById(article.getCategoryId()));
             dto.setStatus(article.getStatus());
             dto.setCreateTime(article.getCreateTime());
             dto.setUpdateTime(article.getUpdateTime());
+
+            // 2、文章标签内容拼接
+            dto.setTags(articleTagService.getTagsByAId(article.getId()));
+
+            // 3、文章阅读统计信息拼接
+            ArticleCountInfoDTO countInfo = new ArticleCountInfoDTO();
+            // 3.1 获取阅读次数总和
+            countInfo.setReadCount(readCountService.getArticleReadCount(article.getId()));
+            // 3.2 遍历文章id集合，获取收藏、点赞、评论次数总和
+            CountAllDTO countAllDTO = traceCountService.getAllCountByArticleId(null,article.getId());
+
+            countInfo.setCollectionCount(countAllDTO.getCollectionCount());
+            countInfo.setCommentCount(countAllDTO.getCommentCount());
+            countInfo.setPraiseCount(countAllDTO.getPraiseCount());
+
+            // 3.3 内容拼接
+            dto.setCountInfo(countInfo);
 
             res.add(dto);
         });

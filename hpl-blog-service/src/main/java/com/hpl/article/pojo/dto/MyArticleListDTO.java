@@ -1,10 +1,13 @@
 package com.hpl.article.pojo.dto;
 
+import com.hpl.article.pojo.entity.Tag;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author : rbe
@@ -20,13 +23,14 @@ public class MyArticleListDTO implements Serializable {
     private Long authorId;
     private String title;
     private String shortTitle;
-    private String picture;
     private String summary;
 
-    private String category;
+    private String categoryName;
 
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
     private Integer status;
+    private List<TagDTO> tags;
+    private ArticleCountInfoDTO countInfo;
 
 }

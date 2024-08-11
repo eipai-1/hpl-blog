@@ -5,7 +5,7 @@ import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
 import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
 import com.hpl.article.pojo.enums.OperateTypeEnum;
 import com.hpl.pojo.CommonPageParam;
-import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.statistic.pojo.dto.StatisticUserFootDTO;
 import com.hpl.user.pojo.entity.UserFoot;
 
@@ -98,9 +98,9 @@ public interface UserFootService extends IService<UserFoot> {
      * @param articleId
      * @return
      */
-    ArticleFootCountDTO countArticleByArticleId(Long articleId);
+    ArticleCountInfoDTO countArticleByArticleId(Long articleId);
 
-    ArticleFootCountDTO countArticleByUserId(Long userId);
+    ArticleCountInfoDTO countArticleByUserId(Long userId);
 
     Long countCommentPraise(Long commentId);
 }

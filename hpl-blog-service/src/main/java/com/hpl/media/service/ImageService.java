@@ -2,8 +2,8 @@ package com.hpl.media.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.media.pojo.dto.ImagePostDTO;
-import com.hpl.media.pojo.dto.SearchImageDTO;
 import com.hpl.media.pojo.entity.Image;
+import com.hpl.pojo.CommonPageParam;
 
 import java.util.List;
 
@@ -15,13 +15,15 @@ public interface ImageService extends IService<Image> {
 
     void uploadImage(ImagePostDTO imagePostDTO, byte[] bytes, String imageName);
 
-    List<Image> listImages(SearchImageDTO searchImageDTO);
+    List<Image> listImages(String searchName, CommonPageParam pageParam);
 
-    List<Image> listHiddenImages();
+    List<Image> listHiddenImages(String searchName, CommonPageParam pageParam);
 
     void renameById(String id,String newName);
 
     void hideImage(String id);
 
     void showImage(String id);
+
+    void editRemarkById(String id, String newRemark);
 }

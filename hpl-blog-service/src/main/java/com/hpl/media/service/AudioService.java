@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.media.pojo.dto.ImagePostDTO;
 import com.hpl.media.pojo.dto.SearchAudioDTO;
 import com.hpl.media.pojo.entity.Audio;
+import com.hpl.pojo.CommonPageParam;
 
 import java.util.List;
 
@@ -14,9 +15,11 @@ import java.util.List;
 public interface AudioService extends IService<Audio> {
     void uploadImage(ImagePostDTO imagePostDTO, byte[] bytes, String imageName);
 
-    List<Audio> listAudios(SearchAudioDTO searchAudioDTO);
+    List<Audio> listAudios(String searchName, CommonPageParam pageParam);
 
     void renameById(String id,String newName);
 
     void deleteById(String id);
+
+    void editRemarkById(String id, String newRemark);
 }

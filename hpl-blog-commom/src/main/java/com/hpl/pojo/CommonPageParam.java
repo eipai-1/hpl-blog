@@ -71,7 +71,7 @@ public class CommonPageParam {
      * @return 返回格式化后的limit子句字符串。
      */
     public static String getLimitSql(CommonPageParam commonPageParam) {
-        // 使用String.format方法格式化生成limit子句，其中%s会被替换为commomPageDto对象的offset和limit属性值
+        // 使用String.format方法格式化生成limit子句，其中%s会被替换为commonPageDto对象的offset和limit属性值
         return String.format("limit %s,%s", commonPageParam.offset, commonPageParam.limit);
     }
 

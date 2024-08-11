@@ -8,7 +8,7 @@ import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
 import com.hpl.article.pojo.enums.OperateTypeEnum;
 import com.hpl.article.pojo.enums.PraiseStateEnum;
 import com.hpl.pojo.CommonPageParam;
-import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.statistic.pojo.dto.StatisticUserFootDTO;
 import com.hpl.user.pojo.entity.UserFoot;
 import com.hpl.user.mapper.UserFootMapper;
@@ -230,12 +230,12 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
      * @return
      */
     @Override
-    public ArticleFootCountDTO countArticleByArticleId(Long articleId){
+    public ArticleCountInfoDTO countArticleByArticleId(Long articleId){
         return userFootMapper.countArticleByArticleId(articleId);
     }
 
     @Override
-    public ArticleFootCountDTO countArticleByUserId(Long userId){
+    public ArticleCountInfoDTO countArticleByUserId(Long userId){
         return userFootMapper.countArticleByUserId(userId);
     }
 

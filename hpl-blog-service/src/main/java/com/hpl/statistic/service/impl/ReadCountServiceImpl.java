@@ -8,7 +8,7 @@ import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.statistic.mapper.ReadCountMapper;
 import com.hpl.statistic.pojo.constant.CountConstant;
-import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.statistic.pojo.entity.ReadCount;
 import com.hpl.statistic.service.ReadCountService;
 import com.hpl.user.service.UserFootService;
@@ -30,25 +30,36 @@ import java.util.Map;
 @Service
 public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount> implements ReadCountService {
 
+    private final Integer INIT_COUNT = 1;
+
     @Resource
     private UserFootService userFootService;
 
     @Resource
     private UserRelationService userRelationService;
 
-//    @Resource
-//    private ArticleReadService articleReadService;
-
     @Resource
     private ReadCountMapper readCountMapper;
 
+    /**
+     * 初始化文章阅读计数
+     * @param articleId
+     */
+    @Override
+    public void InitArticleReadCount(Long articleId){
+        ReadCount readCount = new ReadCount();
+        readCount.setDocumentId(articleId);
+        readCount.setDocumentType(DocumentTypeEnum.ARTICLE.getCode());
+        readCount.setCnt(INIT_COUNT);
+        readCountMapper.insert(readCount);
+    }
 
 
     @Override
-    public ArticleFootCountDTO queryArticleCountInfoByArticleId(Long articleId) {
-        ArticleFootCountDTO res = userFootService.countArticleByArticleId(articleId);
+    public ArticleCountInfoDTO queryArticleCountInfoByArticleId(Long articleId) {
+        ArticleCountInfoDTO res = userFootService.countArticleByArticleId(articleId);
         if (res == null) {
-            res = new ArticleFootCountDTO();
+            res = new ArticleCountInfoDTO();
         } else {
             //todo 完善评论服务在启用
 //            res.setCommentCount(commentReadService.queryCommentCount(articleId));
@@ -59,7 +70,7 @@ public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount
 
 
     @Override
-    public ArticleFootCountDTO queryArticleCountInfoByUserId(Long userId) {
+    public ArticleCountInfoDTO queryArticleCountInfoByUserId(Long userId) {
         return userFootService.countArticleByUserId(userId);
     }
 
@@ -89,9 +100,9 @@ public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount
 //    }
 
     @Override
-    public ArticleFootCountDTO getArticleStatisticInfo(Long articleId) {
+    public ArticleCountInfoDTO getArticleStatisticInfo(Long articleId) {
         Map<String, Integer> ans = RedisUtil.hGetAll(CountConstant.ARTICLE_STATISTIC_INFO + articleId, Integer.class);
-        ArticleFootCountDTO info = new ArticleFootCountDTO();
+        ArticleCountInfoDTO info = new ArticleCountInfoDTO();
         info.setPraiseCount(ans.getOrDefault(CountConstant.PRAISE_COUNT, 0));
         info.setCollectionCount(ans.getOrDefault(CountConstant.COLLECTION_COUNT, 0));
         info.setCommentCount(ans.getOrDefault(CountConstant.COMMENT_COUNT, 0));
@@ -191,9 +202,9 @@ public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount
     @Override
     public void refreshUserStatisticInfo(Long userId) {
         // 用户的文章点赞数，收藏数，阅读计数
-        ArticleFootCountDTO count = userFootService.countArticleByUserId(userId);
+        ArticleCountInfoDTO count = userFootService.countArticleByUserId(userId);
         if (count == null) {
-            count = new ArticleFootCountDTO();
+            count = new ArticleCountInfoDTO();
         }
 
         // 获取关注数
@@ -218,9 +229,9 @@ public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount
 
     @Override
     public void refreshArticleStatisticInfo(Long articleId) {
-        ArticleFootCountDTO res = userFootService.countArticleByArticleId(articleId);
+        ArticleCountInfoDTO res = userFootService.countArticleByArticleId(articleId);
         if (res == null) {
-            res = new ArticleFootCountDTO();
+            res = new ArticleCountInfoDTO();
         } else {
             //todo 别忘了补回来
 //            res.setCommentCount(commentReadService.queryCommentCount(articleId));

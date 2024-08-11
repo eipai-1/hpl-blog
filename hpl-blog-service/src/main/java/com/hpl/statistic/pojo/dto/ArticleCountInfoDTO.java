@@ -7,7 +7,7 @@ import lombok.Data;
  * @date : 2024/7/3 19:01
  */
 @Data
-public class ArticleFootCountDTO {
+public class ArticleCountInfoDTO {
 
     /** 文章点赞数 */
     private Integer  praiseCount;
@@ -21,7 +21,7 @@ public class ArticleFootCountDTO {
     /** 评论数 */
     private Integer commentCount;
 
-    public ArticleFootCountDTO() {
+    public ArticleCountInfoDTO() {
         praiseCount = 0;
         readCount = 0;
         collectionCount = 0;

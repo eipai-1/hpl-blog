@@ -2,7 +2,7 @@ package com.hpl.user.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
-import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.statistic.pojo.dto.StatisticUserFootDTO;
 import com.hpl.user.pojo.entity.UserFoot;
 import org.apache.ibatis.annotations.Mapper;
@@ -40,7 +40,7 @@ public interface UserFootMapper extends BaseMapper<UserFoot> {
      * @param articleId
      * @return
      */
-    ArticleFootCountDTO countArticleByArticleId(Long articleId);
+    ArticleCountInfoDTO countArticleByArticleId(Long articleId);
 
-    ArticleFootCountDTO countArticleByUserId(Long userId);
+    ArticleCountInfoDTO countArticleByUserId(Long userId);
 }

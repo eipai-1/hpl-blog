@@ -15,5 +15,11 @@ public class SearchVideoDTO implements Serializable {
     @Schema(description = "视频名称")
     private String videoName;
 
+    @Schema(description = "页码")
+    private Long pageNum;
+
+    @Schema(description = "页面大小")
+    private Long pageSize;
+
 
 }

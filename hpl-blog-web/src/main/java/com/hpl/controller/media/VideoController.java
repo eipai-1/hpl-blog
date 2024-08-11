@@ -5,6 +5,8 @@ import com.hpl.media.pojo.dto.SearchVideoDTO;
 import com.hpl.media.pojo.dto.VideoPostDTO;
 import com.hpl.media.pojo.entity.Video;
 import com.hpl.media.service.VideoService;
+import com.hpl.pojo.CommonController;
+import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +28,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/video")
-public class VideoController {
+public class VideoController extends CommonController {
 
     // 单个文件最大大小
     private final Long MAX_FILE_SIZE = 50 * 1024 * 1024L;
@@ -37,7 +39,12 @@ public class VideoController {
     @Operation(summary = "列表查看所有视频")
     @PostMapping("/videos")
     public CommonResult<List<Video>> listVideos(@RequestBody SearchVideoDTO searchVideoDTO){
-        List<Video> list = videoService.listVideos(searchVideoDTO);
+        log.warn("searchImageDTO:{}",searchVideoDTO);
+
+        // 校验页码和每页大小
+        CommonPageParam pageParam =this.buildPageParam(searchVideoDTO.getPageNum(), searchVideoDTO.getPageSize());
+
+        List<Video> list = videoService.listVideos(searchVideoDTO.getVideoName(), pageParam);
         return CommonResult.data(list);
     }
 
@@ -110,6 +117,13 @@ public class VideoController {
     @PutMapping("/rename/{id}")
     public CommonResult<?> renameVideo(@PathVariable String id, @RequestParam String newName) {
         videoService.renameById(id,newName);
+        return CommonResult.success();
+    }
+
+    @Operation(summary = "编辑备注")
+    @PutMapping("/remark/{id}")
+    public CommonResult<?> editRemark(@PathVariable String id, @RequestParam String newRemark) {
+        videoService.editRemarkById(id,newRemark);
         return CommonResult.success();
     }
 }

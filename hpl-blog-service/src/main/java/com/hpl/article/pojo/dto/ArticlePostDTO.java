@@ -21,9 +21,9 @@ public class ArticlePostDTO implements Serializable {
     @Schema(description = "文章标题" )
     private String title;
 
-    /** 文章短标题 */
-    @Schema(description = "文章短标题" )
-    private String shortTitle;
+//    /** 文章短标题 */
+//    @Schema(description = "文章短标题" )
+//    private String shortTitle;
 
     /** 分类 */
     @Schema(description = "分类" )
@@ -33,9 +33,6 @@ public class ArticlePostDTO implements Serializable {
     @Schema(description = "标签" )
     private Set<Long> tagIds;
 
-    /** 简介 */
-    @Schema(description = "简介" )
-    private String summary;
 
     /** 正文内容 */
     @Schema(description = "正文内容" )

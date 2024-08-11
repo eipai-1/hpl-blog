@@ -3,10 +3,11 @@ package com.hpl.media.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.media.mapper.VideoMapper;
-import com.hpl.media.pojo.dto.SearchVideoDTO;
 import com.hpl.media.pojo.dto.VideoPostDTO;
 import com.hpl.media.pojo.entity.Video;
 import com.hpl.media.service.VideoService;
+import com.hpl.pojo.CommonDeletedEnum;
+import com.hpl.pojo.CommonPageParam;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import io.minio.MinioClient;
@@ -44,23 +45,21 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private String END_POINT;
 
     @Override
-    public List<Video> listVideos(SearchVideoDTO searchVideoDTO) {
+    public List<Video> listVideos(String searchName, CommonPageParam pageParam) {
 
         //todo
         Long userId = 1L;
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, userId)
-                //todo
-                .eq(Video::getDeleted, 0);
+                .eq(Video::getDeleted, CommonDeletedEnum.NO.getCode());
 
-        if (searchVideoDTO != null) {
-            if (StringUtils.hasText(searchVideoDTO.getVideoName())) {
-                queryWrapper.like(Video::getVideoName, searchVideoDTO.getVideoName());
-            }
-
+        if (StringUtils.hasText(searchName)){
+                queryWrapper.like(Video::getVideoName, searchName);
         }
 
+
         queryWrapper.orderByAsc(Video::getUpdateTime);
+        queryWrapper.last(CommonPageParam.getLimitSql(pageParam));
 
         return videoMapper.selectList(queryWrapper);
 
@@ -227,6 +226,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         Video video = videoMapper.selectById(id);
         video.setDeleted(1);
         videoMapper.updateById(video);
+    }
+
+    @Override
+    public void editRemarkById(String id, String newRemark){
+        lambdaUpdate().set(Video::getRemark,newRemark)
+                .eq(Video::getId,id)
+                .update();
     }
 
 }

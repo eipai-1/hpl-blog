@@ -4,6 +4,8 @@ import com.hpl.media.pojo.dto.ImagePostDTO;
 import com.hpl.media.pojo.dto.SearchAudioDTO;
 import com.hpl.media.pojo.entity.Audio;
 import com.hpl.media.service.AudioService;
+import com.hpl.pojo.CommonController;
+import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +27,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/audio")
-public class AudioController {
+public class AudioController extends CommonController {
 
     // 单个文件最大大小
     private final Long MAX_FILE_SIZE = 50 * 1024 * 1024L;
@@ -36,7 +38,14 @@ public class AudioController {
     @Operation(summary = "列表查看所有音频")
     @PostMapping("/audios")
     public CommonResult<List<Audio>> listImages(@RequestBody SearchAudioDTO searchAudioDTO){
-        List<Audio> list = audioService.listAudios(searchAudioDTO);
+        log.warn("searchImageDTO:{}",searchAudioDTO);
+
+        // 校验页码和每页大小
+        CommonPageParam pageParam =this.buildPageParam(searchAudioDTO.getPageNum(), searchAudioDTO.getPageSize());
+
+
+
+        List<Audio> list = audioService.listAudios(searchAudioDTO.getAudioName(), pageParam);
         return CommonResult.data(list);
     }
 
@@ -103,6 +112,13 @@ public class AudioController {
     @PutMapping("/rename/{id}")
     public CommonResult<?> renameImage(@PathVariable String id, @RequestParam String newName) {
         audioService.renameById(id,newName);
+        return CommonResult.success();
+    }
+
+    @Operation(summary = "编辑备注")
+    @PutMapping("/remark/{id}")
+    public CommonResult<?> editRemark(@PathVariable String id, @RequestParam String newRemark) {
+        audioService.editRemarkById(id,newRemark);
         return CommonResult.success();
     }
 }

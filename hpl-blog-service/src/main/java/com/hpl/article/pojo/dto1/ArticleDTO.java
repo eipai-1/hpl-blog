@@ -1,6 +1,6 @@
 package com.hpl.article.pojo.dto1;
 
-import com.hpl.statistic.pojo.dto.ArticleFootCountDTO;
+import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -129,7 +129,7 @@ public class ArticleDTO implements Serializable {
     /**
      * 文章对应的统计计数
      */
-    private ArticleFootCountDTO count;
+    private ArticleCountInfoDTO count;
 
     /**
      * 点赞用户信息

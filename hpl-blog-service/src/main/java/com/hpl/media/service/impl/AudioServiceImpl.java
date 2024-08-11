@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.media.mapper.AudioMapper;
 import com.hpl.media.pojo.dto.ImagePostDTO;
-import com.hpl.media.pojo.dto.SearchAudioDTO;
 import com.hpl.media.pojo.entity.Audio;
 import com.hpl.media.service.AudioService;
+import com.hpl.pojo.CommonDeletedEnum;
+import com.hpl.pojo.CommonPageParam;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import io.minio.MinioClient;
@@ -44,23 +45,20 @@ public class AudioServiceImpl extends ServiceImpl<AudioMapper, Audio> implements
     private String END_POINT;
 
     @Override
-    public List<Audio> listAudios(SearchAudioDTO searchAudioDTO){
+    public List<Audio> listAudios(String searchName, CommonPageParam pageParam){
 
         //todo
         Long userId = 1L;
         LambdaQueryWrapper<Audio> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Audio::getUserId, userId)
-                //todo
-                .eq(Audio::getDeleted,0);
+                .eq(Audio::getDeleted, CommonDeletedEnum.NO.getCode());
 
-        if (searchAudioDTO!=null){
-            if (StringUtils.hasText(searchAudioDTO.getAudioName())){
-                queryWrapper.like(Audio::getAudioName, searchAudioDTO.getAudioName());
-            }
-
+        if (StringUtils.hasText(searchName)){
+            queryWrapper.like(Audio::getAudioName, searchName);
         }
 
         queryWrapper.orderByAsc(Audio::getUpdateTime);
+        queryWrapper.last(CommonPageParam.getLimitSql(pageParam));
 
         return audioMapper.selectList(queryWrapper);
 
@@ -235,5 +233,11 @@ public class AudioServiceImpl extends ServiceImpl<AudioMapper, Audio> implements
         audioMapper.updateById(audio);
     }
 
+    @Override
+    public void editRemarkById(String id, String newRemark){
+        lambdaUpdate().set(Audio::getRemark,newRemark)
+                .eq(Audio::getId,id)
+                .update();
+    }
 
 }

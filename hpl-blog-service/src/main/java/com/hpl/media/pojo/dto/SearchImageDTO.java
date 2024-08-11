@@ -15,5 +15,11 @@ public class SearchImageDTO implements Serializable {
     @Schema(description = "图片名称")
     private String imageName;
 
+    @Schema(description = "页码")
+    private Long pageNum;
+
+    @Schema(description = "页面大小")
+    private Long pageSize;
+
 
 }

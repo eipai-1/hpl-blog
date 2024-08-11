@@ -15,5 +15,10 @@ public class SearchAudioDTO implements Serializable {
     @Schema(description = "音频图片名称")
     private String audioName;
 
+    @Schema(description = "页码")
+    private Long pageNum;
+
+    @Schema(description = "页面大小")
+    private Long pageSize;
 
 }

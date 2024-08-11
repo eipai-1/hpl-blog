@@ -5,6 +5,8 @@ import com.hpl.media.pojo.dto.ImagePostDTO;
 import com.hpl.media.pojo.dto.SearchImageDTO;
 import com.hpl.media.pojo.entity.Image;
 import com.hpl.media.service.ImageService;
+import com.hpl.pojo.CommonController;
+import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,15 +27,20 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/image")
-public class ImageController {
+public class ImageController extends CommonController {
 
     @Resource
     private ImageService imageService;
 
-    @Operation(summary = "列表查看所有图片")
+    @Operation(summary = "列表分页查看所有图片")
     @PostMapping("/images")
     public CommonResult<List<Image>> listImages(@RequestBody SearchImageDTO searchImageDTO) {
-        List<Image> list = imageService.listImages(searchImageDTO);
+        log.warn("searchImageDTO:{}",searchImageDTO);
+
+        // 校验页码和每页大小
+        CommonPageParam pageParam =this.buildPageParam(searchImageDTO.getPageNum(), searchImageDTO.getPageSize());
+
+        List<Image> list = imageService.listImages(searchImageDTO.getImageName(),pageParam);
         return CommonResult.data(list);
     }
 
@@ -41,8 +48,11 @@ public class ImageController {
     //查看所有隐藏图片
     @Operation(summary = "查看所有隐藏图片")
     @PostMapping("/hidden")
-    public CommonResult<List<Image>> listHiddenImages() {
-        List<Image> list = imageService.listHiddenImages();
+    public CommonResult<List<Image>> listHiddenImages(@RequestBody SearchImageDTO searchImageDTO) {
+        // 校验页码和每页大小
+        CommonPageParam pageParam =this.buildPageParam(searchImageDTO.getPageNum(), searchImageDTO.getPageSize());
+
+        List<Image> list = imageService.listHiddenImages(searchImageDTO.getImageName(),pageParam);
         return CommonResult.data(list);
     }
 
@@ -105,6 +115,13 @@ public class ImageController {
     @PutMapping("/rename/{id}")
     public CommonResult<?> renameImage(@PathVariable String id, @RequestParam String newName) {
         imageService.renameById(id,newName);
+        return CommonResult.success();
+    }
+
+    @Operation(summary = "编辑备注")
+    @PutMapping("/remark/{id}")
+    public CommonResult<?> editRemark(@PathVariable String id, @RequestParam String newRemark) {
+        imageService.editRemarkById(id,newRemark);
         return CommonResult.success();
     }
 }

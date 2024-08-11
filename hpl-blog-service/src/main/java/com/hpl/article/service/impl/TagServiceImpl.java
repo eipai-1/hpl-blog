@@ -4,7 +4,9 @@ package com.hpl.article.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.hpl.article.pojo.dto1.TagDTO;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import com.hpl.article.pojo.dto.TagDTO;
 import com.hpl.article.pojo.entity.Tag;
 import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.mapper.TagMapper;
@@ -25,7 +27,7 @@ import java.util.stream.Collectors;
  * @date 2022-07-20
  */
 @Service
-public class TagServiceImpl implements TagService {
+public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagService {
 
     @Autowired
     private TagMapper tagMapper;
@@ -45,44 +47,56 @@ public class TagServiceImpl implements TagService {
         return tagMapper.selectOne(queryWrapper);
     }
 
-    /**
-     * 查询标签信息，支持分页和关键词搜索。
-     *
-     * @param key 搜索关键词，用于匹配标签名。
-     * @param pageParam 分页参数，包含页码和每页数量。
-     * @return 返回包含标签数据的分页对象。
-     */
-    @Override
-    public CommonPageVo<TagDTO> queryTags(String key, CommonPageParam pageParam) {
-        // 构建查询条件，查询在线且未被删除的标签，支持按关键词搜索和按标签ID降序排序
-        LambdaQueryWrapper<Tag> query = Wrappers.lambdaQuery();
-        query.eq(Tag::getStatus, PublishStatusEnum.PUBLISHED.getCode())
-                .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
-                .and(StringUtils.isNotBlank(key), v -> v.like(Tag::getTagName, key))
-                .orderByDesc(Tag::getId);
-        // 如果提供了分页参数，则添加分页限制
-        if (pageParam != null) {
-            query.last(CommonPageParam.getLimitSql(pageParam));
-        }
-        // 执行查询，获取标签列表
-        List<Tag> tags = tagMapper.selectList(query);
+//    /**
+//     * 查询标签信息，支持分页和关键词搜索。
+//     *
+//     * @param key 搜索关键词，用于匹配标签名。
+//     * @param pageParam 分页参数，包含页码和每页数量。
+//     * @return 返回包含标签数据的分页对象。
+//     */
+//    @Override
+//    public CommonPageVo<TagDTO> queryTags(String key, CommonPageParam pageParam) {
+//        // 构建查询条件，查询在线且未被删除的标签，支持按关键词搜索和按标签ID降序排序
+//        LambdaQueryWrapper<Tag> query = Wrappers.lambdaQuery();
+//        query.eq(Tag::getStatus, PublishStatusEnum.PUBLISHED.getCode())
+//                .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
+//                .and(StringUtils.isNotBlank(key), v -> v.like(Tag::getTagName, key))
+//                .orderByDesc(Tag::getId);
+//        // 如果提供了分页参数，则添加分页限制
+//        if (pageParam != null) {
+//            query.last(CommonPageParam.getLimitSql(pageParam));
+//        }
+//        // 执行查询，获取标签列表
+//        List<Tag> tags = tagMapper.selectList(query);
+//
+//        // 将标签实体转换为DTO对象
+//        List<TagDTO> tagDTOS = tags.stream()
+//                .map(this::tagToDto)
+//                .collect(Collectors.toList());
+//
+//        // 计算总记录数，用于分页
+//        LambdaQueryWrapper<Tag> wrapper = Wrappers.lambdaQuery();
+//        wrapper.eq(Tag::getStatus, PublishStatusEnum.PUBLISHED.getCode())
+//                .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
+//                .and(StringUtils.isNotBlank(key), v -> v.like(Tag::getTagName, key));
+//        Long totalCount = tagMapper.selectCount(wrapper);
+//
+//        // 构建并返回分页响应对象
+//        return CommonPageVo.build(tagDTOS, pageParam.getPageSize(), pageParam.getPageNum(), totalCount);
+//    }
 
-        // 将标签实体转换为DTO对象
-        List<TagDTO> tagDTOS = tags.stream()
+    @Override
+    public List<TagDTO> getTags(){
+        List<Tag> tags=lambdaQuery()
+                .eq(Tag::getStatus, PublishStatusEnum.PUBLISHED.getCode())
+                .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
+                .orderByDesc(Tag::getId)
+                .list();
+
+        return tags.stream()
                 .map(this::tagToDto)
                 .collect(Collectors.toList());
-
-        // 计算总记录数，用于分页
-        LambdaQueryWrapper<Tag> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Tag::getStatus, PublishStatusEnum.PUBLISHED.getCode())
-                .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
-                .and(StringUtils.isNotBlank(key), v -> v.like(Tag::getTagName, key));
-        Long totalCount = tagMapper.selectCount(wrapper);
-
-        // 构建并返回分页响应对象
-        return CommonPageVo.build(tagDTOS, pageParam.getPageSize(), pageParam.getPageNum(), totalCount);
     }
-
 
 
     private TagDTO tagToDto(Tag tag){
@@ -90,9 +104,9 @@ public class TagServiceImpl implements TagService {
             return null;
         }
         TagDTO dto = new TagDTO();
-        dto.setTag(tag.getTagName());
+        dto.setTagName(tag.getTagName());
         dto.setTagId(tag.getId());
-        dto.setStatus(tag.getStatus());
+
         return dto;
     }
 

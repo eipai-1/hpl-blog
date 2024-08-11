@@ -7,14 +7,14 @@ package com.hpl.pojo;
 public class CommonController {
 
     /**
-     * @param page 请求的页码，如果小于等于0，则使用默认页码。
-     * @param size 每页的大小，如果为null或大于默认最大值，则使用默认每页大小。
+     * @param pageNum 请求的页码，如果小于等于0，则使用默认页码。
+     * @param pageSize 每页的大小，如果为null或大于默认最大值，则使用默认每页大小。
      * @return 返回一个新的分页参数对象，包含校验和设置后的页码和每页大小。
      */
-    public CommonPageParam buildPageParam(Long page, Long size) {
+    public CommonPageParam buildPageParam(Long pageNum, Long pageSize) {
 
         // 创建并返回新的分页参数实例，包含校验后的页码和每页大小
-        return CommonPageParam.newInstance(page, size);
+        return CommonPageParam.newInstance(pageNum, pageSize);
     }
 
 //  推荐使用它替代 GlobalViewInterceptor 中的全局属性设置
