@@ -53,6 +53,10 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
         ColumnInfo columnInfo = new ColumnInfo();
         BeanUtils.copyProperties(columnPostDTO, columnInfo);
 
+        // todo
+        Long userId = 1L;
+        columnInfo.setAuthorId(userId);
+
         columnInfoMapper.insert(columnInfo);
     }
 
@@ -147,6 +151,7 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             dto.setColumnId(columnInfo.getId());
             dto.setIntroduction(columnInfo.getIntroduction());
             dto.setColumnName(columnInfo.getColumnName());
+            dto.setSection(columnInfo.getSection());
             dto.setCover(columnInfo.getCover());
             dto.setCreateTime(columnInfo.getCreateTime());
 
