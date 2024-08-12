@@ -7,7 +7,6 @@ import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.ArticleRecommendService;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
-import com.hpl.sidebar.service.SidebarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -24,12 +23,6 @@ public class ArticleRecommendServiceImpl implements ArticleRecommendService {
 
     @Autowired
     private ArticleReadService articleReadService;
-
-
-
-
-    @Autowired
-    private SidebarService sidebarService;
 
     /**
      * 查询文章关联推荐列表

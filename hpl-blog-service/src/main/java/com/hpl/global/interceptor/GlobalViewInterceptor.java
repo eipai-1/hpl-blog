@@ -2,11 +2,9 @@ package com.hpl.global.interceptor;
 
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.hpl.global.context.ReqInfoContext;
-import com.hpl.global.service.GlobalInitService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
@@ -23,9 +21,9 @@ import org.springframework.web.servlet.ModelAndView;
 @Slf4j
 @Component
 public class GlobalViewInterceptor implements AsyncHandlerInterceptor {
-
-    @Autowired
-    private GlobalInitService globalInitService;
+//
+//    @Autowired
+//    private GlobalInitService globalInitService;
 
 //    @Override
 //    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -102,20 +100,20 @@ public class GlobalViewInterceptor implements AsyncHandlerInterceptor {
                     ReqInfoContext.ReqInfo reqInfo = new ReqInfoContext.ReqInfo();
                     // 初始化登录用户信息，确保在异常情况下也能保持登录状态
                     // fixme 对于异常重定向到 /error 时，会导致登录信息丢失，待解决
-                    globalInitService.initLoginUser(reqInfo);
+//                    globalInitService.initLoginUser(reqInfo);
                     // 将请求信息添加到上下文中
                     ReqInfoContext.addReqInfo(reqInfo);
                     // 在模型中添加全局属性
-                    modelAndView.getModel().put("global", globalInitService.globalAttr());
-                    log.warn("global   :{}",globalInitService.globalAttr());
+//                    modelAndView.getModel().put("global", globalInitService.globalAttr());
+//                    log.warn("global   :{}",globalInitService.globalAttr());
                 } finally {
                     // 无论成功与否，清理请求信息上下文
                     ReqInfoContext.clear();
                 }
             } else {
                 // 如果响应状态为HTTP OK，直接在模型中添加全局属性
-                modelAndView.getModel().put("global", globalInitService.globalAttr());
-                log.warn("global   :{}",globalInitService.globalAttr());
+//                modelAndView.getModel().put("global", globalInitService.globalAttr());
+//                log.warn("global   :{}",globalInitService.globalAttr());
             }
         }
 

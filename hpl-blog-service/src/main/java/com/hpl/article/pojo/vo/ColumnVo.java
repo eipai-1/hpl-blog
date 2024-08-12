@@ -2,7 +2,6 @@ package com.hpl.article.pojo.vo;
 
 import com.hpl.column.pojo.dto.ColumnDTO;
 import com.hpl.pojo.CommonPageListVo;
-import com.hpl.sidebar.pojo.dto.SideBarDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -18,9 +17,6 @@ public class ColumnVo {
      */
     private CommonPageListVo<ColumnDTO> columns;
 
-    /**
-     * 侧边栏信息
-     */
-    private List<SideBarDTO> sideBarItems;
+
 
 }

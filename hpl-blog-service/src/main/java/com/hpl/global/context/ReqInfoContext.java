@@ -1,7 +1,6 @@
 package com.hpl.global.context;
 
 
-import com.hpl.global.pojo.entity.Seo;
 import com.hpl.user.pojo.entity.UserInfo;
 import lombok.Data;
 
@@ -64,8 +63,8 @@ public class ReqInfoContext {
         /** 消息数量 */
         private Integer msgNum;
 
-        /** 搜索引擎优化 */
-        private Seo seo;
+//        /** 搜索引擎优化 */
+//        private Seo seo;
 
         /** 设备id */
         private String deviceId;
