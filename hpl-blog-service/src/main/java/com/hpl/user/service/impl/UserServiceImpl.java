@@ -8,7 +8,7 @@ import com.hpl.global.context.ReqInfoContext;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.user.helper.UserPwdHelper;
 import com.hpl.user.helper.UserSessionHelper;
-import com.hpl.user.pojo.dto.RegisterPwdDto;
+import com.hpl.user.pojo.dto.RegisterPwdDTO;
 import com.hpl.user.pojo.entity.User;
 import com.hpl.user.mapper.UserMapper;
 import com.hpl.user.service.UserInfoService;
@@ -110,7 +110,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
      * 用户名密码方式进行注册
      */
     @Override
-    public String registerByUserPwd(RegisterPwdDto registerPwdDto) {
+    public String registerByUserPwd(RegisterPwdDTO registerPwdDto) {
         // 1. 前置校验
         registerPreCheck(registerPwdDto);
 
@@ -120,28 +120,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         //todo 因为这里是注册，也还没弄第三方登录，所以没登录，所以直接走id为空流程
 //        Long userId = ReqInfoContext.getReqInfo().getUserId();
 
-        Long userId = null;
-
-        if (userId != null) {
-            // 已登录用户绑定新用户名和密码
-            // 2.1 如果用户已经登录，则走绑定用户信息流程
-            User user=userMapper.selectById(userId);
-            user.setUserName(registerPwdDto.getUsername());
-            user.setPassword(userPwdHelper.encodePwd(registerPwdDto.getPassword()));
-            user.setSalt(userPwdHelper.genSalt());
-            userMapper.updateById(user);
-
-            // 2.2 初始化用户详细信息
-            userInfoService.initUserInfo(user.getId());
-
-            return ReqInfoContext.getReqInfo().getSession();
-        }
+//        Long userId = null;
+//
+//        if (userId != null) {
+//            // 已登录用户绑定新用户名和密码
+//            // 2.1 如果用户已经登录，则走绑定用户信息流程
+//            User user=userMapper.selectById(userId);
+//            user.setUserName(registerPwdDto.getUsername());
+//            user.setPassword(userPwdHelper.encodePwd(registerPwdDto.getPassword()));
+//            user.setSalt(userPwdHelper.genSalt());
+//            userMapper.updateById(user);
+//
+//            // 2.2 初始化用户详细信息
+//            userInfoService.initUserInfo(user.getId());
+//
+//            return ReqInfoContext.getReqInfo().getSession();
+//        }
 
         // 3. 新用户注册流程
         User user=new User();
         user.setUserName(registerPwdDto.getUsername());
-        user.setPassword(userPwdHelper.encodePwd(registerPwdDto.getPassword()));
         user.setSalt(userPwdHelper.genSalt());
+        String password=registerPwdDto.getPassword()+user.getSalt();
+        user.setPassword(userPwdHelper.encodePwd(password));
+
+        // todo
         user.setLoginType(1);
         userMapper.insert(user);
 
@@ -162,7 +165,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
      * 在注册前进行信息校验，确保用户名、密码及确认密码的合法性和一致性。
      * 此方法旨在防止无效或不安全的注册信息提交，保障系统用户数据的安全性和完整性。
      */
-    private void registerPreCheck(RegisterPwdDto registerPwdDto) {
+    private void registerPreCheck(RegisterPwdDTO registerPwdDto) {
         // 检查用户名、密码和确认密码是否为空，如果为空则抛出异常
         if (StringUtils.isBlank(registerPwdDto.getUsername()) || StringUtils.isBlank(registerPwdDto.getPassword())
                         || StringUtils.isBlank(registerPwdDto.getTwicePwd())) {

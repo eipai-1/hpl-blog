@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 @Data
 @Accessors(chain = true)
-public class RegisterPwdDto implements Serializable {
+public class RegisterPwdDTO implements Serializable {
 
     private static final long serialVersionUID = 2139742660700910738L;
 

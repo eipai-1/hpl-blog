@@ -1,10 +1,8 @@
 package com.hpl.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hpl.user.pojo.dto.RegisterPwdDto;
+import com.hpl.user.pojo.dto.RegisterPwdDTO;
 import com.hpl.user.pojo.entity.User;
-import com.hpl.user.pojo.entity.UserInfo;
-import org.springframework.stereotype.Service;
 
 /**
  * @author : rbe
@@ -40,7 +38,7 @@ public interface UserService extends IService<User>{
      * @param registerPwdDto 注册信息
      * @return
      */
-    String registerByUserPwd(RegisterPwdDto registerPwdDto);
+    String registerByUserPwd(RegisterPwdDTO registerPwdDto);
 
 
 
