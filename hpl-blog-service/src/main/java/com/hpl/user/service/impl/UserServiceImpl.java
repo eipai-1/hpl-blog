@@ -140,11 +140,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         // 3. 新用户注册流程
         User user=new User();
         user.setUserName(registerPwdDto.getUsername());
+        user.setPassword(userPwdHelper.encodePwd(registerPwdDto.getPassword()));
         user.setSalt(userPwdHelper.genSalt());
-        String password=registerPwdDto.getPassword()+user.getSalt();
-        user.setPassword(userPwdHelper.encodePwd(password));
-
-        // todo
         user.setLoginType(1);
         userMapper.insert(user);
 

@@ -94,26 +94,26 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             throw ExceptionUtil.of(StatusEnum.USER_NOT_EXISTS, "userId=" + userId);
         }
 
-        // 2.并更新最后一次使用的ip
-
-        // 获取用户的IP信息
-        IpInfo ip = userInfo.getIp();
-        // 如果客户端IP不为空且与最新的IP不同，则更新最新的IP和地域信息
-        if (clientIp != null && !Objects.equals(ip.getLatestIp(), clientIp)) {
-            // 更新最新的IP和地域信息
-            ip.setLatestIp(clientIp);
-            ip.setLatestRegion(IpUtil.getLocationByIp(clientIp).toRegionStr());
-
-            // 如果首次IP为空，则设置为当前最新的IP，并更新首次地域信息
-            if (ip.getFirstIp() == null) {
-                ip.setFirstIp(clientIp);
-                ip.setFirstRegion(ip.getLatestRegion());
-            }
-
-            // 更新用户信息
-            userInfo.setIp(ip);
-            userInfoMapper.updateById(userInfo);
-        }
+//        // 2.并更新最后一次使用的ip
+//
+//        // 获取用户的IP信息
+//        IpInfo ip = userInfo.getIp();
+//        // 如果客户端IP不为空且与最新的IP不同，则更新最新的IP和地域信息
+//        if (clientIp != null && !Objects.equals(ip.getLatestIp(), clientIp)) {
+//            // 更新最新的IP和地域信息
+//            ip.setLatestIp(clientIp);
+//            ip.setLatestRegion(IpUtil.getLocationByIp(clientIp).toRegionStr());
+//
+//            // 如果首次IP为空，则设置为当前最新的IP，并更新首次地域信息
+//            if (ip.getFirstIp() == null) {
+//                ip.setFirstIp(clientIp);
+//                ip.setFirstRegion(ip.getLatestRegion());
+//            }
+//
+//            // 更新用户信息
+//            userInfo.setIp(ip);
+//            userInfoMapper.updateById(userInfo);
+//        }
 
 
         // 将用户信息返回
