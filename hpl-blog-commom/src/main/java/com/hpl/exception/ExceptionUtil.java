@@ -1,7 +1,4 @@
-package com.hpl.util;
-
-import com.hpl.enums.StatusEnum;
-import com.hpl.exception.CommonException;
+package com.hpl.exception;
 
 /**
  * @author : rbe

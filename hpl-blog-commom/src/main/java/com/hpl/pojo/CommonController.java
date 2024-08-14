@@ -17,7 +17,7 @@ public class CommonController {
         return CommonPageParam.newInstance(pageNum, pageSize);
     }
 
-//  推荐使用它替代 GlobalViewInterceptor 中的全局属性设置
+//  推荐使用它替代 PermissionInterceptor 中的全局属性设置
 //    /**
 //     * 全局属性配置
 //     *

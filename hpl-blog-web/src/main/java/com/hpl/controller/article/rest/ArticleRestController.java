@@ -1,8 +1,8 @@
 //package com.hpl.controller.article.rest;
 //
 //
-//import com.hpl.annotation.permission.Permission;
-//import com.hpl.annotation.permission.UserRole;
+//import com.hpl.user.permission.Permission;
+//import com.hpl.user.permission.UserRole;
 //import com.hpl.article.pojo.entity.Article;
 //import com.hpl.article.pojo.dto.*;
 //import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
@@ -10,7 +10,7 @@
 //import com.hpl.article.pojo.vo.ArticleDetailVo;
 //import com.hpl.article.service.*;
 //import com.hpl.converter.MarkdownConverter;
-//import com.hpl.enums.StatusEnum;
+//import com.hpl.exception.StatusEnum;
 //import com.hpl.global.component.TemplateEngineHelper;
 //import com.hpl.global.comtext.ReqInfoContext;
 //import com.hpl.notify.pojo.enums.NotifyTypeEnum;

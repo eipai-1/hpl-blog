@@ -1,4 +1,4 @@
-package com.hpl.annotation.permission;
+package com.hpl.user.permission;
 
 import java.lang.annotation.*;
 
@@ -16,5 +16,5 @@ public @interface Permission {
      *
      * @return
      */
-    UserRole role() default UserRole.ALL;
+    UserRole role() default UserRole.VISITOR;
 }

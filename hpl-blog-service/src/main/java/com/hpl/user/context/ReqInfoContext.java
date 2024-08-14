@@ -1,4 +1,4 @@
-package com.hpl.global.context;
+package com.hpl.user.context;
 
 
 import com.hpl.user.pojo.entity.UserInfo;

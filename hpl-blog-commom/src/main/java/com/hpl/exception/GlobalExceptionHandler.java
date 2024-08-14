@@ -1,4 +1,4 @@
-package com.hpl.handler;
+package com.hpl.exception;
 
 /**
  * @author : rbe

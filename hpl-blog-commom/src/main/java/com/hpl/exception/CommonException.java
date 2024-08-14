@@ -1,7 +1,5 @@
 package com.hpl.exception;
 
-import com.hpl.enums.StatusEnum;
-import com.hpl.pojo.CommonStatus;
 import lombok.Getter;
 
 /**

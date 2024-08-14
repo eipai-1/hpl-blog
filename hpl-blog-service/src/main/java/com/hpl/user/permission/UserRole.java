@@ -1,4 +1,4 @@
-package com.hpl.annotation.permission;
+package com.hpl.user.permission;
 
 import lombok.Getter;
 
@@ -9,15 +9,17 @@ import lombok.Getter;
 @Getter
 public enum UserRole {
 
+    /** 所有用户 */
+    VISITOR(-1,"游客"),
+
     /** 登录用户 */
-    LOGIN(0,"普通用户"),
+    USER(0,"普通用户"),
 
 
     /** 管理员 */
     ADMIN(1,"管理员"),
 
-    /** 所有用户 */
-    ALL(2,"所有用户"),
+
     ;
 
     private final Integer code;

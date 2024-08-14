@@ -1,4 +1,4 @@
-package com.hpl.enums;
+package com.hpl.exception;
 
 /**
  * @author : rbe

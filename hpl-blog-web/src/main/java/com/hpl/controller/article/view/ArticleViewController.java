@@ -2,8 +2,8 @@
 //
 //
 //import cn.hutool.extra.spring.SpringUtil;
-//import com.hpl.annotation.permission.Permission;
-//import com.hpl.annotation.permission.UserRole;
+//import com.hpl.user.permission.Permission;
+//import com.hpl.user.permission.UserRole;
 //import com.hpl.column.pojo.entity.ColumnArticle;
 //import com.hpl.article.pojo.dto.ArticleDTO;
 //import com.hpl.article.pojo.dto.ArticleOtherDTO;
