@@ -1,6 +1,5 @@
-package com.hpl.producer;
+package com.hpl.snowflake;
 
-import com.hpl.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -26,7 +25,7 @@ public class SnowflakeProducer {
         return t;
     });
 
-    public SnowflakeProducer(final IdGenerator generator) {
+    public SnowflakeProducer(final SnowflakeIdGenerator generator) {
         queue = new LinkedBlockingQueue<>(QUEUE_SIZE);
         es.submit(() -> {
             long lastTime = System.currentTimeMillis();

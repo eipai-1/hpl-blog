@@ -1,7 +1,6 @@
-package com.hpl.producer;
+package com.hpl.snowflake;
 
 import com.hpl.util.AsyncUtil;
-import com.hpl.util.DateUtil;
 import com.hpl.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +16,7 @@ import java.time.LocalDateTime;
  * @date : 2024/7/6 10:04
  */
 @Slf4j
-public class SnowflakeIdGenerator implements IdGenerator {
+public class SnowflakeIdGenerator{
     /**
      * 自增序号位数
      */
@@ -76,7 +75,6 @@ public class SnowflakeIdGenerator implements IdGenerator {
      *
      * @return
      */
-    @Override
     public synchronized Long nextId() {
         long nowTime = waitToIncrDiffIfNeed(getNowTime());
         if (lastTime == nowTime) {

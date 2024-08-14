@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 /**
  * @author : rbe
  * @date : 2024/6/29 19:25
@@ -34,6 +35,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Resource
     UserSessionHelper userSessionHelper;
+
 
     /**
      * 初始化用户信息。
@@ -64,6 +66,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      */
     @Override
     public UserInfo getUserInfoBySessionId(String session, String clientIp){
+
+
         // 检查会话ID是否为空
         if (StringUtils.isBlank(session)) {
             return null;
@@ -76,6 +80,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             return null;
         }
 
+
         // 1.根据用户ID查询用户信息
         LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserInfo::getUserId, userId)
@@ -85,6 +90,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         if (userInfo == null) {
             throw ExceptionUtil.of(StatusEnum.USER_NOT_EXISTS, "userId=" + userId);
         }
+
+
 
 //        // 2.并更新最后一次使用的ip
 //

@@ -12,7 +12,7 @@ import com.hpl.sitemap.pojo.vo.SiteMapVo;
 import com.hpl.sitemap.pojo.vo.SiteUrlVo;
 import com.hpl.sitemap.service.SitemapService;
 import com.hpl.statistic.service.ReadCountService;
-import com.hpl.util.DateUtil;
+import com.hpl.snowflake.DateUtil;
 import com.hpl.util.RedisUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

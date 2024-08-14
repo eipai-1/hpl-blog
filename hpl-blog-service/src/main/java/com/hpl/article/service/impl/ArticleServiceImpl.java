@@ -31,7 +31,7 @@ import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
 import com.hpl.user.service.UserRelationService;
 import com.hpl.exception.ExceptionUtil;
-import com.hpl.util.IdUtil;
+import com.hpl.snowflake.SnowFlakeIdUtil;
 import com.hpl.util.NumUtil;
 import jakarta.annotation.Resource;
 
@@ -459,7 +459,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         // 1. 保存文章
         // 使用分布式id生成文章主键
-        Long articleId = IdUtil.genId();
+        Long articleId = SnowFlakeIdUtil.genId();
         article.setId(articleId);
         articleMapper.insert(article);
 

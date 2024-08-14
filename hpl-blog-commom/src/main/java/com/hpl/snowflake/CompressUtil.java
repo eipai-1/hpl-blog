@@ -1,4 +1,4 @@
-package com.hpl.util;
+package com.hpl.snowflake;
 
 import java.nio.ByteBuffer;
 
