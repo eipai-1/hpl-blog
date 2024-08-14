@@ -7,7 +7,7 @@ package com.hpl.exception;
 public class ExceptionUtil {
 
     public static CommonException of(StatusEnum status, Object... args) {
-        return new CommonException(status, args);
+        throw new CommonException(status, args);
     }
 
 }

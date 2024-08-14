@@ -5,27 +5,23 @@ package com.hpl.exception;
  * @date : 2024/7/26 10:48
  */
 
-import com.hpl.exception.CommonException;
 import com.hpl.pojo.CommonResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.sql.SQLIntegrityConstraintViolationException;
 
 /**
  * 全局异常处理器，处理项目中抛出的业务异常
  */
 @RestControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
+public class ExceptionHandler {
 
     /**
      * 捕获业务异常
      * @param ex
      * @return
      */
-    @ExceptionHandler
+    @org.springframework.web.bind.annotation.ExceptionHandler
     public CommonResult exceptionHandler(CommonException ex){
         log.error("异常信息：{}", ex.getStatus().getMsg());
         return CommonResult.error(ex.getStatus().getCode(),ex.getStatus().getMsg());

@@ -39,26 +39,15 @@ public class UserController {
 
     @Operation(summary = "根据token获取用户信息")
     @GetMapping("/info")
-//    @Permission(role = UserRole.USER)
+    @Permission(role = UserRole.ADMIN)
     public CommonResult<?> getUserInfo(HttpServletRequest request) {
-//        log.warn("session: {}", request.getHeader("Authorization"));
-//        String authorizationHeader = request.getHeader("Authorization");
-//        if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
-//            // 去掉Bearer
-//            String token = authorizationHeader.substring(7);
-//
-//            return CommonResult.data(userInfoService.getUserInfoBySessionId(token, "127.0.0.1"));
-//        }
-////        return CommonResult.data(userInfoService.getUserInfoBySessionId(session, "127.0.0.1"));
-//        return CommonResult.error("token无效");
-
         log.warn("info: {}", ReqInfoContext.getReqInfo());
         return CommonResult.data(ReqInfoContext.getReqInfo());
     }
 
     @Operation(summary = "根据token获取用户信息2")
     @GetMapping("/info2")
-//    @Permission(role = UserRole.USER)
+    @Permission(role = UserRole.USER)
     public CommonResult<?> getUserInfo(String token) {
         log.warn("info: {}", ReqInfoContext.getReqInfo());
         return CommonResult.data(userInfoService.getUserInfoBySessionId(token, "127.0.0.1"));
