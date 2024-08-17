@@ -8,9 +8,11 @@ import com.hpl.column.pojo.entity.ColumnInfo;
 import com.hpl.column.service.ColumnArticleService;
 import com.hpl.column.service.ColumnInfoService;
 import com.hpl.pojo.CommonDeletedEnum;
+import com.hpl.redis.RedisClient;
 import com.hpl.statistic.pojo.dto.CountAllDTO;
 import com.hpl.statistic.service.ReadCountService;
 import com.hpl.statistic.service.TraceCountService;
+import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
 import jakarta.annotation.Resource;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -46,6 +49,8 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
     @Autowired
     private ColumnArticleService columnArticleService;
 
+    @Resource
+    private RedisClient redisClient;
 
 
     @Override
@@ -53,11 +58,12 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
         ColumnInfo columnInfo = new ColumnInfo();
         BeanUtils.copyProperties(columnPostDTO, columnInfo);
 
-        // todo
-        Long userId = 1L;
+
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
         columnInfo.setAuthorId(userId);
 
         columnInfoMapper.insert(columnInfo);
+        redisClient.del("columnInfo:all");
     }
 
 
@@ -68,10 +74,7 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
 
         // 1、处理专栏信息
         // 1.1 查询所有专栏信息并排序
-        List<ColumnInfo> columnList = lambdaQuery()
-                .eq(ColumnInfo::getDeleted, CommonDeletedEnum.NO.getCode())
-                .orderByDesc(ColumnInfo::getSection)
-                .list();
+        List<ColumnInfo> columnList = this.getColumnInfos();
 
         // 1.2 遍历专栏信息
         columnList.forEach(columnInfo -> {
@@ -138,10 +141,14 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
 
         // 1、处理专栏信息
         // 1.1 查询所有专栏信息并排序
-        List<ColumnInfo> columnList = lambdaQuery()
-                .eq(ColumnInfo::getDeleted, CommonDeletedEnum.NO.getCode())
-                .orderByDesc(ColumnInfo::getSection)
-                .list();
+
+
+        List<ColumnInfo> columnList = this.getColumnInfos();
+
+        // 筛选作者文章
+        columnList = columnList.stream()
+                .filter(columnInfo -> columnInfo.getAuthorId().equals(userId))
+                .toList();
 
         // 1.2 遍历专栏信息
         columnList.forEach(columnInfo -> {
@@ -195,6 +202,21 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
         return res;
     }
 
+    private List<ColumnInfo> getColumnInfos() {
+        List<ColumnInfo> columnList = redisClient.getList("columnInfo:all", ColumnInfo.class);
+        if (columnList != null) {
+            return columnList;
+        }
+        columnList = lambdaQuery()
+                .eq(ColumnInfo::getDeleted, CommonDeletedEnum.NO.getCode())
+                .orderByDesc(ColumnInfo::getSection)
+                .list();
+
+        redisClient.set("columnInfo:all", columnList, 60 * 60 * 24L, TimeUnit.SECONDS);
+
+        return columnList;
+    }
+
     /**
      * 编辑栏目信息
      * 该方法将传入的ColumnEditDTO对象转换为ColumnInfo对象，并更新数据库中的相应栏目信息
@@ -219,6 +241,7 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
 
         // 调用updateById方法，根据ID更新数据库中的栏目信息
         this.updateById(columnInfo);
+        redisClient.del("columnInfo:all");
     }
 
     /**
@@ -226,7 +249,7 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
      * 此方法不直接删除数据，而是通过逻辑删除的方式更新数据状态
      */
     @Override
-    public void deleteByid(Long columnId){
+    public void deleteById(Long columnId){
         // 使用lambdaUpdate方法启动更新操作
         lambdaUpdate()
                 // 设置逻辑删除状态为“是”
@@ -237,6 +260,9 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
                 .eq(ColumnInfo::getId, columnId)
                 // 执行更新操作
                 .update();
+
+        redisClient.del("columnInfo:all");
+        redisClient.del("column:"+columnId+":articleIds");
     }
 
 

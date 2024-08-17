@@ -4,7 +4,6 @@ package com.hpl.column.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.column.pojo.dto.*;
 import com.hpl.column.pojo.entity.ColumnInfo;
-import com.hpl.pojo.CommonPageParam;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public interface ColumnInfoService extends IService<ColumnInfo> {
      * 根据ID删除列信息
      * 此方法不直接删除数据，而是通过逻辑删除的方式更新数据状态
      */
-    void deleteByid(Long columnId);
+    void deleteById(Long columnId);
 
 
 //    /**

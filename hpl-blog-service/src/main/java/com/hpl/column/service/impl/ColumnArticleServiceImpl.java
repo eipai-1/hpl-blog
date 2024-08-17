@@ -11,6 +11,7 @@ import com.hpl.column.pojo.entity.ColumnArticle;
 import com.hpl.column.mapper.ColumnArticleMapper;
 import com.hpl.column.service.ColumnArticleService;
 import com.hpl.pojo.CommonPageParam;
+import com.hpl.redis.RedisClient;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -18,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author : rbe
@@ -32,6 +34,9 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
     @Resource
     private ArticleService articleService;
 
+    @Resource
+    private RedisClient redisClient;
+
     /**
      * 根据专栏id，查询该专栏下的所有文章id
      * @param columnId
@@ -39,8 +44,17 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
      */
     @Override
     public List<Long> getArticleIds(Long columnId){
+        List<Long> articleIds = redisClient.getList( "column:"+columnId+":articleIds", Long.class);
+        if (!CollectionUtils.isEmpty(articleIds)){
+            return articleIds;
+        }
         // 1.查询该专栏下的所有文章id
-        return columnArticleMapper.getArticleIds(columnId);
+        articleIds = columnArticleMapper.getArticleIds(columnId);
+        if (!CollectionUtils.isEmpty(articleIds)){
+            redisClient.set("column:"+columnId+":articleIds", articleIds, 60 * 60 * 24L, TimeUnit.SECONDS);
+        }
+
+        return articleIds;
     }
 
     @Override

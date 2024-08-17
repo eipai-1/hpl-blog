@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.service.ArticleService;
 import com.hpl.exception.StatusEnum;
 import com.hpl.pojo.CommonDeletedEnum;
+import com.hpl.redis.RedisClient;
 import com.hpl.user.helper.UserRandomGenHelper;
 import com.hpl.user.helper.UserSessionHelper;
 import com.hpl.user.pojo.dto.AuthorDTO;
@@ -18,6 +19,8 @@ import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -36,6 +39,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Resource
     UserSessionHelper userSessionHelper;
 
+    @Resource
+    private RedisClient redisClient;
 
     /**
      * 初始化用户信息。
@@ -127,15 +132,21 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      */
     @Override
     public UserInfo getByUserId(Long userId){
+        UserInfo userInfo = redisClient.get("userInfo:" + userId, UserInfo.class);
+        if(userInfo!=null){
+            return userInfo;
+        }
 
         LambdaQueryWrapper<UserInfo> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(UserInfo::getUserId, userId)
                 .eq(UserInfo::getDeleted, CommonDeletedEnum.NO.getCode());
-        UserInfo userInfo =  userInfoMapper.selectOne(wrapper);
+        userInfo =  userInfoMapper.selectOne(wrapper);
 
         if (userInfo == null) {
             throw ExceptionUtil.of(StatusEnum.USER_NOT_EXISTS, "userId=" + userId);
         }
+
+        redisClient.set("userInfo:" + userId, userInfo, 60 * 60 * 24L, TimeUnit.SECONDS);
 
         return userInfo;
     }

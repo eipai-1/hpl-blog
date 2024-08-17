@@ -3,6 +3,9 @@ package com.hpl.controller.column;
 import com.hpl.column.pojo.dto.*;
 import com.hpl.column.service.ColumnInfoService;
 import com.hpl.pojo.CommonResult;
+import com.hpl.user.context.ReqInfoContext;
+import com.hpl.user.permission.Permission;
+import com.hpl.user.permission.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -34,10 +37,10 @@ public class ColumnInfoController {
 
     @Operation(summary = "我的专栏")
     @GetMapping("myself-list")
+    @Permission(role = UserRole.USER)
     public CommonResult<?> listMyColumns(@RequestBody(required = false) SearchMyColumnDTO searchMyColumnDTO) {
 
-        //todo
-        Long userId = 1L;
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
 
         List<MyColumnListDTO> res =  columnInfoService.listMyColumns(searchMyColumnDTO,userId);
         return CommonResult.data(res);
@@ -45,6 +48,7 @@ public class ColumnInfoController {
 
     @Operation(summary = "发布专栏")
     @PostMapping
+    @Permission(role = UserRole.USER)
     public CommonResult<?> publishColumn(@RequestBody ColumnPostDTO columnPostDTO) {
         columnInfoService.publishColumn(columnPostDTO);
 
@@ -53,6 +57,7 @@ public class ColumnInfoController {
 
     @Operation(summary = "编辑专栏")
     @PutMapping()
+    @Permission(role = UserRole.USER)
     public CommonResult<?> editColumn(@RequestBody ColumnEditDTO columnEditDTO) {
         columnInfoService.editColumn(columnEditDTO);
 
@@ -61,8 +66,9 @@ public class ColumnInfoController {
 
     @Operation(summary = "删除专栏")
     @DeleteMapping("/{columnId}")
+    @Permission(role = UserRole.USER)
     public CommonResult<?> deleteColumn(@PathVariable("columnId") Long columnId) {
-        columnInfoService.deleteByid(columnId);
+        columnInfoService.deleteById(columnId);
 
         return CommonResult.success();
     }
