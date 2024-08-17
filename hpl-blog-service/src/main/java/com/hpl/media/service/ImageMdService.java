@@ -2,6 +2,7 @@ package com.hpl.media.service;
 
 import com.github.hui.quick.plugin.base.constants.MediaType;
 import com.github.hui.quick.plugin.base.file.FileReadUtil;
+import com.hpl.media.pojo.dto.ImagePostDTO;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,4 +40,13 @@ public interface ImageMdService {
      * @return
      */
     String saveImg(HttpServletRequest request) throws Exception;
+
+
+    /**
+     * md上传图片
+     * @param contentType
+     * @param fileName
+     * @param bytes
+     */
+    String upload(String contentType, String fileName, byte[] bytes) ;
 }

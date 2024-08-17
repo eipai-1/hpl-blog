@@ -2,8 +2,9 @@ package com.hpl.article.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.article.pojo.dto.*;
+import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.article.pojo.entity.Article;
-import com.hpl.article.pojo.vo.ArticleListVo;
+import com.hpl.article.pojo.vo.ArticleListDTO;
 import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
@@ -23,7 +24,7 @@ public interface ArticleService extends IService<Article> {
      * @param pageParam
      * @return
      */
-    CommonPageListVo<ArticleListVo> listArticlesByCategory(Long categoryId, CommonPageParam pageParam);
+    CommonPageListVo<ArticleListDTO> listArticlesByCategory(Long categoryId, CommonPageParam pageParam);
 
     /**
      * 返回 优质作者信息
@@ -71,4 +72,14 @@ public interface ArticleService extends IService<Article> {
 
 
     List<MyArticleListDTO> listMyArticles(SearchMyArticleDTO searchMyselfDTO, Long userId);
+
+    /**
+     * 查询文章详情，包括正文内容，分类、标签等信息
+     *
+     * @param articleId
+     * @return
+     */
+    ArticleDTO getArticleInfoById(Long articleId);
+
+    SimpleDetailDTO getSimpleArticleDetail(Long articleId);
 }

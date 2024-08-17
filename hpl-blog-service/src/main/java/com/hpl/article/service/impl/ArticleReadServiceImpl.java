@@ -7,16 +7,18 @@ import com.google.common.collect.Maps;
 import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.article.pojo.dto1.CategoryDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
-import com.hpl.article.pojo.dto1.TagDTO;
+import com.hpl.article.pojo.dto.TagDTO;
 import com.hpl.article.mapper.ArticleDetailMapper;
 import com.hpl.article.mapper.ArticleMapper;
 import com.hpl.article.mapper.ArticleTagMapper;
 import com.hpl.article.pojo.entity.*;
 import com.hpl.article.pojo.enums.*;
 import com.hpl.article.service.ArticleReadService;
+import com.hpl.article.service.ArticleTagService;
 import com.hpl.article.service.CategoryService;
 import com.hpl.article.service.TagService;
 import com.hpl.exception.StatusEnum;
+import com.hpl.redis.RedisClient;
 import com.hpl.user.context.ReqInfoContext;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageParam;
@@ -30,6 +32,7 @@ import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserFootService;
 import com.hpl.user.service.UserInfoService;
 import com.hpl.exception.ExceptionUtil;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -77,6 +81,12 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     @Autowired
     private ReadCountService readCountService;
 
+    @Resource
+    private ArticleTagService articleTagService;
+
+    @Resource
+    private RedisClient redisClient;
+
 
 
     // 是否开启ES
@@ -88,10 +98,20 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
     @Override
     public Article getById(Long articleId) {
+        Article article = redisClient.get("article:" + articleId, Article.class);
+        if (article != null) {
+            return article;
+        }
+
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getId, articleId)
                 .eq(Article::getDeleted,0);
-        return articleMapper.selectOne(queryWrapper);
+        article = articleMapper.selectOne(queryWrapper);
+
+        redisClient.set("article:" + articleId, article, 60 * 60 * 24L, TimeUnit.SECONDS);
+
+
+        return article;
     }
 
     @Override
@@ -151,12 +171,9 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         if(tags!=null){
             tags.forEach(t -> {
                 // 根据标签ID，获取标签列表
-                Tag tag = tagService.getById(t.getTagId());
+                TagDTO tagDTO = tagService.getById(t.getTagId());
 
-                TagDTO tagDTO = new TagDTO();
-                tagDTO.setTag(tag.getTagName());
-                tagDTO.setTagId(tag.getId());
-                tagDTO.setStatus(tag.getStatus());
+
                 tagsDTO.add(tagDTO);
             });
         }
@@ -185,7 +202,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
             throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, articleId);
         }
 
-        // 查询文章正文
         ArticleDTO articleDTO=new ArticleDTO();
         BeanUtils.copyProperties(article,articleDTO);
         articleDTO.setArticleId(articleId);
@@ -193,6 +209,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
         articleDTO.setCategory(new CategoryDTO((article.getCategoryId()),null));
 
+        // 查询文章正文
         articleDTO.setContent(this.getArticleDetailById(articleId).getContent());
 
         // 更新分类相关信息
@@ -200,19 +217,32 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         category.setCategory(categoryService.getNameById(category.getCategoryId()));
 
         // 更新标签信息
-        articleDTO.setTags(this.getTagsByAId(articleId));
+        articleDTO.setTags(articleTagService.getTagsByAId(articleId));
         return articleDTO;
     }
 
 
 
     private ArticleDetail getArticleDetailById(long articleId) {
+
+        ArticleDetail articleDetail = redisClient.get("articleDetail:" + articleId, ArticleDetail.class);
+        if (articleDetail != null) {
+            return articleDetail;
+        }
+
         // 查询文章内容
         LambdaQueryWrapper<ArticleDetail> contentQuery = Wrappers.lambdaQuery();
         contentQuery.eq(ArticleDetail::getDeleted, 0)
                 .eq(ArticleDetail::getArticleId, articleId)
                 .orderByDesc(ArticleDetail::getVersion);
-        return articleDetailMapper.selectOne(contentQuery);
+        articleDetail = articleDetailMapper.selectOne(contentQuery);
+
+        if (articleDetail == null) {
+            throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, articleId);
+        }
+        redisClient.set("articleDetail:" + articleId, articleDetail, 60 * 60 * 24L, TimeUnit.SECONDS);
+
+        return articleDetail;
     }
 
 

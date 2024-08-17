@@ -8,11 +8,12 @@ import com.hpl.article.enent.ArticleMsgEvent;
 import com.hpl.article.mapper.ArticleDetailMapper;
 import com.hpl.article.mapper.ArticleMapper;
 import com.hpl.article.pojo.dto.*;
+import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.entity.ArticleDetail;
 import com.hpl.article.pojo.entity.ArticleTag;
 import com.hpl.article.pojo.enums.*;
-import com.hpl.article.pojo.vo.ArticleListVo;
+import com.hpl.article.pojo.vo.ArticleListDTO;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.ArticleTagService;
 import com.hpl.article.service.CategoryService;
@@ -22,11 +23,13 @@ import com.hpl.media.service.ImageMdService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
+import com.hpl.redis.RedisClient;
 import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.statistic.pojo.dto.CountAllDTO;
 import com.hpl.statistic.pojo.entity.ReadCount;
 import com.hpl.statistic.service.ReadCountService;
 import com.hpl.statistic.service.TraceCountService;
+import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
 import com.hpl.user.service.UserRelationService;
@@ -37,12 +40,14 @@ import jakarta.annotation.Resource;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -87,6 +92,26 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Resource
     private TraceCountService traceCountService;
 
+    @Resource
+    private RedisClient redisClient;
+
+
+    private Article getById(Long articleId) {
+        Article article = redisClient.get("article:" + articleId, Article.class);
+        if (article != null) {
+            return article;
+        }
+
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getId, articleId)
+                .eq(Article::getDeleted,0);
+        article = articleMapper.selectOne(queryWrapper);
+
+        redisClient.set("article:" + articleId, article, 60 * 60 * 24L, TimeUnit.SECONDS);
+
+
+        return article;
+    }
 
     /**
      * 查询文章列表
@@ -96,7 +121,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * @return
      */
     @Override
-    public CommonPageListVo<ArticleListVo> listArticlesByCategory(Long categoryId, CommonPageParam pageParam) {
+    public CommonPageListVo<ArticleListDTO> listArticlesByCategory(Long categoryId, CommonPageParam pageParam) {
 
         // 处理categoryId参数，无效的分类ID被视为查询所有分类
         if (categoryId != null && categoryId <= 0) {
@@ -109,12 +134,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
                 .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode());
 
-        // 如果是查询首页的置顶文章，且没有指定分类，则只查询官方文章
-        // 如果分页中置顶的四条数据，需要加上官方的查询条件
-        // 说明是查询官方的文章，非置顶的文章，只限制全部分类
-        if (categoryId == null && pageParam.getPageSize() == CommonPageParam.TOP_PAGE_SIZE) {
-            wrapper.eq(Article::getOfficalState, OfficalStateEnum.OFFICAL.getCode());
-        }
+//        // 如果是查询首页的置顶文章，且没有指定分类，则只查询官方文章
+//        // 如果分页中置顶的四条数据，需要加上官方的查询条件
+//        // 说明是查询官方的文章，非置顶的文章，只限制全部分类
+//        if (categoryId == null && pageParam.getPageSize() == CommonPageParam.TOP_PAGE_SIZE) {
+//            wrapper.eq(Article::getOfficalState, OfficalStateEnum.OFFICAL.getCode());
+//        }
 
         // 根据categoryId条件，添加分类ID查询条件，如果categoryId为null，则不添加
         Optional.ofNullable(categoryId)
@@ -139,10 +164,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * @return 返回包含转换后文章DTO的分页列表视图对象。
      */
 //    @Override
-    private CommonPageListVo<ArticleListVo> buildArticleListVo(List<Article> records, long pageSize) {
+    private CommonPageListVo<ArticleListDTO> buildArticleListVo(List<Article> records, long pageSize) {
 
         // 使用流式处理将文章数据对象转换为文章Vo，并收集到列表中
-        List<ArticleListVo> result = records.stream()
+        List<ArticleListDTO> result = records.stream()
                 .map(this::fillArticleRelatedInfo)
                 .collect(Collectors.toList());
         // 根据转换后的文章DTO列表和分页大小，构建并返回分页列表视图对象
@@ -156,7 +181,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * @param article 文章数据对象（Article），包含基础文章信息。
      * @return 填充了关联信息的文章详情传输对象（ArticleDTO）。
      */
-    private ArticleListVo fillArticleRelatedInfo(Article article) {
+    private ArticleListDTO fillArticleRelatedInfo(Article article) {
 
         // 4步走
         // 1、文章内容拼接
@@ -166,17 +191,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         // 1、文章内容拼接
         // 将文章数据对象转换为文章详情传输对象
-        ArticleListVo articleListVo =new ArticleListVo();
-        articleListVo.setAuthorId(article.getAuthorId());
-        articleListVo.setArticleId(article.getId());
-        articleListVo.setTitle(article.getTitle());
-        articleListVo.setSummary(article.getSummary());
-        articleListVo.setUpdateTime(article.getUpdateTime());
+        ArticleListDTO articleListDTO =new ArticleListDTO();
+        articleListDTO.setAuthorId(article.getAuthorId());
+        articleListDTO.setArticleId(article.getId());
+        articleListDTO.setTitle(article.getTitle());
+        articleListDTO.setSummary(article.getSummary());
+        articleListDTO.setUpdateTime(article.getUpdateTime());
         // 分类信息
-        articleListVo.setCategoryName(categoryService.getNameById(article.getCategoryId()));
+        articleListDTO.setCategoryName(categoryService.getNameById(article.getCategoryId()));
 
         // 2、文章标签内容拼接
-        articleListVo.setTags(articleTagService.getTagsByAId(article.getId()));
+        articleListDTO.setTags(articleTagService.getTagsByAId(article.getId()));
 
         // 3、文章阅读统计信息拼接
         ArticleCountInfoDTO countInfo = new ArticleCountInfoDTO();
@@ -190,18 +215,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         countInfo.setPraiseCount(countAllDTO.getPraiseCount());
 
         // 3.3 内容拼接
-        articleListVo.setCountInfo(countInfo);
+        articleListDTO.setCountInfo(countInfo);
 
 
         // 4、文章作者信息拼接
         // 查询文章作者的基本信息
-        UserInfo author = userInfoService.getByUserId(articleListVo.getAuthorId());
+        UserInfo author = userInfoService.getByUserId(articleListDTO.getAuthorId());
         // 设置作者姓名到文章详情传输对象中
-        articleListVo.setAuthorName(author.getNickName());
+        articleListDTO.setAuthorName(author.getNickName());
         // 设置作者头像到文章详情传输对象中
-        articleListVo.setAuthorAvatar(author.getPhoto());
+        articleListDTO.setAuthorAvatar(author.getPhoto());
 
-        return articleListVo;
+        return articleListDTO;
     }
 
     /**
@@ -222,15 +247,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             // 查user_relation 粉丝数量
             Long fansCount = userRelationService.queryUserFansCount(simpleAuthorCountDTO.getAuthorId());
 
-            //todo
+
+            Long loginUserId = ReqInfoContext.getReqInfo().getUserId();
+            Boolean isFollow;
             // 我的关注情况 注意处理 用户没登入的情况
-
-            Boolean isFollow = false;
-            //todo 如果用户登入了 替换false 和 固定 1L
-            if(false){
-                isFollow = userRelationService.isFollow(simpleAuthorCountDTO.getAuthorId(),1L);
+            if(loginUserId==null) {
+                isFollow = false;
+            }else{
+                isFollow = userRelationService.isFollow(simpleAuthorCountDTO.getAuthorId(),loginUserId);
             }
-
 
 
             //拼接返回
@@ -386,8 +411,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 //        article.setSourceUrl(articlePostDTO.getSourceUrl());
 
 
-        // 处理文章图片
-        String content = imageMdService.mdImgReplace(articlePostDTO.getContent());
+        // todo 处理文章图片
+//        String content = imageMdService.mdImgReplace(articlePostDTO.getContent());
+        String content = articlePostDTO.getContent();
 
         return transactionTemplate.execute(new TransactionCallback<Long>() {
             @Override
@@ -512,11 +538,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         // 2、更新article_detail表
         // 更新内容 和 版本号
-        LambdaQueryWrapper<ArticleDetail> contentQuery = Wrappers.lambdaQuery();
-        contentQuery.eq(ArticleDetail::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(ArticleDetail::getArticleId, article.getId())
-                .orderByDesc(ArticleDetail::getVersion);
-        ArticleDetail latest = articleDetailMapper.selectList(contentQuery).get(0);
+        ArticleDetail latest = getDetailById(article.getId());
 
         // 如何文章是已发布，则版本号+1
         if(article.getStatus()==PublishStatusEnum.PUBLISHED.getCode()){
@@ -536,6 +558,27 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
 
         return article.getId();
+    }
+
+    private ArticleDetail getDetailById(Long articleId) {
+        ArticleDetail articleDetail = redisClient.get("articleDetail:" + articleId, ArticleDetail.class);
+        if (articleDetail != null) {
+            return articleDetail;
+        }
+
+        // 查询文章内容
+        LambdaQueryWrapper<ArticleDetail> contentQuery = Wrappers.lambdaQuery();
+        contentQuery.eq(ArticleDetail::getDeleted, 0)
+                .eq(ArticleDetail::getArticleId, articleId)
+                .orderByDesc(ArticleDetail::getVersion);
+        articleDetail = articleDetailMapper.selectOne(contentQuery);
+
+        if (articleDetail == null) {
+            throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, articleId);
+        }
+        redisClient.set("articleDetail:" + articleId, articleDetail, 60 * 60 * 24L, TimeUnit.SECONDS);
+
+        return articleDetail;
     }
 
 
@@ -576,11 +619,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 //
 //        }
 
+
         wrapper.eq(Article::getAuthorId, userId)
                 .eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
                 .orderByDesc(Article::getCategoryId,Article::getCreateTime);
 
-        //查询文章列表
+        //查询文章列表 todo cache
         List<Article> articles = articleMapper.selectList(wrapper);
 
         List<MyArticleListDTO> res = new ArrayList<>();
@@ -619,6 +663,65 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         });
 
         return res;
+    }
+
+    @Override
+    public ArticleDTO getArticleInfoById(Long articleId) {
+
+        // 查询文章记录
+        Article article = this.getById(articleId);
+        if (article == null) {
+            throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, articleId);
+        }
+
+        ArticleDTO articleDTO=new ArticleDTO();
+        BeanUtils.copyProperties(article,articleDTO);
+        articleDTO.setArticleId(articleId);
+        articleDTO.setCover(article.getPicture());
+        articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
+        articleDTO.setCategory(new com.hpl.article.pojo.dto1.CategoryDTO((article.getCategoryId()),null));
+
+        // 查询文章正文
+        articleDTO.setContent(this.getDetailById(articleId).getContent());
+
+        // 更新分类相关信息
+        com.hpl.article.pojo.dto1.CategoryDTO category = articleDTO.getCategory();
+        category.setCategory(categoryService.getNameById(category.getCategoryId()));
+
+        // 更新标签信息
+        articleDTO.setTags(articleTagService.getTagsByAId(articleId));
+        return articleDTO;
+    }
+
+    /**
+     * 获取文章详细的简单信息 （供文章编辑功能使用）
+     * @param articleId
+     * @return
+     */
+    @Override
+    public SimpleDetailDTO getSimpleArticleDetail(Long articleId){
+        SimpleDetailDTO simpleDetailDTO = new SimpleDetailDTO();
+
+        // 1、先查询文章信息
+        Article article = this.getById(articleId);
+        simpleDetailDTO.setArticleId(article.getId());
+        simpleDetailDTO.setTitle(article.getTitle());
+        simpleDetailDTO.setCategoryId(article.getCategoryId());
+        simpleDetailDTO.setStatus(article.getStatus());
+
+        // 2、再查询文章内容
+        ArticleDetail articleDetail = this.getDetailById(articleId);
+        simpleDetailDTO.setContent(articleDetail.getContent());
+
+        // 3、文章标签id
+        List<TagDTO> tags = articleTagService.getTagsByAId(articleId);
+        List<Long> tagIds = new ArrayList<>();
+        tags.forEach(tag -> {
+            tagIds.add(tag.getTagId());
+        });
+        simpleDetailDTO.setTagIds(tagIds);
+
+        return simpleDetailDTO;
     }
 
 }

@@ -219,21 +219,12 @@ public class ImageMdServiceImpl implements ImageMdService {
      * @param bytes
      * @return
      */
-    private String upload(String contentType, String fileName, byte[] bytes) {
-        String fileMD5 = DigestUtils.md5DigestAsHex(bytes);
+    @Override
+    public String upload(String contentType, String fileName, byte[] bytes) {
 
-        // 如果文件名为空，则设置其默认文件名为 userid + 文件的md5码 + 文件后缀名
-        //todo 因为后面要和用户绑定 但可以id加上后太长了 无法保存 看看怎么优化
-
-//        // 处理数据库保存名称
+        // 处理后缀保存名称
         String extendName = fileName.substring(fileName.lastIndexOf("."));
-//
-//        // 如果图片名为空，则使用原文件名作为文件名
-//        if(org.springframework.util.StringUtils.isEmpty(imageName)){
-//            imageName = imagePostDTO.getFileName();
-//        }else{
-//            imageName += extendName;
-//        }
+
 
         // 处理minio图片名 根据时间生成
 
@@ -257,12 +248,7 @@ public class ImageMdServiceImpl implements ImageMdService {
                     .contentType(contentType)
                     .build());
         } catch (Exception e) {
-            //todo xxx.of
-            log.debug("上传过程中出错：{}", e.getMessage());
-            ExceptionUtil.of(StatusEnum.UPLOAD_PIC_FAILED);
-
-
-//            XueChengPlusException.cast("上传过程中出错" + e.getMessage());
+            ExceptionUtil.of(StatusEnum.UPLOAD_PIC_FAILED,"md上传过程");
         }
 
 

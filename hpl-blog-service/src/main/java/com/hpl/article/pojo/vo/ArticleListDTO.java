@@ -1,10 +1,10 @@
 package com.hpl.article.pojo.vo;
 
 import com.hpl.article.pojo.dto.TagDTO;
-import com.hpl.article.pojo.entity.Tag;
 import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,8 +13,7 @@ import java.util.List;
  * @date : 2024/7/10 14:21
  */
 @Data
-public class ArticleListVo {
-    private static final long serialVersionUID = -793906904770296838L;
+public class ArticleListDTO implements Serializable {
 
     /**
      * 文章ID

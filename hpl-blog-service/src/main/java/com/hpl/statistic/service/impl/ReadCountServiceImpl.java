@@ -47,6 +47,7 @@ public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount
      */
     @Override
     public void InitArticleReadCount(Long articleId){
+
         ReadCount readCount = new ReadCount();
         readCount.setDocumentId(articleId);
         readCount.setDocumentType(DocumentTypeEnum.ARTICLE.getCode());

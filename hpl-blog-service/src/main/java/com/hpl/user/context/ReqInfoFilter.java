@@ -1,11 +1,7 @@
 package com.hpl.user.context;
 
-import cn.hutool.core.date.StopWatch;
-import cn.hutool.extra.spring.SpringUtil;
-import com.hpl.sitemap.service.impl.SitemapServiceImpl;
 import com.hpl.user.helper.UserSessionHelper;
 import com.hpl.user.service.UserInfoService;
-import com.hpl.util.AsyncUtil;
 import com.hpl.util.IpUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.*;
@@ -13,7 +9,6 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 

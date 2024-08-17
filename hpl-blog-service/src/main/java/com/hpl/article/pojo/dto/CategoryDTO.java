@@ -1,4 +1,4 @@
-package com.hpl.article.pojo.vo;
+package com.hpl.article.pojo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +15,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryVo implements Serializable {
+public class CategoryDTO implements Serializable {
 
     private Long categoryId;
 

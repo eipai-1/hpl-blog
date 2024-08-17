@@ -6,7 +6,7 @@ import com.hpl.article.pojo.dto1.CategoryPostDTO;
 import com.hpl.article.pojo.dto1.SearchCategoryDTO;
 import com.hpl.article.pojo.entity.Category;
 import com.hpl.article.mapper.CategoryMapper;
-import com.hpl.article.pojo.vo.CategoryVo;
+import com.hpl.article.pojo.dto.CategoryDTO;
 import com.hpl.article.service.CategoryService;
 import com.hpl.article.service.CategorySettingService;
 import com.hpl.pojo.CommonDeletedEnum;
@@ -68,7 +68,7 @@ public class CategorySettingServiceImpl implements CategorySettingService {
             categoryMapper.updateById(category);
         }
         // 更新完成后，刷新分类缓存
-        categoryService.refreshCache();
+//        categoryService.refreshCache();
     }
 
 
@@ -78,7 +78,7 @@ public class CategorySettingServiceImpl implements CategorySettingService {
         if (category != null){
             categoryMapper.deleteById(category);
         }
-        categoryService.refreshCache();
+//        categoryService.refreshCache();
     }
 
 
@@ -101,7 +101,7 @@ public class CategorySettingServiceImpl implements CategorySettingService {
             categoryMapper.updateById(category);
         }
         // 更新完成后，刷新缓存以保持数据一致性
-        categoryService.refreshCache();
+//        categoryService.refreshCache();
     }
 
     /**
@@ -111,7 +111,7 @@ public class CategorySettingServiceImpl implements CategorySettingService {
      * @return 返回分类的分页结果，包含分类DTO列表和总记录数等信息。
      */
     @Override
-    public CommonPageVo<CategoryVo> getCategoryList(SearchCategoryDTO searchCategoryDTO) {
+    public CommonPageVo<CategoryDTO> getCategoryList(SearchCategoryDTO searchCategoryDTO) {
         // 检查搜索条件是否为空，为空则直接返回null
         if (searchCategoryDTO == null) {
             return null;
@@ -131,8 +131,8 @@ public class CategorySettingServiceImpl implements CategorySettingService {
 
         // 将分类实体转换为分类DTO列表
         // 将查询到的分类数据转换为DTO格式
-        List<CategoryVo> categoriesVo = new ArrayList<>();
-        list.forEach(s -> categoriesVo.add(categoryService.categoryToVo(s)));
+        List<CategoryDTO> categoriesVo = new ArrayList<>();
+        list.forEach(s -> categoriesVo.add(null));
 
         // 构建查询条件，用于计算总记录数（与获取列表的查询条件相同）
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();

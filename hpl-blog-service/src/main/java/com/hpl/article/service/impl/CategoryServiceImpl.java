@@ -3,22 +3,20 @@ package com.hpl.article.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.hpl.article.pojo.entity.Category;
 import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.mapper.CategoryMapper;
-import com.hpl.article.pojo.vo.CategoryVo;
+import com.hpl.article.pojo.dto.CategoryDTO;
 import com.hpl.article.service.CategoryService;
 import com.hpl.pojo.CommonDeletedEnum;
-import jakarta.annotation.PostConstruct;
-import org.jetbrains.annotations.NotNull;
+import com.hpl.redis.RedisClient;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -30,55 +28,52 @@ import java.util.List;
 @Service
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
 
-    /**
-     * 分类数一般不会特别多，如编程领域可以预期的分类将不会超过30，所以可以做一个全量的内存缓存
-     * todo 后续可改为Guava -> Redis
-     */
-    private LoadingCache<Long, CategoryVo> categoryCaches;
 
-    private final CategoryMapper categoryMapper;
+    @Resource
+    private CategoryMapper categoryMapper;
 
-    public CategoryServiceImpl(CategoryMapper categoryDao) {
-        this.categoryMapper = categoryDao;
-    }
+    @Resource
+    private RedisClient redisClient;
 
-    /**
-     * 初始化分类缓存。
-     * 使用Guava Cache构建器配置缓存，最大大小为300。当缓存达到最大大小时，最旧的条目将被移除。
-     * 缓存的目的是为了提高分类数据的访问速度，避免频繁地对数据库进行读取操作。
-     *
-     * @PostConstruct 注解表示该方法在实例初始化后调用，确保在任何方法调用之前完成缓存的初始化。
-     */
-    @PostConstruct
-    public void init() {
-        categoryCaches = CacheBuilder.newBuilder().maximumSize(300).build(new CacheLoader<Long, CategoryVo>() {
-            /**
-             * 当缓存中不存在指定的分类ID时，该方法被调用以加载数据。
-             * 它通过查询数据库来获取分类信息，并将其转换为CategoryDTO对象存储在缓存中。
-             * 如果分类不存在或已被标记为删除，则返回一个空的CategoryDTO对象。
-             */
-            @Override
-            public @NotNull CategoryVo load(@NotNull Long categoryId) throws Exception {
-                LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(Category::getId, categoryId)
-                        .eq(Category::getDeleted, CommonDeletedEnum.NO.getCode());
-                Category category = categoryMapper.selectOne(wrapper);
-                if (category == null || category.getDeleted() == CommonDeletedEnum.YES.getCode()) {
-//                    return CategoryDTO.EMPTY;
-                    return CategoryVo.builder()
-                            .categoryId(-1L)
-                            .categoryName("illegal")
-                            .build();
-                }
-//                return new CategoryVo(categoryId, category.getCategoryName(), category.getRank());
-                return CategoryVo.builder()
-                        .categoryId(category.getId())
-                        .categoryName(category.getCategoryName())
-                        .rank(category.getRank())
-                        .build();
-            }
-        });
-    }
+    private final String  CATEGORY_CACHE_KEY = "category:all";
+
+//    /**
+//     * 初始化分类缓存。
+//     * 使用Guava Cache构建器配置缓存，最大大小为300。当缓存达到最大大小时，最旧的条目将被移除。
+//     * 缓存的目的是为了提高分类数据的访问速度，避免频繁地对数据库进行读取操作。
+//     *
+//     * @PostConstruct 注解表示该方法在实例初始化后调用，确保在任何方法调用之前完成缓存的初始化。
+//     */
+//    @PostConstruct
+//    public void init() {
+//        categoryCaches = CacheBuilder.newBuilder().maximumSize(300).build(new CacheLoader<Long, CategoryDTO>() {
+//            /**
+//             * 当缓存中不存在指定的分类ID时，该方法被调用以加载数据。
+//             * 它通过查询数据库来获取分类信息，并将其转换为CategoryDTO对象存储在缓存中。
+//             * 如果分类不存在或已被标记为删除，则返回一个空的CategoryDTO对象。
+//             */
+//            @Override
+//            public @NotNull CategoryDTO load(@NotNull Long categoryId) throws Exception {
+//                LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+//                wrapper.eq(Category::getId, categoryId)
+//                        .eq(Category::getDeleted, CommonDeletedEnum.NO.getCode());
+//                Category category = categoryMapper.selectOne(wrapper);
+//                if (category == null || category.getDeleted() == CommonDeletedEnum.YES.getCode()) {
+////                    return CategoryDTO.EMPTY;
+//                    return CategoryDTO.builder()
+//                            .categoryId(-1L)
+//                            .categoryName("illegal")
+//                            .build();
+//                }
+////                return new CategoryDTO(categoryId, category.getCategoryName(), category.getRank());
+//                return CategoryDTO.builder()
+//                        .categoryId(category.getId())
+//                        .categoryName(category.getCategoryName())
+//                        .rank(category.getRank())
+//                        .build();
+//            }
+//        });
+//    }
 
 
     /**
@@ -90,23 +85,42 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * @return 包含所有有效分类的列表，列表中的分类按排名升序排列。
      */
     @Override
-    public List<CategoryVo> getAllCategories() {
-        // 检查缓存中的分类数量，如果不足，则刷新缓存
+    public List<CategoryDTO> getAllCategories() {
 
-        if (categoryCaches.size() <= 5) {
-            refreshCache();
+        // redis
+        List<CategoryDTO> res = redisClient.getList(CATEGORY_CACHE_KEY, CategoryDTO.class);
+        if (res!=null) {
+            return res;
         }
 
-        // 从缓存中获取所有分类，并转换为List形式
-        List<CategoryVo> list = new ArrayList<>(categoryCaches.asMap().values());
+        // 构建查询条件，只查询未删除且在线状态的分类
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Category::getDeleted, CommonDeletedEnum.NO.getCode())
+                .eq(Category::getStatus, PublishStatusEnum.PUBLISHED.getCode())
+                .orderByAsc(Category::getRank);
 
-        // 移除无效的分类（分类ID小于等于0）
-        list.removeIf(s -> s.getCategoryId() <= 0);
+        // 根据查询条件查询符合条件的分类列表
+        List<Category> list = categoryMapper.selectList(wrapper);
 
-        // 根据分类的排名进行排序
-        list.sort(Comparator.comparingInt(CategoryVo::getRank));
+        // 将查询到的分类数据转换为DTO格式，并存入缓存
+        List<CategoryDTO> result =  new ArrayList<>();
+        list.forEach(s -> result.add(categoryToDTO(s)));
+        redisClient.set(CATEGORY_CACHE_KEY, result,1L, TimeUnit.DAYS);
 
-        return list;
+        return result;
+    }
+
+    /**
+     * 将Category实体转换为CategoryDTO数据传输对象。
+     */
+
+    private CategoryDTO categoryToDTO(Category category) {
+        CategoryDTO dto = new CategoryDTO();
+        dto.setCategoryName(category.getCategoryName());
+        dto.setCategoryId(category.getId());
+        dto.setRank(category.getRank());
+        dto.setStatus(category.getStatus());
+        return dto;
     }
 
 
@@ -119,7 +133,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public String getNameById(Long categoryId) {
         // 从缓存中获取类目对象，并返回其名称
-        return categoryCaches.getUnchecked(categoryId).getCategoryName();
+        return this.getAllCategories().stream()
+                .filter(s -> s.getCategoryId().equals(categoryId))
+                .findFirst()
+                .map(CategoryDTO::getCategoryName)
+                .orElse(null);
+//                .ifPresent(s -> redisClient.set("category-name-" + categoryId, s, 1L, TimeUnit.DAYS));
     }
 
     /**
@@ -132,70 +151,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Override
     public Long getIdByName(String category) {
-        //todo 还没有配置redis 先用mysql找
-        // 从categoryCaches的值流中过滤出类别名称与输入参数category忽略大小写相等的CategoryDTO
-//        return categoryCaches.asMap().values().stream()
-//                .filter(s -> s.getCategoryName().equalsIgnoreCase(category))
-//                // 找到第一个匹配的CategoryDTO
-//                .findFirst()
-//                // 提取匹配CategoryDTO的类别ID
-//                .map(CategoryVo::getCategoryId)
-//                // 如果没有找到匹配的CategoryDTO，则返回null
-//                .orElse(null);
-
-
-       Category categoryOne  = lambdaQuery().eq(Category::getCategoryName, category)
-                .eq(Category::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Category::getStatus, PublishStatusEnum.PUBLISHED.getCode())
-                .one();
-       if (categoryOne!=null) {
-           return categoryOne.getId();
-       }
-
-        return null;
+        return this.getAllCategories().stream()
+                .filter(s -> s.getCategoryName().equalsIgnoreCase(category))
+                .findFirst()
+                .map(CategoryDTO::getCategoryId)
+                .orElse(null);
     }
-
-
-
-    /**
-     * 刷新缓存方法，用于更新缓存中的分类数据。
-     * 此方法首先根据删除状态和推送状态查询有效的分类数据，
-     * 然后清除现有的分类缓存，最后将查询到的分类数据重新存入缓存。
-     * 这样做的目的是为了确保缓存中的分类数据与数据库中的数据保持同步，
-     * 以提供准确的数据服务。
-     */
-    @Override
-    public void refreshCache() {
-        // 构建查询条件，只查询未删除且在线状态的分类
-        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Category::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Category::getStatus, PublishStatusEnum.PUBLISHED.getCode());
-
-        // 根据查询条件查询符合条件的分类列表
-        List<Category> list = categoryMapper.selectList(wrapper);
-
-        // 清除缓存中的所有分类数据
-        categoryCaches.invalidateAll();
-        // 进一步清理缓存，确保缓存数据的准确性
-        categoryCaches.cleanUp();
-        // 将查询到的分类数据转换为Vo格式，并存入缓存
-        list.forEach(s -> categoryCaches.put(s.getId(), categoryToVo(s)));
-    }
-
-
-    /**
-     * 将Category实体转换为CategoryDTO数据传输对象。
-     */
-    @Override
-    public CategoryVo categoryToVo(Category category) {
-        CategoryVo vo = new CategoryVo();
-        vo.setCategoryName(category.getCategoryName());
-        vo.setCategoryId(category.getId());
-        vo.setRank(category.getRank());
-        vo.setStatus(category.getStatus());
-        return vo;
-    }
-
-
 
 }

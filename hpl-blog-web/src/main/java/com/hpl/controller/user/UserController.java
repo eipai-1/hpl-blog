@@ -46,7 +46,7 @@ public class UserController {
 
     @Operation(summary = "根据token获取用户信息")
     @GetMapping("/info")
-    @Permission(role = UserRole.ADMIN)
+    @Permission(role = UserRole.USER)
     public CommonResult<?> getUserInfo(HttpServletRequest request) {
         log.warn("info: {}", ReqInfoContext.getReqInfo());
         return CommonResult.data(ReqInfoContext.getReqInfo());

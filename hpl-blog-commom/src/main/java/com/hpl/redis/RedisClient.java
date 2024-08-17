@@ -1,7 +1,7 @@
 package com.hpl.redis;
 
-import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +64,36 @@ public class RedisClient {
 
         return null;
     }
+
+    public <T> List<T> getList(String key, Class<T> type) {
+        // 1、从redis中查数据
+        String json = stringRedisTemplate.opsForValue().get(key);
+
+        // 2、数据不为null 也不等于''
+        if (StrUtil.isNotBlank(json)) {
+            // 则将数据转换为目标类型并返回
+            JSONArray jsonArray = JSONUtil.parseArray(json);
+//            log.warn("jsonArray:{}",jsonArray);
+//            log.warn("jsonArray-len:{}",jsonArray.size());
+            return jsonArray.toList(type);
+        }
+
+        // 3、等于空值 ''
+        if(json!=null){
+            return Collections.singletonList((T) json);
+        }
+
+        return null;
+    }
+
+    public Long incr(String key){
+        return stringRedisTemplate.opsForValue().increment(key);
+    }
+
+    public void incrByStep(String key, Long num){
+        stringRedisTemplate.opsForValue().increment(key,num);
+    }
+
 
 
 //    /**
@@ -230,4 +262,6 @@ public class RedisClient {
 //    private void unlock(String key) {
 //        stringRedisTemplate.delete(key);
 //    }
+
+
 }

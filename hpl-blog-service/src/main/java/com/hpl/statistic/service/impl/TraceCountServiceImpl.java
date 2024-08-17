@@ -3,6 +3,7 @@ package com.hpl.statistic.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hpl.redis.RedisClient;
 import com.hpl.statistic.mapper.TraceCountMapper;
 import com.hpl.statistic.pojo.dto.CountAllDTO;
 import com.hpl.statistic.pojo.entity.TraceCount;
@@ -14,6 +15,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author : rbe
  * @date : 2024/7/3 18:29
@@ -24,6 +27,9 @@ public class TraceCountServiceImpl extends ServiceImpl<TraceCountMapper, TraceCo
 
     @Resource
     private TraceCountMapper traceCountMapper;
+
+    @Resource
+    private RedisClient redisClient;
 
     /**
      * 查询文章的点赞、评论、收藏数量
@@ -53,6 +59,20 @@ public class TraceCountServiceImpl extends ServiceImpl<TraceCountMapper, TraceCo
      */
     @Override
     public Integer getCollectedCount(Long userId, Long articleId){
+        // KEY 的形式为CollectedCount:userid:articleid /
+        // CollectedCount:userid /  用户的所有收藏数
+        // CollectedCount:articleid 用户的点赞收藏数
+//        String key = "CollectedCount:";
+//        if(userId != null){
+//            key += "user:" + userId;
+//        }
+//        if(articleId != null){
+//            key += "article:" + articleId;
+//        }
+//        Integer count = redisClient.incr(key).intValue();
+//        if(count != null){
+//            return count;
+//        }
 
         // 创建查询条件封装对象
         LambdaQueryWrapper<TraceCount> wrapper = new LambdaQueryWrapper<>();
@@ -70,8 +90,13 @@ public class TraceCountServiceImpl extends ServiceImpl<TraceCountMapper, TraceCo
             wrapper.eq(TraceCount::getArticleId,articleId);
         }
 
-        // 调用Mapper的selectCount方法，根据查询条件统计点赞数
         return traceCountMapper.selectCount(wrapper).intValue();
+
+        // 调用Mapper的selectCount方法，根据查询条件统计点赞数
+//        Long initCount = traceCountMapper.selectCount(wrapper);
+//        log.info("从数据库中获取点赞数：{}",initCount);
+//        redisClient.incrByStep(key,initCount);
+//        return count;
     }
 
 

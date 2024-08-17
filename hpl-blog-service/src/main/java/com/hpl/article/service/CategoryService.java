@@ -3,7 +3,7 @@ package com.hpl.article.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.article.pojo.entity.Category;
-import com.hpl.article.pojo.vo.CategoryVo;
+import com.hpl.article.pojo.dto.CategoryDTO;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public interface CategoryService extends IService<Category> {
      *
      * @return
      */
-    List<CategoryVo> getAllCategories();
+    List<CategoryDTO> getAllCategories();
 
     /**
      * 根据id查询分类目名
@@ -37,20 +37,5 @@ public interface CategoryService extends IService<Category> {
      * @return
      */
     Long getIdByName(String category);
-
-
-    /**
-     * 刷新缓存
-     */
-    void refreshCache();
-
-    /**
-     * 将Category实体转换为CategoryVo数据传输对象。
-     */
-    CategoryVo categoryToVo(Category category);
-
-
-
-
 
 }

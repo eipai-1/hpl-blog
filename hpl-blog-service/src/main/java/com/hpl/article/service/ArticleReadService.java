@@ -4,7 +4,7 @@ package com.hpl.article.service;
 import com.hpl.article.pojo.entity.ArticleTag;
 import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
-import com.hpl.article.pojo.dto1.TagDTO;
+import com.hpl.article.pojo.dto.TagDTO;
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.enums.HomeSelectEnum;
 import com.hpl.pojo.CommonPageListVo;

@@ -9,6 +9,8 @@ import com.hpl.media.pojo.enums.ImageStatusEnum;
 import com.hpl.media.service.ImageService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageParam;
+import com.hpl.snowflake.SnowFlakeIdUtil;
+import com.hpl.snowflake.SnowflakeIdGenerator;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import io.minio.MinioClient;
@@ -99,7 +101,8 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
     @Override
     @Transactional
     public void uploadImage(ImagePostDTO imagePostDTO, byte[] bytes, String imageName) {
-        String fileMD5 = DigestUtils.md5DigestAsHex(bytes);
+//        String fileMD5 = DigestUtils.md5DigestAsHex(bytes);
+
 
         // 如果文件名为空，则设置其默认文件名为 userid + 文件的md5码 + 文件后缀名
         //todo 因为后面要和用户绑定 但可以id加上后太长了 无法保存 看看怎么优化
@@ -132,7 +135,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
 
         try {
             this.addImageToMiniO(bytes, IMAGE_BUCKET, urlMinio);
-            this.addImageToDB(imagePostDTO, imageName,urlMinio,fileMD5);
+            this.addImageToDB(imagePostDTO, imageName,urlMinio,SnowFlakeIdUtil.genStrId());
         } catch (Exception e) {
             //todo xxx.of
             log.debug("上传过程中出错：{}",e.getMessage());

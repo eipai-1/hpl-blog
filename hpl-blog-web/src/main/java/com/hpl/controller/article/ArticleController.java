@@ -4,17 +4,19 @@ import com.hpl.article.pojo.dto.*;
 import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.enums.PublishStatusEnum;
-import com.hpl.article.pojo.vo.ArticleListVo;
-import com.hpl.article.pojo.vo.CategoryVo;
+import com.hpl.article.pojo.vo.ArticleListDTO;
+import com.hpl.article.pojo.dto.CategoryDTO;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.CategoryService;
 import com.hpl.article.service.TagService;
-import com.hpl.markdowm.MarkdownConverter;
 import com.hpl.pojo.CommonController;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonResult;
+import com.hpl.user.context.ReqInfoContext;
+import com.hpl.user.permission.Permission;
+import com.hpl.user.permission.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -35,7 +37,7 @@ import java.util.List;
  */
 @RequestMapping(path = "article")
 @RestController
-@Tag(name = "文章列表视图")
+@Tag(name = "文章相关操作")
 @Slf4j
 public class ArticleController extends CommonController {
 
@@ -52,12 +54,11 @@ public class ArticleController extends CommonController {
     private TagService tagService;
 
 
-
     @Operation(summary = "列表查询我的文章")
     @GetMapping(path = "myself-list")
+    @Permission(role = UserRole.USER)
     public CommonResult<?> myselfList(@RequestBody(required = false) SearchMyArticleDTO searchMyArticleDTO) {
-        //todo
-        Long userId = 1L;
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
         List<MyArticleListDTO> list =articleService.listMyArticles(searchMyArticleDTO,userId);
 
         return CommonResult.data(list);
@@ -65,6 +66,7 @@ public class ArticleController extends CommonController {
 
     @Operation(summary = "新增或更新文章")
     @PostMapping
+    @Permission(role = UserRole.USER)
     public CommonResult<?> addArticle(@RequestBody ArticlePostDTO articlePostDTO) {
         // todo
         Long userId = 1L;
@@ -77,7 +79,7 @@ public class ArticleController extends CommonController {
     @GetMapping(path = "categories")
     @Operation(summary = "获取所有文章分类")
     public CommonResult<?> getCategories(){
-        List<CategoryVo> res= categoryService.getAllCategories();
+        List<CategoryDTO> res= categoryService.getAllCategories();
         return CommonResult.data(res);
     }
 
@@ -91,12 +93,10 @@ public class ArticleController extends CommonController {
     @GetMapping(path = "category/{category}")
     @Operation(summary = "查询某个分类下的文章列表")
     public CommonResult<?> categoryList(@PathVariable("category") String category) {
-        log.warn("lailelail");
         Long categoryId = categoryService.getIdByName(category);
 
-        CommonPageListVo<ArticleListVo> listVo = articleService.listArticlesByCategory(categoryId, CommonPageParam.newInstance());
-//        CommonPageListVo<ArticleListVo> listVo = null;
-        return CommonResult.data(listVo);
+        CommonPageListVo<ArticleListDTO> list = articleService.listArticlesByCategory(categoryId, CommonPageParam.newInstance());
+        return CommonResult.data(list);
     }
 
 
@@ -105,10 +105,10 @@ public class ArticleController extends CommonController {
     @GetMapping(path = "/detail/{articleId}")
     @Operation(summary = "获取文章详情")
     public CommonResult<?> getArticleDetail(@PathVariable("articleId") Long articleId) {
-        ArticleDTO article = articleService1.getArticleInfoById(articleId);
+        ArticleDTO article = articleService.getArticleInfoById(articleId);
 
-        //返回给前端页面是，将文章内容由md格式转为html格式
-        article.setContent(MarkdownConverter.markdownToHtml(article.getContent()));
+//        //返回给前端页面是，将文章内容由md格式转为html格式
+//        article.setContent(MarkdownConverter.markdownToHtml(article.getContent()));
         return CommonResult.data(article);
     }
 
@@ -179,11 +179,18 @@ public class ArticleController extends CommonController {
     @Operation(summary = "获取所有标签")
     @GetMapping("/tags")
     public CommonResult<?> getTags() {
-        List<TagDTO> tags = tagService.getTags();
+        List<TagDTO> tags = tagService.getAllTags();
 
         return CommonResult.data(tags);
     }
 
+
+    @Operation(summary = "获取简单文章详细")
+    @GetMapping("/simple-detail/{articleId}")
+    public CommonResult<?> getSimpleArticleDetail(@PathVariable("articleId") Long articleId){
+        SimpleDetailDTO simpleDetailDTO = articleService.getSimpleArticleDetail(articleId);
+        return CommonResult.data(simpleDetailDTO);
+    }
 
 
 

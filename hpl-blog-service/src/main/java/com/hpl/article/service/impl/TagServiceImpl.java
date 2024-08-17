@@ -2,8 +2,6 @@ package com.hpl.article.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.hpl.article.pojo.dto.TagDTO;
@@ -12,12 +10,13 @@ import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.mapper.TagMapper;
 import com.hpl.article.service.TagService;
 import com.hpl.pojo.CommonDeletedEnum;
-import com.hpl.pojo.CommonPageParam;
-import com.hpl.pojo.CommonPageVo;
+import com.hpl.redis.RedisClient;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -32,20 +31,9 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     @Autowired
     private TagMapper tagMapper;
 
-    /**
-     * 根据id查询标签
-     *
-     * @param tagId
-     * @return
-     */
-    @Override
-    public Tag getById(Long tagId){
-        LambdaQueryWrapper<Tag> queryWrapper=new LambdaQueryWrapper<>();
+    @Resource
+    private RedisClient redisClient;
 
-        queryWrapper.eq(Tag::getId,tagId)
-                .eq(Tag::getDeleted,CommonDeletedEnum.NO.getCode());
-        return tagMapper.selectOne(queryWrapper);
-    }
 
 //    /**
 //     * 查询标签信息，支持分页和关键词搜索。
@@ -71,7 +59,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
 //
 //        // 将标签实体转换为DTO对象
 //        List<TagDTO> tagDTOS = tags.stream()
-//                .map(this::tagToDto)
+//                .map(this::tagToDTO)
 //                .collect(Collectors.toList());
 //
 //        // 计算总记录数，用于分页
@@ -86,20 +74,29 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
 //    }
 
     @Override
-    public List<TagDTO> getTags(){
+    public List<TagDTO> getAllTags(){
+
+        List<TagDTO> res= redisClient.getList("tag:all", TagDTO.class);
+        if (res!=null){
+            return res;
+        }
+
         List<Tag> tags=lambdaQuery()
                 .eq(Tag::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
                 .orderByDesc(Tag::getId)
                 .list();
 
-        return tags.stream()
-                .map(this::tagToDto)
+        res = tags.stream()
+                .map(this::tagToDTO)
                 .collect(Collectors.toList());
+
+        redisClient.set("tag:all",res,1L, TimeUnit.DAYS);
+        return res;
     }
 
 
-    private TagDTO tagToDto(Tag tag){
+    private TagDTO tagToDTO(Tag tag){
         if (tag == null) {
             return null;
         }
@@ -111,24 +108,31 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     }
 
     /**
+     * 根据id查询标签
+     *
+     * @param tagId
+     * @return
+     */
+    @Override
+    public TagDTO getById(Long tagId){
+        return this.getAllTags().stream()
+                .filter(t -> t.getTagId().equals(tagId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
      * 根据标签名称查询标签ID。
      *
      * @param tag 标签名称
      * @return 如果找到匹配的标签，则返回标签的ID；否则返回null。
      */
     @Override
-    public Long queryTagId(String tag) {
-        // 创建查询条件包装对象
-        LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
-        // 设置查询条件：选择ID列，筛选未删除的标签，且标签名称与参数tag匹配
-        wrapper.select(Tag::getId)
-                .eq(Tag::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Tag::getTagName, tag)
-                .last("limit 1");
-
-        // 根据查询条件查询标签信息
-        Tag record = tagMapper.selectOne(wrapper);
-        // 如果查询结果不为空，则返回标签ID；否则返回null
-        return record != null ? record.getId() : null;
+    public Long getIdByName(String tag) {
+        return this.getAllTags().stream()
+                .filter(t -> t.getTagName().equals(tag))
+                .map(TagDTO::getTagId)
+                .findFirst()
+                .orElse(null);
     }
 }
