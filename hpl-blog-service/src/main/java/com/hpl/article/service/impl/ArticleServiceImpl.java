@@ -509,7 +509,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         readCountService.InitArticleReadCount(articleId);
 
 
-
         //todo
 //        // 发布文章，阅读计数+1
 //        userFootService.saveOrUpdateUserFoot(DocumentTypeEnum.ARTICLE, articleId, article.getAuthorId(), article.getAuthorId(), OperateTypeEnum.READ);
@@ -557,6 +556,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             articleTagService.saveTagByAId(tags,article.getId());
         }
 
+        //删除缓存
+        redisClient.del("article:" + article.getId());
+        redisClient.del("articleDetail:" + article.getId());
+        redisClient.del("articleTags:" + article.getId());
+
         return article.getId();
     }
 
@@ -589,11 +593,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Override
     public void deleteArticle(Long articleId, Long loginUserId) {
-        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Article::getId, articleId)
-                .eq(Article::getDeleted, CommonDeletedEnum.NO.getCode());
 
-        Article article = articleMapper.selectOne(wrapper);
+        Article article = this.getById(articleId);
 
         if (article != null && !Objects.equals(article.getAuthorId(), loginUserId)) {
             // 没有权限
@@ -603,6 +604,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (article != null && article.getDeleted() != CommonDeletedEnum.YES.getCode()) {
             article.setDeleted(CommonDeletedEnum.YES.getCode());
             articleMapper.updateById(article);
+            redisClient.del("article:" + articleId);
 
             // 发布文章删除事件
             SpringUtil.publishEvent(new ArticleMsgEvent<>(this, ArticleEventEnum.DELETE, article));

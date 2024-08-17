@@ -46,6 +46,10 @@ public class RedisClient {
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(value), time, unit);
     }
 
+    public void del(String key){
+        stringRedisTemplate.delete(key);
+    }
+
     public <T> T get(String key, Class<T> type) {
         // 1、从redis中查数据
         String json = stringRedisTemplate.opsForValue().get(key);

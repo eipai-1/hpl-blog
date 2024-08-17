@@ -14,6 +14,7 @@ import com.hpl.pojo.CommonController;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonResult;
+import com.hpl.redis.RedisClient;
 import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.permission.Permission;
 import com.hpl.user.permission.UserRole;
@@ -53,6 +54,9 @@ public class ArticleController extends CommonController {
     @Resource
     private TagService tagService;
 
+    @Resource
+    private RedisClient redisClient;
+
 
     @Operation(summary = "列表查询我的文章")
     @GetMapping(path = "myself-list")
@@ -68,8 +72,7 @@ public class ArticleController extends CommonController {
     @PostMapping
     @Permission(role = UserRole.USER)
     public CommonResult<?> addArticle(@RequestBody ArticlePostDTO articlePostDTO) {
-        // todo
-        Long userId = 1L;
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
 
         Long articleId =articleService.saveOrUpdate(articlePostDTO,userId);
         return CommonResult.data(articleId);
@@ -136,41 +139,43 @@ public class ArticleController extends CommonController {
 
     @Operation(summary = "发布文章")
     @PutMapping("/publish/{articleId}")
+    @Permission(role = UserRole.USER)
     public CommonResult<?> publishArticle(@PathVariable("articleId") Long articleId) {
-        //todo
-        Long userId = 1L;
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
         Article article = articleService.getById(articleId);
 
         if(article.getAuthorId().equals(userId)){
             article.setStatus(PublishStatusEnum.PUBLISHED.getCode());
             articleService.updateById(article);
+            redisClient.del("article:"+articleId);
             return CommonResult.success("发布成功");
         }else{
-            return CommonResult.error("您没有权限发布该文章");
+            return CommonResult.error("您不是文章作者，您没有权限发布该文章");
         }
     }
 
     @Operation(summary = "取消发布文章")
     @PutMapping("/un-publish/{articleId}")
+    @Permission(role = UserRole.USER)
     public CommonResult<?> unPublishArticle(@PathVariable("articleId") Long articleId) {
-        //todo
-        Long userId = 1L;
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
         Article article = articleService.getById(articleId);
 
         if(article.getAuthorId().equals(userId)){
             article.setStatus(PublishStatusEnum.UN_PUBLISHED.getCode());
             articleService.updateById(article);
+            redisClient.del("article:"+articleId);
             return CommonResult.success("取消发布成功");
         }else{
-            return CommonResult.error("您没有权限取消发布该文章");
+            return CommonResult.error("您不是文章作者，您没有权限取消发布该文章");
         }
     }
 
     @Operation(summary = "删除文章")
     @DeleteMapping("/delete/{articleId}")
+    @Permission(role = UserRole.USER)
     public CommonResult<?> deleteArticle(@PathVariable("articleId") Long articleId) {
-        //todo
-        Long userId = 1L;
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
         articleService.deleteArticle(articleId, userId);
 
         return CommonResult.success("删除成功");

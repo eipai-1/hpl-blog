@@ -46,7 +46,8 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
     public List<TagDTO> getTagsByAId(Long articleId) {
 
         // redis
-        String key = "article-tag:list:" + articleId;
+
+        String key = "articleTags:" + articleId;
 
         List<ArticleTag> articleTags = redisClient.getList(key, ArticleTag.class);
         if(articleTags == null){
