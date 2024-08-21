@@ -118,8 +118,14 @@
         select id, title, update_time as createTime from article
         where id > #{lastId}
           and status =${@com.hpl.article.pojo.enums.PushStatusEnum@ONLINE.code}
-          and deleted = ${@com.hpl.pojo.CommomDeletedEnum@NO.code}
+          and deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code}
         order by id asc limit #{size}
+    </select>
+
+    <select id="getArticleIdsByAuthorId" resultType="java.lang.Long">
+        select id from article
+        where author_id = #{authorId}
+          and deleted = ${@com.hpl.pojo.CommonDeletedEnum@NO.code}
     </select>
 
 </mapper>

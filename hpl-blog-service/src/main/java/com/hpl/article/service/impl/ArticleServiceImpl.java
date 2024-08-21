@@ -48,6 +48,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -197,8 +198,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleListDTO.setTitle(article.getTitle());
         articleListDTO.setSummary(article.getSummary());
         articleListDTO.setUpdateTime(article.getUpdateTime());
-        // 分类信息
-        articleListDTO.setCategoryName(categoryService.getNameById(article.getCategoryId()));
+        // 分类信息 todo
+//        articleListDTO.setCategoryName(categoryService.getNameById(article.getCategoryId()));
 
         // 2、文章标签内容拼接
         articleListDTO.setTags(articleTagService.getTagsByAId(article.getId()));
@@ -208,7 +209,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 3.1 获取阅读次数总和
         countInfo.setReadCount(readCountService.getArticleReadCount(article.getId()));
         // 3.2 遍历文章id集合，获取收藏、点赞、评论次数总和
-        CountAllDTO countAllDTO = traceCountService.getAllCountByArticleId(null,article.getId());
+        CountAllDTO countAllDTO = traceCountService.getAllCountById(null,article.getId());
 
         countInfo.setCollectionCount(countAllDTO.getCollectionCount());
         countInfo.setCommentCount(countAllDTO.getCommentCount());
@@ -233,19 +234,48 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * 返回 优质作者信息
      */
     @Override
-    public List<TopAuthorDTO> getTopFourAuthor(Long categoryId){
+    public List<TopAuthorDTO> getTopFourAuthor(List<String> leafIds){
 
         List<TopAuthorDTO> res = new ArrayList<>();
+        List<SimpleAuthorCountDTO> simpleAuthorCountsDTO = new ArrayList<>();
+        if(leafIds.size()==1) {
+            //获取前四位作者的id和文章数
+            simpleAuthorCountsDTO = articleMapper.getTopFourAuthor(leafIds.get(0));
+        }else{
+            log.warn("处理多个叶子结点");
+            // 使用hashMap防止作者重复
+            Map<Long,Long> simpleMap = new HashMap<>();
+            leafIds.forEach(leafId->{
+                List<SimpleAuthorCountDTO> simpleAuthorCounts = new ArrayList<>();
+                simpleAuthorCounts=articleMapper.getTopFourAuthor(leafId);
 
-        //获取前四位作者的id和文章数
-        List<SimpleAuthorCountDTO> simpleAuthorCountsDTO=articleMapper.getTopFourAuthor(categoryId);
+                simpleAuthorCounts.forEach(simpleAuthorCount->{
+                    if(simpleMap.containsKey(simpleAuthorCount.getAuthorId())){
+                        simpleMap.put(simpleAuthorCount.getAuthorId(),simpleAuthorCount.getArticleCount()+simpleMap.get(simpleAuthorCount.getAuthorId()));
+                    }else{
+                        simpleMap.put(simpleAuthorCount.getAuthorId(),simpleAuthorCount.getArticleCount());
+                    }
+                });
+            });
 
+            simpleAuthorCountsDTO=simpleMap.entrySet().stream()
+                    .sorted((o1, o2)->{
+                        return o2.getValue().compareTo(o1.getValue());
+                    })
+                    .map(entry->{
+                SimpleAuthorCountDTO simpleAuthorCountDTO = new SimpleAuthorCountDTO();
+                simpleAuthorCountDTO.setAuthorId(entry.getKey());
+                simpleAuthorCountDTO.setArticleCount(entry.getValue());
+                return simpleAuthorCountDTO;
+            })
+                    .collect(Collectors.toList());
+        }
         for(SimpleAuthorCountDTO simpleAuthorCountDTO :simpleAuthorCountsDTO){
             // 查询作者的info信息
             UserInfo userInfo = userInfoService.getByUserId(simpleAuthorCountDTO.getAuthorId());
 
             // 查user_relation 粉丝数量
-            Long fansCount = userRelationService.queryUserFansCount(simpleAuthorCountDTO.getAuthorId());
+            Long fansCount = userRelationService.getUserFansCount(simpleAuthorCountDTO.getAuthorId());
 
 
             Long loginUserId = ReqInfoContext.getReqInfo().getUserId();
@@ -400,7 +430,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         article.setId(articlePostDTO.getArticleId());
         article.setTitle(articlePostDTO.getTitle());
 //        article.setShortTitle(articlePostDTO.getShortTitle());
-        article.setCategoryId(articlePostDTO.getCategoryId());
+        //todo 1
+//        article.setCategoryId(articlePostDTO.getCategoryId());
 
         article.setSummary(this.pickSummary(articlePostDTO.getContent()));
         log.warn(article.getSummary());
@@ -639,7 +670,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             dto.setTitle(article.getTitle());
             dto.setShortTitle(article.getShortTitle());
             dto.setSummary(article.getSummary());
-            dto.setCategoryName(categoryService.getNameById(article.getCategoryId()));
+            //todo 1
+//            dto.setCategoryName(categoryService.getNameById(article.getCategoryId()));
             dto.setStatus(article.getStatus());
             dto.setCreateTime(article.getCreateTime());
             dto.setUpdateTime(article.getUpdateTime());
@@ -652,7 +684,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             // 3.1 获取阅读次数总和
             countInfo.setReadCount(readCountService.getArticleReadCount(article.getId()));
             // 3.2 遍历文章id集合，获取收藏、点赞、评论次数总和
-            CountAllDTO countAllDTO = traceCountService.getAllCountByArticleId(null,article.getId());
+            CountAllDTO countAllDTO = traceCountService.getAllCountById(null,article.getId());
 
             countInfo.setCollectionCount(countAllDTO.getCollectionCount());
             countInfo.setCommentCount(countAllDTO.getCommentCount());
@@ -681,7 +713,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleDTO.setArticleId(articleId);
         articleDTO.setCover(article.getPicture());
         articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
-        articleDTO.setCategory(new com.hpl.article.pojo.dto1.CategoryDTO((article.getCategoryId()),null));
+        //todo 1
+//        articleDTO.setCategory(new com.hpl.article.pojo.dto1.CategoryDTO((article.getCategoryId()),null));
 
         // 查询文章正文
         articleDTO.setContent(this.getDetailById(articleId).getContent());
@@ -708,7 +741,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         Article article = this.getById(articleId);
         simpleDetailDTO.setArticleId(article.getId());
         simpleDetailDTO.setTitle(article.getTitle());
-        simpleDetailDTO.setCategoryId(article.getCategoryId());
+        //todo 1
+//        simpleDetailDTO.setCategoryId(article.getCategoryId());
         simpleDetailDTO.setStatus(article.getStatus());
 
         // 2、再查询文章内容
@@ -726,4 +760,35 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return simpleDetailDTO;
     }
 
+    @Override
+    public List<ArticleListDTO> listArticlesByCategories(List<String> leafIds, CommonPageParam pageParam){
+        List<ArticleListDTO> res = new ArrayList<>();
+        leafIds.forEach(leafId -> {
+            listArticlesByLeafIds(leafId,res);
+        });
+
+        return res;
+    }
+
+    private void listArticlesByLeafIds(String categoryId, List<ArticleListDTO> res) {
+
+        // 创建查询Wrapper，设置文章未删除且状态为在线
+        LambdaQueryWrapper<Article> wrapper =  Wrappers.lambdaQuery();
+        wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
+                .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode())
+                .eq(Article::getCategoryId, categoryId)
+                .orderByDesc(Article::getToppingState,  Article::getCreateTime);
+
+        // 执行查询并返回结果列表
+        List<Article> records = articleMapper.selectList(wrapper);
+
+//        // 使用流式处理将文章数据对象转换为文章Vo，并收集到列表中
+//        List<ArticleListDTO> result = records.stream()
+//                .map(this::fillArticleRelatedInfo)
+//                .collect(Collectors.toList());
+
+        records.forEach(t->{
+            res.add(fillArticleRelatedInfo(t));
+        });
+    }
 }

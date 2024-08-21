@@ -9,12 +9,12 @@ import com.hpl.pojo.CommonPageParam;
  * @date : 2024/7/10 11:26
  */
 public interface ArticleRecommendService {
-    /**
-     * 文章关联推荐
-     *
-     * @param articleId
-     * @param pageParam
-     * @return
-     */
-    CommonPageListVo<ArticleDTO> relatedRecommend(Long articleId, CommonPageParam pageParam);
+//    /**
+//     * 文章关联推荐
+//     *
+//     * @param articleId
+//     * @param pageParam
+//     * @return
+//     */
+//    CommonPageListVo<ArticleDTO> relatedRecommend(Long articleId, CommonPageParam pageParam);
 }

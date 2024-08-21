@@ -211,7 +211,7 @@ public class ReadCountServiceImpl extends ServiceImpl<ReadCountMapper, ReadCount
         // 获取关注数
         Long followCount = userRelationService.queryUserFollowCount(userId);
         // 粉丝数
-        Long fansCount = userRelationService.queryUserFansCount(userId);
+        Long fansCount = userRelationService.getUserFansCount(userId);
 
         // 查询用户发布的文章数
         ArticleReadService articleReadService = SpringUtil.getBean(ArticleReadService.class);

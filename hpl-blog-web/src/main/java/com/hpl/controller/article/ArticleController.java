@@ -5,13 +5,8 @@ import com.hpl.article.pojo.dto1.ArticleDTO;
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.pojo.vo.ArticleListDTO;
-import com.hpl.article.pojo.dto.CategoryDTO;
-import com.hpl.article.service.ArticleReadService;
-import com.hpl.article.service.ArticleService;
-import com.hpl.article.service.CategoryService;
-import com.hpl.article.service.TagService;
+import com.hpl.article.service.*;
 import com.hpl.pojo.CommonController;
-import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonResult;
 import com.hpl.redis.RedisClient;
@@ -25,7 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author : rbe
@@ -51,6 +48,8 @@ public class ArticleController extends CommonController {
     @Autowired
     private CategoryService categoryService;
 
+    @Resource
+    private Category1Service category1Service;
     @Resource
     private TagService tagService;
 
@@ -79,26 +78,42 @@ public class ArticleController extends CommonController {
     }
 
 
-    @GetMapping(path = "categories")
-    @Operation(summary = "获取所有文章分类")
-    public CommonResult<?> getCategories(){
-        List<CategoryDTO> res= categoryService.getAllCategories();
-        return CommonResult.data(res);
-    }
+//    @GetMapping(path = "categories")
+//    @Operation(summary = "获取所有文章分类")
+//    public CommonResult<?> getCategories(){
+//        List<CategoryDTO> res= categoryService.getAllCategories();
+//        return CommonResult.data(res);
+//    }
 
+
+//    /**
+//     * 查询某个分类下的文章列表
+//     *
+//     * @param category
+//     * @return
+//     */
+//    @GetMapping(path = "category/{category}")
+//    @Operation(summary = "查询某个分类下的文章列表")
+//    public CommonResult<?> categoryList(@PathVariable("category") String category) {
+//        Long categoryId = categoryService.getIdByName(category);
+//
+//        CommonPageListVo<ArticleListDTO> list = articleService.listArticlesByCategory(categoryId, CommonPageParam.newInstance());
+//        return CommonResult.data(list);
+//    }
 
     /**
      * 查询某个分类下的文章列表
      *
-     * @param category
+     * @param category1TreeDTO
      * @return
      */
-    @GetMapping(path = "category/{category}")
-    @Operation(summary = "查询某个分类下的文章列表")
-    public CommonResult<?> categoryList(@PathVariable("category") String category) {
-        Long categoryId = categoryService.getIdByName(category);
+    @PostMapping(path = "categories")
+    @Operation(summary = "查询分类下的文章列表")
+    public CommonResult<?> listByCategory(@RequestBody Category1TreeDTO category1TreeDTO) {
+        List<String> leafIds = category1Service.getLeafIds(category1TreeDTO);
 
-        CommonPageListVo<ArticleListDTO> list = articleService.listArticlesByCategory(categoryId, CommonPageParam.newInstance());
+        List<ArticleListDTO> list = articleService.listArticlesByCategories(leafIds, CommonPageParam.newInstance());
+
         return CommonResult.data(list);
     }
 
@@ -117,15 +132,21 @@ public class ArticleController extends CommonController {
 
     @GetMapping(path = "/top-four/author")
     @Operation(summary = "获取作者排行")
-    public CommonResult<?> getTopAuthor(@RequestParam(required = true) String categoryName) {
+    public CommonResult<?> getTopAuthor(@RequestParam(required = true) String categoryId) {
+        List<String> leafIds = redisClient.getList("category-leafIds:" + categoryId, String.class);
 
-        //根据名称获取分类id
-        Long categoryId = categoryService.getIdByName(categoryName);
-        log.warn("categoryId:{}", categoryId);
-        log.warn("作者前四呢");
 
-        List<TopAuthorDTO> topAuthorsDTO = articleService.getTopFourAuthor(categoryId);
-        return CommonResult.data(topAuthorsDTO);
+        log.warn("获取作者排行,{}",leafIds);
+        if(leafIds!=null){
+            List<TopAuthorDTO> topAuthorsDTO = articleService.getTopFourAuthor(leafIds);
+            if(topAuthorsDTO.size()>3){
+                topAuthorsDTO.subList(0,4);
+            }
+            return CommonResult.data(topAuthorsDTO);
+        }
+
+        return CommonResult.error("网络繁忙，请稍后再试");
+
     }
 
     @GetMapping(path = "/top-eight/")

@@ -36,7 +36,7 @@ public class Article extends CommonEntity {
     private String summary;
 
     /** 类目ID */
-    private Long categoryId;
+    private String categoryId;
 
     /** 来源：1-转载，2-原创，3-翻译 */
     private Integer source;

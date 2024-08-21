@@ -36,7 +36,7 @@ public class TraceCountServiceImpl extends ServiceImpl<TraceCountMapper, TraceCo
      * @param articleId
      */
     @Override
-    public CountAllDTO getAllCountByArticleId(Long userId,Long articleId){
+    public CountAllDTO getAllCountById(Long userId, Long articleId){
 
         CountAllDTO countAllDTO = new CountAllDTO();
 

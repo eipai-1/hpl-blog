@@ -3,7 +3,6 @@ package com.hpl.column.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.column.pojo.dto.*;
 import com.hpl.column.mapper.ColumnInfoMapper;
-import com.hpl.article.service.ArticleReadService;
 import com.hpl.column.pojo.entity.ColumnInfo;
 import com.hpl.column.service.ColumnArticleService;
 import com.hpl.column.service.ColumnInfoService;
@@ -117,7 +116,7 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             Integer praisedCountTotal = 0;
 
             for (Long articleId : articleIds) {
-                CountAllDTO countAllDTO = traceCountService.getAllCountByArticleId(null,articleId);
+                CountAllDTO countAllDTO = traceCountService.getAllCountById(null,articleId);
 
                 collectedCountTotal += countAllDTO.getCollectionCount();
                 commentedCountTotal += countAllDTO.getCommentCount();
@@ -184,7 +183,7 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             Integer praisedCountTotal = 0;
 
             for (Long articleId : articleIds) {
-                CountAllDTO countAllDTO = traceCountService.getAllCountByArticleId(null,articleId);
+                CountAllDTO countAllDTO = traceCountService.getAllCountById(null,articleId);
 
                 collectedCountTotal += countAllDTO.getCollectionCount();
                 commentedCountTotal += countAllDTO.getCommentCount();

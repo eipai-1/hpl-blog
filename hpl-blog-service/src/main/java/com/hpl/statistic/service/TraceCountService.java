@@ -14,7 +14,7 @@ public interface TraceCountService extends IService<TraceCount> {
      * 查询文章的点赞、评论、收藏数量
      * @param articleId
      */
-    CountAllDTO getAllCountByArticleId(Long userId, Long articleId);
+    CountAllDTO getAllCountById(Long userId, Long articleId);
 
     /**
      * 获取文章的点赞数

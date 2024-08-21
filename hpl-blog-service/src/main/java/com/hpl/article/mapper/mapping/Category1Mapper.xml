@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hpl.article.mapper.Category1Mapper">
+
+    <select id="selectTreeCategories" parameterType="string" resultType="com.hpl.article.pojo.dto.Category1TreeDTO">
+        WITH RECURSIVE t1 AS (
+            SELECT p.* FROM category1 p WHERE p.id = #{id}
+            UNION ALL
+            SELECT c.* FROM category1 c JOIN t1 WHERE c.parent_id = t1.id
+        )
+        SELECT * FROM t1;
+    </select>
+</mapper>

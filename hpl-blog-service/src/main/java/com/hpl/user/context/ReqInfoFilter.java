@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 
-
 /**
  * 请求拦截器，每次请求都会拦截，并注入context信息
  *
@@ -73,14 +72,17 @@ public class ReqInfoFilter implements Filter {
 
             log.warn("session: {}", request.getHeader("Authorization"));
             String authorizationHeader = request.getHeader("Authorization");
-            if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 // 去掉Bearer
                 String token = authorizationHeader.substring(7);
 
                 Long userId = userSessionHelper.getUserIdBySession(token);
-                reqInfo.setUserId(userId);
 
-                reqInfo.setUserInfo(userInfoService.getByUserId(userId));
+                if (userId != null) {
+                    reqInfo.setUserId(userId);
+
+                    reqInfo.setUserInfo(userInfoService.getByUserId(userId));
+                }
             }
 
             reqInfo.setHost(request.getHeader("host"));
@@ -101,8 +103,8 @@ public class ReqInfoFilter implements Filter {
 //            request = this.wrapperRequest(request, reqInfo);
 
 
-
             ReqInfoContext.addReqInfo(reqInfo);
+            log.warn("这个永远不可能为空,:{}", ReqInfoContext.getReqInfo());
 
 //            // 更新uv/pv计数
 //            AsyncUtil.execute(() -> SpringUtil.getBean(SitemapServiceImpl.class).saveVisitInfo(reqInfo.getClientIp(), reqInfo.getPath()));

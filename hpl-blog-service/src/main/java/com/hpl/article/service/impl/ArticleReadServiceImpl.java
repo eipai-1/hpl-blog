@@ -207,7 +207,8 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         articleDTO.setArticleId(articleId);
         articleDTO.setCover(article.getPicture());
         articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
-        articleDTO.setCategory(new CategoryDTO((article.getCategoryId()),null));
+        //todo 1
+//        articleDTO.setCategory(new CategoryDTO((article.getCategoryId()),null));
 
         // 查询文章正文
         articleDTO.setContent(this.getArticleDetailById(articleId).getContent());
@@ -377,11 +378,13 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 //        }
 
         // 设置类目id
-        articleDTO.setCategory(new CategoryDTO(article.getCategoryId(), null));
+        //todo 1
+//        articleDTO.setCategory(new CategoryDTO(article.getCategoryId(), null));
 
 
         // 分类信息
-        articleDTO.getCategory().setCategory(categoryService.getNameById(article.getCategoryId()));
+        //todo 1
+//        articleDTO.getCategory().setCategory(categoryService.getNameById(article.getCategoryId()));
 
         // 标签列表
         articleDTO.setTags(this.getTagsByAId(article.getId()));
@@ -676,42 +679,42 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
 
-    /**
-     * 查询文章关联推荐列表
-     *
-     * @param articleId
-     * @param page
-     * @return
-     */
-    @Override
-    public CommonPageListVo<ArticleDTO> relatedRecommend(Long articleId, CommonPageParam page) {
-        Article article = this.getById(articleId);
-        if (article == null) {
-            return CommonPageListVo.emptyVo();
-        }
-
-        LambdaQueryWrapper<ArticleTag> wrapper=new LambdaQueryWrapper<>();
-        wrapper.eq(ArticleTag::getArticleId, articleId)
-                .eq(ArticleTag::getDeleted, CommonDeletedEnum.NO.getCode());
-
-        List<Long> tagIds = articleTagMapper.selectList(wrapper).stream()
-                .map(ArticleTag::getTagId)
-                .collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(tagIds)) {
-            return CommonPageListVo.emptyVo();
-        }
-
-
-
-
-        List<Article> recommendArticles = this.listRelatedArticlesOrderByReadCount(article.getCategoryId(), tagIds, page);
-        if (recommendArticles.removeIf(s -> s.getId().equals(articleId))) {
-            // 移除推荐列表中的当前文章
-            page.setPageSize(page.getPageSize() - 1);
-        }
-        return this.buildArticleListVo(recommendArticles, page.getPageSize());
-    }
+//    /**
+//     * 查询文章关联推荐列表
+//     *
+//     * @param articleId
+//     * @param page
+//     * @return
+//     */
+//    @Override
+//    public CommonPageListVo<ArticleDTO> relatedRecommend(Long articleId, CommonPageParam page) {
+//        Article article = this.getById(articleId);
+//        if (article == null) {
+//            return CommonPageListVo.emptyVo();
+//        }
+//
+//        LambdaQueryWrapper<ArticleTag> wrapper=new LambdaQueryWrapper<>();
+//        wrapper.eq(ArticleTag::getArticleId, articleId)
+//                .eq(ArticleTag::getDeleted, CommonDeletedEnum.NO.getCode());
+//
+//        List<Long> tagIds = articleTagMapper.selectList(wrapper).stream()
+//                .map(ArticleTag::getTagId)
+//                .collect(Collectors.toList());
+//
+//        if (CollectionUtils.isEmpty(tagIds)) {
+//            return CommonPageListVo.emptyVo();
+//        }
+//
+//
+//
+//
+//        List<Article> recommendArticles = this.listRelatedArticlesOrderByReadCount(article.getCategoryId(), tagIds, page);
+//        if (recommendArticles.removeIf(s -> s.getId().equals(articleId))) {
+//            // 移除推荐列表中的当前文章
+//            page.setPageSize(page.getPageSize() - 1);
+//        }
+//        return this.buildArticleListVo(recommendArticles, page.getPageSize());
+//    }
 
 
     @Override

@@ -4,23 +4,31 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hpl.article.mapper.ArticleMapper;
 import com.hpl.article.service.ArticleService;
 import com.hpl.exception.StatusEnum;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.redis.RedisClient;
+import com.hpl.statistic.pojo.dto.CountAllDTO;
+import com.hpl.statistic.service.ReadCountService;
+import com.hpl.statistic.service.TraceCountService;
 import com.hpl.user.helper.UserRandomGenHelper;
 import com.hpl.user.helper.UserSessionHelper;
 import com.hpl.user.pojo.dto.AuthorDTO;
+import com.hpl.user.pojo.dto.AuthorDetailDTO;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.mapper.UserInfoMapper;
 import com.hpl.user.service.UserInfoService;
 import com.hpl.exception.ExceptionUtil;
+import com.hpl.user.service.UserRelationService;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -38,6 +46,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Resource
     UserSessionHelper userSessionHelper;
+
+    @Resource
+    private UserRelationService userRelationService;
+
+    @Resource
+    private ReadCountService readCountService;
+
+    @Resource
+    private TraceCountService traceCountService;
 
     @Resource
     private RedisClient redisClient;
@@ -189,5 +206,51 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     }
 
 
+    @Override
+    public AuthorDetailDTO getAuthorDetailById(Long userId){
+        // 1、先获取用户info信息
+        UserInfo userInfo = getByUserId(userId);
+        if(userInfo==null) {
+            ExceptionUtil.of(StatusEnum.USER_NOT_EXISTS, "userId=" + userId);
+        }
+
+        AuthorDetailDTO authorDetailDTO = new AuthorDetailDTO();
+        authorDetailDTO.setUserId(userInfo.getUserId());
+        authorDetailDTO.setNickName(userInfo.getNickName());
+        authorDetailDTO.setAvatar(userInfo.getPhoto());
+        authorDetailDTO.setProfile(userInfo.getProfile());
+        authorDetailDTO.setIpInfo(userInfo.getIp());
+        authorDetailDTO.setCreateTime(userInfo.getCreateTime());
+
+        // 2、获取用户计数信息
+        // 2.1 获取粉丝数量
+        authorDetailDTO.setFansCount(userRelationService.getUserFansCount(userId));
+
+        // 2.2 获取文章id
+        Set<Long> articleIds = SpringUtil.getBean(ArticleMapper.class).getArticleIdsByAuthorId(userId);
+
+        // 2.3 获取阅读量
+        AtomicReference<Long> readCount = new AtomicReference<>(0L);
+        AtomicReference<Long> praiseCount = new AtomicReference<>(0L);
+        AtomicReference<Long> commentCount = new AtomicReference<>(0L);
+        AtomicReference<Long> collectionCount = new AtomicReference<>(0L);
+
+
+        articleIds.forEach(articleId -> {
+            readCount.updateAndGet(v -> v + readCountService.getArticleReadCount(articleId).longValue());
+            CountAllDTO countInfo = traceCountService.getAllCountById(null, articleId);
+            praiseCount.updateAndGet(v -> v + countInfo.getPraiseCount());
+            commentCount.updateAndGet(v -> v + countInfo.getCommentCount());
+            collectionCount.updateAndGet(v -> v + countInfo.getCollectionCount());
+        });
+
+        authorDetailDTO.setArticleCount((long) articleIds.size());
+        authorDetailDTO.setReadCount(readCount.get());
+        authorDetailDTO.setPraiseCount(praiseCount.get());
+        authorDetailDTO.setCommentCount(commentCount.get());
+        authorDetailDTO.setCollectionCount(collectionCount.get());
+
+        return authorDetailDTO;
+    }
 
 }

@@ -81,7 +81,7 @@ public class UserRelationServiceImpl extends ServiceImpl<UserRelationMapper, Use
     }
 
     @Override
-    public Long queryUserFansCount(Long userId){
+    public Long getUserFansCount(Long userId){
         return lambdaQuery()
                 .eq(UserRelation::getUserId, userId)
                 .eq(UserRelation::getFollowState, FollowStateEnum.FOLLOW.getCode())

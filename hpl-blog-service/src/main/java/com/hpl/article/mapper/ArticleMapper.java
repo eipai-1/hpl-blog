@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author : rbe
@@ -24,7 +25,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * 获取当前分类下前四位作者的id和文章数
      * @param categoryId
      */
-    List<SimpleAuthorCountDTO> getTopFourAuthor(Long categoryId);
+    List<SimpleAuthorCountDTO> getTopFourAuthor(String categoryId);
 
 
     /**
@@ -62,5 +63,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
      */
     List<SimpleArticleDTO> listArticlesOrderById(@Param("lastId") Long lastId, @Param("size") int size);
 
+
+    Set<Long> getArticleIdsByAuthorId(Long authorId);
 
 }

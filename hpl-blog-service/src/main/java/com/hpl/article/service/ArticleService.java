@@ -29,7 +29,7 @@ public interface ArticleService extends IService<Article> {
     /**
      * 返回 优质作者信息
      */
-    List<TopAuthorDTO> getTopFourAuthor(Long categoryId);
+    List<TopAuthorDTO> getTopFourAuthor(List<String> leafIds);
 
     /**
      * 获取文章排行
@@ -82,4 +82,6 @@ public interface ArticleService extends IService<Article> {
     ArticleDTO getArticleInfoById(Long articleId);
 
     SimpleDetailDTO getSimpleArticleDetail(Long articleId);
+
+    List<ArticleListDTO> listArticlesByCategories(List<String> leafIds, CommonPageParam pageParam);
 }

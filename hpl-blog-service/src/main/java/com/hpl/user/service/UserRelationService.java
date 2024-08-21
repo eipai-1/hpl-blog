@@ -47,7 +47,7 @@ public interface UserRelationService extends IService<UserRelation> {
      * @param userId
      * @return
      */
-    Long queryUserFansCount(Long userId);
+    Long getUserFansCount(Long userId);
 
     /**
      * 根据fanId判断是否关注userId

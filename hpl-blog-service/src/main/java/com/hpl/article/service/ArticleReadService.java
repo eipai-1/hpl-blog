@@ -162,14 +162,14 @@ public interface ArticleReadService {
      */
     Long getCountByAuthorId(Long authorId);
 
-    /**
-     * 文章关联推荐
-     *
-     * @param article
-     * @param pageParam
-     * @return
-     */
-    CommonPageListVo<ArticleDTO> relatedRecommend(Long article, CommonPageParam pageParam);
+//    /**
+//     * 文章关联推荐
+//     *
+//     * @param article
+//     * @param pageParam
+//     * @return
+//     */
+//    CommonPageListVo<ArticleDTO> relatedRecommend(Long article, CommonPageParam pageParam);
 
 
     List<SimpleArticleDTO> listArticlesOrderById(long lastId, int scanSize);

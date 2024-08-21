@@ -1,12 +1,13 @@
 package com.hpl.controller.user;
 
 import cn.hutool.core.util.StrUtil;
+import com.hpl.pojo.CommonResult;
 import com.hpl.redis.RedisClient;
 import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.permission.Permission;
 import com.hpl.user.permission.UserRole;
-import com.hpl.pojo.CommonResult;
 import com.hpl.user.pojo.dto.AuthorDTO;
+import com.hpl.user.pojo.dto.AuthorDetailDTO;
 import com.hpl.user.service.UserInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,6 +43,17 @@ public class UserController {
         AuthorDTO authorDTO = userInfoService.getAuthorByArticleId(articleId);
 
         return CommonResult.data(authorDTO);
+    }
+
+    @Operation(summary = "获取作者详细信息")
+    @GetMapping("/detail/{userId}")
+    public CommonResult<?> getAuthorDetail(@PathVariable Long userId) {
+        if (StrUtil.isBlank(userId.toString())) {
+            return CommonResult.error("用户id不能为空");
+        }
+        AuthorDetailDTO authorDetailDTO = userInfoService.getAuthorDetailById(userId);
+
+        return CommonResult.data(authorDetailDTO);
     }
 
     @Operation(summary = "根据token获取用户信息")

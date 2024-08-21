@@ -32,7 +32,7 @@ public class TraceCountController extends CommonController {
     public CommonResult<CountAllDTO> getCountInfoByArticleId(@PathVariable Long articleId) {
 
         //只查询文章不涉及作者 ， 置空
-       CountAllDTO countInfo =  traceCountService.getAllCountByArticleId(null, articleId);
+       CountAllDTO countInfo =  traceCountService.getAllCountById(null, articleId);
 
        return CommonResult.data(countInfo);
     }

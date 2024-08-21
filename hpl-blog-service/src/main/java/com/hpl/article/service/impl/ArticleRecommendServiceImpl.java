@@ -24,32 +24,33 @@ public class ArticleRecommendServiceImpl implements ArticleRecommendService {
     @Autowired
     private ArticleReadService articleReadService;
 
-    /**
-     * 查询文章关联推荐列表
-     *
-     * @param articleId
-     * @param page
-     * @return
-     */
-    @Override
-    public CommonPageListVo<ArticleDTO> relatedRecommend(Long articleId, CommonPageParam page) {
-        Article article = articleReadService.getById(articleId);
-        if (article == null) {
-            return CommonPageListVo.emptyVo();
-        }
-        List<Long> tagIds = articleReadService.listTagsByArticleId(articleId).stream()
-                .map(ArticleTag::getTagId).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(tagIds)) {
-            return CommonPageListVo.emptyVo();
-        }
-
-        List<Article> recommendArticles = articleReadService.listRelatedArticlesOrderByReadCount(article.getCategoryId(), tagIds, page);
-        if (recommendArticles.removeIf(s -> s.getId().equals(articleId))) {
-            // 移除推荐列表中的当前文章
-            page.setPageSize(page.getPageSize() - 1);
-        }
-        return articleReadService.buildArticleListVo(recommendArticles, page.getPageSize());
-    }
+//    /**
+//     * 查询文章关联推荐列表
+//     *
+//     * @param articleId
+//     * @param page
+//     * @return
+//     */
+//    @Override
+//    public CommonPageListVo<ArticleDTO> relatedRecommend(Long articleId, CommonPageParam page) {
+//        Article article = articleReadService.getById(articleId);
+//        if (article == null) {
+//            return CommonPageListVo.emptyVo();
+//        }
+//        List<Long> tagIds = articleReadService.listTagsByArticleId(articleId).stream()
+//                .map(ArticleTag::getTagId).collect(Collectors.toList());
+//        if (CollectionUtils.isEmpty(tagIds)) {
+//            return CommonPageListVo.emptyVo();
+//        }
+//
+//
+//        List<Article> recommendArticles = articleReadService.listRelatedArticlesOrderByReadCount(article.getCategoryId(), tagIds, page);
+//        if (recommendArticles.removeIf(s -> s.getId().equals(articleId))) {
+//            // 移除推荐列表中的当前文章
+//            page.setPageSize(page.getPageSize() - 1);
+//        }
+//        return articleReadService.buildArticleListVo(recommendArticles, page.getPageSize());
+//    }
 
 
 }
