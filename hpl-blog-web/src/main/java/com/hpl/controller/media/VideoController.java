@@ -24,7 +24,7 @@ import java.util.List;
  * @author : rbe
  * @date : 2024/7/31 9:05
  */
-@Tag(name="视频媒资管理接口")
+@Tag(name="media-视频媒资管理接口")
 @RestController
 @Slf4j
 @RequestMapping("/video")

@@ -2,8 +2,8 @@ package com.hpl.article.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hpl.article.pojo.dto.CategoryTreeDTO;
 import com.hpl.article.pojo.entity.Category;
-import com.hpl.article.pojo.dto.CategoryDTO;
 
 import java.util.List;
 
@@ -16,26 +16,16 @@ import java.util.List;
 public interface CategoryService extends IService<Category> {
 
     /**
-     * 查询所有的分类
-     *
-     * @return
+     * 树型分类查询
+     * @param id 根节点id
+     * @return 根节点下面的所有子节点
      */
-    List<CategoryDTO> getAllCategories();
+    List<CategoryTreeDTO> getTreeCategories(String id);
 
     /**
-     * 根据id查询分类目名
+     * 根据某分类获取叶子节点
      *
-     * @param categoryId
-     * @return
+     * @param categoryTreeDTO
      */
-    String getNameById(Long categoryId);
-
-    /**
-     * 查询类目id
-     *
-     * @param category
-     * @return
-     */
-    Long getIdByName(String category);
-
+    List<String> getLeafIds(CategoryTreeDTO categoryTreeDTO);
 }

@@ -1,5 +1,7 @@
 package com.hpl.controller.media;
 
+import com.hpl.exception.ExceptionUtil;
+import com.hpl.exception.StatusEnum;
 import com.hpl.media.pojo.dto.ImagePostDTO;
 import com.hpl.media.pojo.dto.SearchAudioDTO;
 import com.hpl.media.pojo.entity.Audio;
@@ -23,7 +25,7 @@ import java.util.List;
  * @author : rbe
  * @date : 2024/7/30 13:37
  */
-@Tag(name="音频媒资管理接口")
+@Tag(name="media-音频媒资管理接口")
 @RestController
 @Slf4j
 @RequestMapping("/audio")
@@ -87,8 +89,8 @@ public class AudioController extends CommonController {
                 audioService.uploadImage(imagePostDTO, upload.getBytes(),imageName);
                 return CommonResult.success();
             } catch (IOException e) {
-                // todo xxx.of
-//            XueChengPlusException.cast("上传文件过程出错:" + e.getMessage());
+                // todo
+                ExceptionUtil.of(StatusEnum.UPLOAD_PIC_FAILED, e.getMessage());
                 log.error("上传图片过程出错:{}",e.getMessage());
             }
         }

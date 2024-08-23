@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/user")
-@Tag(name = "登录相关接口")
+@Tag(name = "user-登录相关接口")
 @Slf4j
 public class LoginController {
 

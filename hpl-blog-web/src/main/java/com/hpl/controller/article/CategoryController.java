@@ -1,7 +1,7 @@
 package com.hpl.controller.article;
 
-import com.hpl.article.pojo.dto.Category1TreeDTO;
-import com.hpl.article.service.Category1Service;
+import com.hpl.article.pojo.dto.CategoryTreeDTO;
+import com.hpl.article.service.CategoryService;
 import com.hpl.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author : rbe
@@ -19,23 +18,23 @@ import java.util.Set;
 @RestController
 @RequestMapping("/category")
 @Slf4j
-@Tag(name = "文章分类相关接口")
+@Tag(name = "article-文章分类相关接口")
 public class CategoryController {
 
     @Resource
-    private Category1Service category1Service;
+    private CategoryService categoryService;
 
     @Operation(summary = "获取课程分类树")
     @GetMapping("/course-category/tree-nodes")
     public CommonResult<?> queryTreeNodes() {
-        return CommonResult.data(category1Service.getTreeCategories("0"));
+        return CommonResult.data(categoryService.getTreeCategories("0"));
     }
 
     @Operation(summary = "获取leafs")
     @PostMapping("/leafs")
-    public CommonResult<?> queryTreeNodesLeaf(@RequestBody Category1TreeDTO category1TreeDTO) {
+    public CommonResult<?> queryTreeNodesLeaf(@RequestBody CategoryTreeDTO categoryTreeDTO) {
         log.warn("leafs");
-        List<String> leafIds = category1Service.getLeafIds(category1TreeDTO);
+        List<String> leafIds = categoryService.getLeafIds(categoryTreeDTO);
         return CommonResult.data(leafIds);
     }
 }

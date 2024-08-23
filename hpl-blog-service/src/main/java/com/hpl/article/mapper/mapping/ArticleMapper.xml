@@ -15,6 +15,7 @@
         <if test="categoryId != null">
             and category_id = #{categoryId}
         </if>
+        and status = ${@com.hpl.article.pojo.enums.PublishStatusEnum@PUBLISHED.code}
         group by author_id
         order by article_count desc
         limit 4

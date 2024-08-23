@@ -23,7 +23,7 @@ import java.util.List;
  * @author : rbe
  * @date : 2024/7/28 18:23
  */
-@Tag(name="图片媒资管理接口")
+@Tag(name="media-图片媒资管理接口")
 @RestController
 @Slf4j
 @RequestMapping("/image")

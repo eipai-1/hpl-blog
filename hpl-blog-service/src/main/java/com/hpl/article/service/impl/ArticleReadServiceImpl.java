@@ -15,7 +15,7 @@ import com.hpl.article.pojo.entity.*;
 import com.hpl.article.pojo.enums.*;
 import com.hpl.article.service.ArticleReadService;
 import com.hpl.article.service.ArticleTagService;
-import com.hpl.article.service.CategoryService;
+import com.hpl.article.service.oldCategoryService;
 import com.hpl.article.service.TagService;
 import com.hpl.exception.StatusEnum;
 import com.hpl.redis.RedisClient;
@@ -67,7 +67,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     private TagService tagService;
 
     @Autowired
-    private CategoryService categoryService;
+    private oldCategoryService oldCategoryService;
     /**
      * 在一个项目中，UserFootService 就是内部服务调用
      * 拆微服务时，这个会作为远程服务访问
@@ -215,7 +215,8 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
         // 更新分类相关信息
         CategoryDTO category = articleDTO.getCategory();
-        category.setCategory(categoryService.getNameById(category.getCategoryId()));
+        //todo 1
+//        category.setCategory(oldCategoryService.getNameById(category.getCategoryId()));
 
         // 更新标签信息
         articleDTO.setTags(articleTagService.getTagsByAId(articleId));
@@ -279,7 +280,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         }
 
         // 更新文章统计计数
-        articleDTO.setCount(readCountService.getArticleStatisticInfo(articleId));
+//        articleDTO.setCount(readCountService.getArticleStatisticInfo(articleId));
 
         // 设置文章的点赞列表
         articleDTO.setPraisedUsers(userFootService.getArticlePraisedUsers(articleId));
@@ -384,13 +385,13 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
         // 分类信息
         //todo 1
-//        articleDTO.getCategory().setCategory(categoryService.getNameById(article.getCategoryId()));
+//        articleDTO.getCategory().setCategory(oldCategoryService.getNameById(article.getCategoryId()));
 
         // 标签列表
         articleDTO.setTags(this.getTagsByAId(article.getId()));
 
         // 阅读计数统计
-        articleDTO.setCount(readCountService.getArticleStatisticInfo(article.getId()));
+//        articleDTO.setCount(readCountService.getArticleStatisticInfo(article.getId()));
 
         // 查询文章作者的基本信息
         UserInfo author = userInfoService.getByUserId(articleDTO.getAuthorId());

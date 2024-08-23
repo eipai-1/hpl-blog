@@ -1,8 +1,11 @@
 package com.hpl.article.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hpl.article.pojo.dto.CategoryTreeDTO;
 import com.hpl.article.pojo.entity.Category;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
  * @author : rbe
@@ -10,4 +13,5 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface CategoryMapper extends BaseMapper<Category> {
+    List<CategoryTreeDTO> selectTreeCategories(String rootId);
 }

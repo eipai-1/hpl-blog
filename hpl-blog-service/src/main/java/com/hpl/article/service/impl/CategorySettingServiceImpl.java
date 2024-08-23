@@ -2,12 +2,12 @@ package com.hpl.article.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hpl.article.mapper.OldCategoryMapper;
 import com.hpl.article.pojo.dto1.CategoryPostDTO;
 import com.hpl.article.pojo.dto1.SearchCategoryDTO;
-import com.hpl.article.pojo.entity.Category;
-import com.hpl.article.mapper.CategoryMapper;
+import com.hpl.article.pojo.entity.oldCategory;
 import com.hpl.article.pojo.dto.CategoryDTO;
-import com.hpl.article.service.CategoryService;
+import com.hpl.article.service.oldCategoryService;
 import com.hpl.article.service.CategorySettingService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageParam;
@@ -30,17 +30,17 @@ import java.util.List;
 public class CategorySettingServiceImpl implements CategorySettingService {
 
     @Autowired
-    private CategoryMapper categoryMapper;
+    private OldCategoryMapper oldCategoryMapper;
 
     @Autowired
-    private CategoryService categoryService;
+    private oldCategoryService oldCategoryService;
 
-    private Category getById(Integer categoryId) {
-        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Category::getId, categoryId)
-                .eq(Category::getDeleted, CommonDeletedEnum.NO.getCode());
+    private oldCategory getById(Integer categoryId) {
+        LambdaQueryWrapper<oldCategory> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(oldCategory::getId, categoryId)
+                .eq(oldCategory::getDeleted, CommonDeletedEnum.NO.getCode());
 
-        return categoryMapper.selectOne(wrapper);
+        return oldCategoryMapper.selectOne(wrapper);
     }
 
     /**
@@ -53,32 +53,32 @@ public class CategorySettingServiceImpl implements CategorySettingService {
     @Override
     public void saveCategory(CategoryPostDTO categoryPostDTO) {
         // 初始化Category实体对象
-        Category category = new Category();
+        oldCategory oldCategory = new oldCategory();
         // 如果categoryPostDTO不为空，填充Category实体对象的属性
         if (categoryPostDTO != null) {
-            category.setCategoryName(categoryPostDTO.getCategory());
-            category.setRank(categoryPostDTO.getRank());
+            oldCategory.setCategoryName(categoryPostDTO.getCategory());
+            oldCategory.setRank(categoryPostDTO.getRank());
         }
 
         // 判断categoryId是否为0，决定是插入还是更新分类
         if (NumUtil.eqZero(categoryPostDTO.getCategoryId())) {
-            categoryMapper.insert(category);
+            oldCategoryMapper.insert(oldCategory);
         } else {
-            category.setId(categoryPostDTO.getCategoryId());
-            categoryMapper.updateById(category);
+            oldCategory.setId(categoryPostDTO.getCategoryId());
+            oldCategoryMapper.updateById(oldCategory);
         }
         // 更新完成后，刷新分类缓存
-//        categoryService.refreshCache();
+//        oldCategoryService.refreshCache();
     }
 
 
     @Override
     public void deleteCategory(Integer categoryId) {
-        Category category = this.getById(categoryId);
-        if (category != null){
-            categoryMapper.deleteById(category);
+        oldCategory oldCategory = this.getById(categoryId);
+        if (oldCategory != null){
+            oldCategoryMapper.deleteById(oldCategory);
         }
-//        categoryService.refreshCache();
+//        oldCategoryService.refreshCache();
     }
 
 
@@ -92,16 +92,16 @@ public class CategorySettingServiceImpl implements CategorySettingService {
     @Override
     public void operateCategory(Integer categoryId, Integer pushStatus) {
         // 根据categoryId获取类别对象
-        Category category = this.getById(categoryId);
+        oldCategory oldCategory = this.getById(categoryId);
         // 检查类别是否存在，如果存在则进行状态更新
-        if (category != null){
+        if (oldCategory != null){
             // 更新类别的推送状态
-            category.setStatus(pushStatus);
+            oldCategory.setStatus(pushStatus);
             // 根据新的状态更新数据库中的类别信息
-            categoryMapper.updateById(category);
+            oldCategoryMapper.updateById(oldCategory);
         }
         // 更新完成后，刷新缓存以保持数据一致性
-//        categoryService.refreshCache();
+//        oldCategoryService.refreshCache();
     }
 
     /**
@@ -118,16 +118,16 @@ public class CategorySettingServiceImpl implements CategorySettingService {
         }
 
         // 构建查询条件，只查询未删除的分类，按更新时间降序、排名升序排序
-        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Category::getDeleted, CommonDeletedEnum.NO.getCode())
-                .like(StringUtils.isNotBlank(searchCategoryDTO.getCategory()), Category::getCategoryName, searchCategoryDTO.getCategory())
-                .orderByDesc(Category::getUpdateTime)
-                .orderByAsc(Category::getRank)
+        LambdaQueryWrapper<oldCategory> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(oldCategory::getDeleted, CommonDeletedEnum.NO.getCode())
+                .like(StringUtils.isNotBlank(searchCategoryDTO.getCategory()), oldCategory::getCategoryName, searchCategoryDTO.getCategory())
+                .orderByDesc(oldCategory::getUpdateTime)
+                .orderByAsc(oldCategory::getRank)
                 .last(CommonPageParam.getLimitSql(
                         CommonPageParam.newInstance(searchCategoryDTO.getPageNumber(), searchCategoryDTO.getPageSize())));
 
         // 根据查询条件获取分类列表
-        List<Category> list = categoryMapper.selectList(wrapper);
+        List<oldCategory> list = oldCategoryMapper.selectList(wrapper);
 
         // 将分类实体转换为分类DTO列表
         // 将查询到的分类数据转换为DTO格式
@@ -135,12 +135,12 @@ public class CategorySettingServiceImpl implements CategorySettingService {
         list.forEach(s -> categoriesVo.add(null));
 
         // 构建查询条件，用于计算总记录数（与获取列表的查询条件相同）
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Category::getDeleted, CommonDeletedEnum.NO.getCode())
-                .like(StringUtils.isNotBlank(searchCategoryDTO.getCategory()), Category::getCategoryName, searchCategoryDTO.getCategory());
+        LambdaQueryWrapper<oldCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(oldCategory::getDeleted, CommonDeletedEnum.NO.getCode())
+                .like(StringUtils.isNotBlank(searchCategoryDTO.getCategory()), oldCategory::getCategoryName, searchCategoryDTO.getCategory());
 
         // 计算符合条件的总记录数
-        Long totalCount = categoryMapper.selectCount(queryWrapper);
+        Long totalCount = oldCategoryMapper.selectCount(queryWrapper);
 
         // 构建并返回分类的分页结果
         return CommonPageVo.build(categoriesVo, searchCategoryDTO.getPageSize(), searchCategoryDTO.getPageNumber(), totalCount);

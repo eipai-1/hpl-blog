@@ -1,6 +1,6 @@
 package com.hpl.article.pojo.dto;
 
-import com.hpl.article.pojo.entity.Category1;
+import com.hpl.article.pojo.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,8 +16,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class Category1TreeDTO extends Category1 {
-    List<Category1TreeDTO> childrenTreeNodes;
+public class CategoryTreeDTO extends Category {
+    List<CategoryTreeDTO> childrenTreeNodes;
 }
 
 

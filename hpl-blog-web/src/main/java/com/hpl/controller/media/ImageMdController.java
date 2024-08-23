@@ -1,5 +1,7 @@
 package com.hpl.controller.media;
 
+import com.hpl.exception.ExceptionUtil;
+import com.hpl.exception.StatusEnum;
 import com.hpl.media.pojo.dto.ImagePostDTO;
 import com.hpl.media.pojo.dto.SimpleMdImageDTO;
 import com.hpl.media.service.ImageMdService;
@@ -18,7 +20,7 @@ import java.io.IOException;
  * @author : rbe
  * @date : 2024/8/15 9:10
  */
-@Tag(name="md图片管理接口")
+@Tag(name="media-md图片管理接口")
 @RestController
 @Slf4j
 @RequestMapping("/md-image")
@@ -46,8 +48,7 @@ public class ImageMdController {
             simpleMdImageDTO.setDesc(upload.getOriginalFilename());
             return CommonResult.data(simpleMdImageDTO);
         } catch (IOException e) {
-            // todo xxx.of
-//            XueChengPlusException.cast("上传文件过程出错:" + e.getMessage());
+            ExceptionUtil.of(StatusEnum.UPLOAD_PIC_FAILED,e.getMessage());
             log.error("上传图片过程出错:{}",e.getMessage());
         }
         return CommonResult.error("上传失败");

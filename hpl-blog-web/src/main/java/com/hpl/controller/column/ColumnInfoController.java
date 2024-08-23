@@ -20,7 +20,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/column")
-@Tag(name = "专栏控制器")
+@Tag(name = "column-专栏控制器")
 @Slf4j
 public class ColumnInfoController {
 

@@ -16,7 +16,7 @@ import com.hpl.article.pojo.enums.*;
 import com.hpl.article.pojo.vo.ArticleListDTO;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.ArticleTagService;
-import com.hpl.article.service.CategoryService;
+import com.hpl.article.service.oldCategoryService;
 import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
 import com.hpl.exception.StatusEnum;
 import com.hpl.media.service.ImageMdService;
@@ -48,7 +48,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -70,13 +69,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private ArticleDetailMapper articleDetailMapper;
 
     @Resource
-    private CategoryService categoryService;
+    private oldCategoryService oldCategoryService;
 
     @Resource
     private ArticleTagService articleTagService;
-
-    @Resource
-    private ReadCountService readCountService;
 
     @Resource
     private UserInfoService userInfoService;
@@ -89,6 +85,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Resource
     private ImageMdService imageMdService;
+
+    @Resource
+    private ReadCountService readCountService;
 
     @Resource
     private TraceCountService traceCountService;
@@ -199,7 +198,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleListDTO.setSummary(article.getSummary());
         articleListDTO.setUpdateTime(article.getUpdateTime());
         // 分类信息 todo
-//        articleListDTO.setCategoryName(categoryService.getNameById(article.getCategoryId()));
+//        articleListDTO.setCategoryName(oldCategoryService.getNameById(article.getCategoryId()));
 
         // 2、文章标签内容拼接
         articleListDTO.setTags(articleTagService.getTagsByAId(article.getId()));
@@ -671,7 +670,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             dto.setShortTitle(article.getShortTitle());
             dto.setSummary(article.getSummary());
             //todo 1
-//            dto.setCategoryName(categoryService.getNameById(article.getCategoryId()));
+//            dto.setCategoryName(oldCategoryService.getNameById(article.getCategoryId()));
             dto.setStatus(article.getStatus());
             dto.setCreateTime(article.getCreateTime());
             dto.setUpdateTime(article.getUpdateTime());
@@ -717,15 +716,32 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 //        articleDTO.setCategory(new com.hpl.article.pojo.dto1.CategoryDTO((article.getCategoryId()),null));
 
         // 查询文章正文
-        articleDTO.setContent(this.getDetailById(articleId).getContent());
+        ArticleDetail detail = this.getDetailById(articleId);
+        articleDTO.setContent(detail.getContent());
+        articleDTO.setCreateTime(detail.getCreateTime());
+        articleDTO.setLastUpdateTime(detail.getUpdateTime());
+
+        // 更新作者信息
+        UserInfo userInfo = userInfoService.getByUserId(article.getAuthorId());
+        articleDTO.setAuthorName(userInfo.getNickName());
+        articleDTO.setAuthorAvatar(userInfo.getPhoto());
 
         // 更新分类相关信息
         com.hpl.article.pojo.dto1.CategoryDTO category = articleDTO.getCategory();
-        category.setCategory(categoryService.getNameById(category.getCategoryId()));
+        //todo 1
+//        category.setCategory(oldCategoryService.getNameById(category.getCategoryId()));
 
         // 更新标签信息
         articleDTO.setTags(articleTagService.getTagsByAId(articleId));
+
+        // 更新阅读统计信息
+        articleDTO.setReadCount(readCountService.getArticleReadCount(articleId));
+        CountAllDTO count = traceCountService.getAllCountById(null, articleId);
+        articleDTO.setPraiseCount(count.getPraiseCount());
+        articleDTO.setCommentCount(count.getCommentCount());
+        articleDTO.setCollectionCount(count.getCollectionCount());
         return articleDTO;
+
     }
 
     /**

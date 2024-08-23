@@ -20,7 +20,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/column-article")
-@Tag(name = "专栏文章控制器")
+@Tag(name = "column-专栏文章控制器")
 @Slf4j
 public class ColumnArticleController {
 

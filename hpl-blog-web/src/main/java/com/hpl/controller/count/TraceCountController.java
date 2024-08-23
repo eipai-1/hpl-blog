@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RequestMapping(path = "count")
 @RestController
-@Tag(name = "计数控制器")
+@Tag(name = "count-计数控制器")
 @Slf4j
 public class TraceCountController extends CommonController {
 

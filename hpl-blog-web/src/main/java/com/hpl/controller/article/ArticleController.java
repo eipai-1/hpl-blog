@@ -20,22 +20,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-/**
- * @author : rbe
- * @date : 2024/7/24 9:34
- */
+import java.util.List;
+
 /**
  * 文章列表视图
  *
- * @author yihui
+ * @author : rbe
+ * @date : 2024/7/24 9:34
  */
 @RequestMapping(path = "article")
 @RestController
-@Tag(name = "文章相关操作")
+@Tag(name = "article-文章相关操作")
 @Slf4j
 public class ArticleController extends CommonController {
 
@@ -46,10 +42,10 @@ public class ArticleController extends CommonController {
     private ArticleService articleService;
 
     @Autowired
-    private CategoryService categoryService;
+    private oldCategoryService oldCategoryService;
 
     @Resource
-    private Category1Service category1Service;
+    private CategoryService categoryService;
     @Resource
     private TagService tagService;
 
@@ -81,7 +77,7 @@ public class ArticleController extends CommonController {
 //    @GetMapping(path = "categories")
 //    @Operation(summary = "获取所有文章分类")
 //    public CommonResult<?> getCategories(){
-//        List<CategoryDTO> res= categoryService.getAllCategories();
+//        List<CategoryDTO> res= oldCategoryService.getAllCategories();
 //        return CommonResult.data(res);
 //    }
 
@@ -95,7 +91,7 @@ public class ArticleController extends CommonController {
 //    @GetMapping(path = "category/{category}")
 //    @Operation(summary = "查询某个分类下的文章列表")
 //    public CommonResult<?> categoryList(@PathVariable("category") String category) {
-//        Long categoryId = categoryService.getIdByName(category);
+//        Long categoryId = oldCategoryService.getIdByName(category);
 //
 //        CommonPageListVo<ArticleListDTO> list = articleService.listArticlesByCategory(categoryId, CommonPageParam.newInstance());
 //        return CommonResult.data(list);
@@ -104,13 +100,13 @@ public class ArticleController extends CommonController {
     /**
      * 查询某个分类下的文章列表
      *
-     * @param category1TreeDTO
+     * @param categoryTreeDTO
      * @return
      */
     @PostMapping(path = "categories")
     @Operation(summary = "查询分类下的文章列表")
-    public CommonResult<?> listByCategory(@RequestBody Category1TreeDTO category1TreeDTO) {
-        List<String> leafIds = category1Service.getLeafIds(category1TreeDTO);
+    public CommonResult<?> listByCategory(@RequestBody CategoryTreeDTO categoryTreeDTO) {
+        List<String> leafIds = categoryService.getLeafIds(categoryTreeDTO);
 
         List<ArticleListDTO> list = articleService.listArticlesByCategories(leafIds, CommonPageParam.newInstance());
 
@@ -124,9 +120,6 @@ public class ArticleController extends CommonController {
     @Operation(summary = "获取文章详情")
     public CommonResult<?> getArticleDetail(@PathVariable("articleId") Long articleId) {
         ArticleDTO article = articleService.getArticleInfoById(articleId);
-
-//        //返回给前端页面是，将文章内容由md格式转为html格式
-//        article.setContent(MarkdownConverter.markdownToHtml(article.getContent()));
         return CommonResult.data(article);
     }
 

@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RestController
 @RequestMapping("/user")
-@Tag(name = "用户信息相关接口")
+@Tag(name = "user-用户信息相关接口")
 @Slf4j
 public class UserController {
 

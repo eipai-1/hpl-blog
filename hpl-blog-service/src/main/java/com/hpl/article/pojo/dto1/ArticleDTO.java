@@ -5,6 +5,7 @@ import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -95,12 +96,12 @@ public class ArticleDTO implements Serializable {
     /**
      * 创建时间
      */
-    private Long createTime;
+    private LocalDateTime createTime;
 
     /**
      * 最后更新时间
      */
-    private Long lastUpdateTime;
+    private LocalDateTime lastUpdateTime;
 
     /**
      * 分类
@@ -127,10 +128,17 @@ public class ArticleDTO implements Serializable {
      */
     private Boolean collected;
 
-    /**
-     * 文章对应的统计计数
-     */
-    private ArticleCountInfoDTO count;
+    /** 文章点赞数 */
+    private Integer  praiseCount;
+
+    /** 文章被阅读数 */
+    private Integer  readCount;
+
+    /** 文章被收藏数 */
+    private Integer  collectionCount;
+
+    /** 评论数 */
+    private Integer commentCount;
 
     /**
      * 点赞用户信息
