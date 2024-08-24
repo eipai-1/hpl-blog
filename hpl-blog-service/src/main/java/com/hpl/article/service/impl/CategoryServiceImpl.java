@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.mapper.CategoryMapper;
 import com.hpl.article.pojo.dto.CategoryTreeDTO;
 import com.hpl.article.pojo.enums.CategoryLeafEnum;
+import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.service.CategoryService;
 import com.hpl.article.pojo.entity.Category;
 import com.hpl.redis.RedisClient;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -110,6 +112,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         for(CategoryTreeDTO child: categoryTreeDTO.getChildrenTreeNodes()){
             dfsGetLeafIds(child,leafIds);
         }
+    }
+
+    @Override
+    public List<Category> getAllLeafs() {
+        List<Category> res = redisClient.getList("category-leafs", Category.class);
+        if (res != null) {
+            return res;
+        }
+
+        res = lambdaQuery()
+                .eq(Category::getStatus, PublishStatusEnum.PUBLISHED.getCode())
+                .eq(Category::getIsLeaf, CategoryLeafEnum.IS_LEAF.getCode())
+                .list();
+
+        redisClient.set("category-leafs", res, 60 * 60 * 24 * 7L, TimeUnit.SECONDS);
+        return res;
     }
 
 }

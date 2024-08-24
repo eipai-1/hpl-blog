@@ -14,6 +14,7 @@ import java.io.Serializable;
 @Data
 @TableName("category")
 public class Category implements Serializable {
+
     /** 类目ID */
     private String id;
 

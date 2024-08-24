@@ -21,9 +21,6 @@ public class ArticlePostDTO implements Serializable {
     @Schema(description = "文章标题" )
     private String title;
 
-//    /** 文章短标题 */
-//    @Schema(description = "文章短标题" )
-//    private String shortTitle;
 
     /** 分类 */
     @Schema(description = "分类" )
@@ -33,6 +30,13 @@ public class ArticlePostDTO implements Serializable {
     @Schema(description = "标签" )
     private Set<Long> tagIds;
 
+    /** 来源：1-转载，2-原创，3-翻译 */
+    @Schema(description = "来源：1-转载，2-原创，3-翻译" )
+    private Integer sourceType;
+
+    /** 原文地址 */
+    @Schema(description = "原文地址" )
+    private String sourceUrl;
 
     /** 正文内容 */
     @Schema(description = "正文内容" )
@@ -41,20 +45,8 @@ public class ArticlePostDTO implements Serializable {
     /** 状态：0-暂存，1-已发布 2-已删除*/
     @Schema(description = "状态：0-暂存，1-已发布 2-已删除" )
     private Integer status;
-//
-//    /** 来源：1-转载，2-原创，3-翻译 */
-//    @Schema(description = "来源：1-转载，2-原创，3-翻译" )
-//    private Integer source;
-//
-//
-//
-//    /** 原文地址 */
-//    @Schema(description = "原文地址" )
-//    private String sourceUrl;
-//
-//
-//    /** 专栏序号 */
-//    @Schema(description = "专栏序号" )
-//    private Long columnId;
+
+
+
 
 }

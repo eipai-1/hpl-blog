@@ -1,6 +1,7 @@
 package com.hpl.controller.article;
 
 import com.hpl.article.pojo.dto.CategoryTreeDTO;
+import com.hpl.article.pojo.entity.Category;
 import com.hpl.article.service.CategoryService;
 import com.hpl.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,11 +31,19 @@ public class CategoryController {
         return CommonResult.data(categoryService.getTreeCategories("0"));
     }
 
-    @Operation(summary = "获取leafs")
-    @PostMapping("/leafs")
-    public CommonResult<?> queryTreeNodesLeaf(@RequestBody CategoryTreeDTO categoryTreeDTO) {
+//    @Operation(summary = "获取leafs")
+//    @PostMapping("/leafs")
+//    public CommonResult<?> queryTreeNodesLeaf(@RequestBody CategoryTreeDTO categoryTreeDTO) {
+//        log.warn("leafs");
+//        List<String> leafIds = categoryService.getLeafIds(categoryTreeDTO);
+//        return CommonResult.data(leafIds);
+//    }
+
+    @Operation(summary = "获取所有leafs")
+    @GetMapping("/leafs")
+    public CommonResult<Object> getAllLeafs() {
         log.warn("leafs");
-        List<String> leafIds = categoryService.getLeafIds(categoryTreeDTO);
-        return CommonResult.data(leafIds);
+        List<Category> leafs = categoryService.getAllLeafs();
+        return CommonResult.data(leafs);
     }
 }

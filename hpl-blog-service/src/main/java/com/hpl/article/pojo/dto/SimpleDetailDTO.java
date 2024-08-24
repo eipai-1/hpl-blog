@@ -27,15 +27,12 @@ public class SimpleDetailDTO implements Serializable {
     /**
      * 分类
      */
-    private Long categoryId;
-
-
+    private String categoryId;
 
     /**
      * 正文
      */
     private String content;
-
 
     /**
      * 标签

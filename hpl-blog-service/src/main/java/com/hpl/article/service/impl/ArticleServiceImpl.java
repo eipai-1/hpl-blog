@@ -69,9 +69,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private ArticleDetailMapper articleDetailMapper;
 
     @Resource
-    private oldCategoryService oldCategoryService;
-
-    @Resource
     private ArticleTagService articleTagService;
 
     @Resource
@@ -145,9 +142,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         Optional.ofNullable(categoryId)
                 .ifPresent(cid -> wrapper.eq(Article::getCategoryId, cid));
 
-        // 设置分页和排序，按照置顶状态和创建时间倒序排列
+        // 设置分页和排序，按照创建时间倒序排列
         wrapper.last(CommonPageParam.getLimitSql(pageParam))
-                .orderByDesc(Article::getToppingState,  Article::getCreateTime);
+                .orderByDesc(Article::getCreateTime);
 
         // 执行查询并返回结果列表
         List<Article> records = articleMapper.selectList(wrapper);
@@ -385,7 +382,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
 
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(Article::getId, Article::getShortTitle, Article::getUpdateTime)
+        queryWrapper.select(Article::getId, Article::getUpdateTime)
                 .eq(Article::getId, articleId)
                 .eq(Article::getDeleted, CommonDeletedEnum.NO.getCode());
 
@@ -407,7 +404,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         return ColumnDirectoryDTO.builder()
                 .articleId(article.getId())
-                .shoutTitle(article.getShortTitle())
                 .updateTime(article.getUpdateTime())
                 .build();
     }
@@ -428,7 +424,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         article.setAuthorId(authorId);
         article.setId(articlePostDTO.getArticleId());
         article.setTitle(articlePostDTO.getTitle());
-//        article.setShortTitle(articlePostDTO.getShortTitle());
         //todo 1
 //        article.setCategoryId(articlePostDTO.getCategoryId());
 
@@ -436,9 +431,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         log.warn(article.getSummary());
         article.setStatus(articlePostDTO.getStatus());
 
-        //todo
-//        article.setSource(articlePostDTO.getSource());
-//        article.setSourceUrl(articlePostDTO.getSourceUrl());
+        article.setSourceType(articlePostDTO.getSourceType());
+        article.setSourceUrl(articlePostDTO.getSourceUrl());
 
 
         // todo 处理文章图片
@@ -457,12 +451,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     log.info("文章更新成功！ title={}", article.getTitle());
                 }
 
-                //todo
-//                if (articlePostDTO.getColumnId() != null) {
-//                    // 更新文章对应的专栏信息
-//                    //todo
-////                    columnSettingService.saveColumnArticle(articleId, articlePostDTO.getColumnId());
-//                }
                 return articleId;
             }
         });
@@ -667,7 +655,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             dto.setArticleId(article.getId());
             dto.setAuthorId(article.getAuthorId());
             dto.setTitle(article.getTitle());
-            dto.setShortTitle(article.getShortTitle());
             dto.setSummary(article.getSummary());
             //todo 1
 //            dto.setCategoryName(oldCategoryService.getNameById(article.getCategoryId()));
@@ -710,8 +697,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         ArticleDTO articleDTO=new ArticleDTO();
         BeanUtils.copyProperties(article,articleDTO);
         articleDTO.setArticleId(articleId);
-        articleDTO.setCover(article.getPicture());
-        articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
+        articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSourceType()).getDesc());
         //todo 1
 //        articleDTO.setCategory(new com.hpl.article.pojo.dto1.CategoryDTO((article.getCategoryId()),null));
 
@@ -757,8 +743,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         Article article = this.getById(articleId);
         simpleDetailDTO.setArticleId(article.getId());
         simpleDetailDTO.setTitle(article.getTitle());
-        //todo 1
-//        simpleDetailDTO.setCategoryId(article.getCategoryId());
+        simpleDetailDTO.setCategoryId(article.getCategoryId());
         simpleDetailDTO.setStatus(article.getStatus());
 
         // 2、再查询文章内容
@@ -793,15 +778,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
                 .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .eq(Article::getCategoryId, categoryId)
-                .orderByDesc(Article::getToppingState,  Article::getCreateTime);
+                .orderByDesc(Article::getCreateTime);
 
         // 执行查询并返回结果列表
         List<Article> records = articleMapper.selectList(wrapper);
-
-//        // 使用流式处理将文章数据对象转换为文章Vo，并收集到列表中
-//        List<ArticleListDTO> result = records.stream()
-//                .map(this::fillArticleRelatedInfo)
-//                .collect(Collectors.toList());
 
         records.forEach(t->{
             res.add(fillArticleRelatedInfo(t));

@@ -28,4 +28,6 @@ public interface CategoryService extends IService<Category> {
      * @param categoryTreeDTO
      */
     List<String> getLeafIds(CategoryTreeDTO categoryTreeDTO);
+
+    List<Category> getAllLeafs();
 }

@@ -36,9 +36,6 @@ public class UserInfo extends CommonEntity {
     /** 用户图像 */
     private String photo;
 
-    /** 职位 */
-    private String position;
-
     /** 个人简介 */
     private String profile;
 

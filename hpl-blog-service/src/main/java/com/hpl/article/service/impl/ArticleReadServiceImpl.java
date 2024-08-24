@@ -205,8 +205,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         ArticleDTO articleDTO=new ArticleDTO();
         BeanUtils.copyProperties(article,articleDTO);
         articleDTO.setArticleId(articleId);
-        articleDTO.setCover(article.getPicture());
-        articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
+        articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSourceType()).getDesc());
         //todo 1
 //        articleDTO.setCategory(new CategoryDTO((article.getCategoryId()),null));
 
@@ -310,12 +309,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
                 .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode());
 
-        // 如果是查询首页的置顶文章，且没有指定分类，则只查询官方文章
-        // 如果分页中置顶的四条数据，需要加上官方的查询条件
-        // 说明是查询官方的文章，非置顶的文章，只限制全部分类
-        if (categoryId == null && pageParam.getPageSize() == CommonPageParam.TOP_PAGE_SIZE) {
-            wrapper.eq(Article::getOfficalState, OfficalStateEnum.OFFICAL.getCode());
-        }
 
         // 根据categoryId条件，添加分类ID查询条件，如果categoryId为null，则不添加
         Optional.ofNullable(categoryId)
@@ -323,7 +316,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
         // 设置分页和排序，按照置顶状态和创建时间倒序排列
         wrapper.last(CommonPageParam.getLimitSql(pageParam))
-                .orderByDesc(Article::getToppingState,  Article::getCreateTime);
+                .orderByDesc(Article::getCreateTime);
 
         // 执行查询并返回结果列表
         List<Article> records = articleMapper.selectList(wrapper);
@@ -364,10 +357,9 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         ArticleDTO articleDTO=new ArticleDTO();
         BeanUtils.copyProperties(article,articleDTO);
         articleDTO.setArticleId(article.getId());
-        articleDTO.setCover(article.getPicture());
 //        articleDTO.setCreateTime(article.getCreateTime().getTime());
 //        articleDTO.setLastUpdateTime(article.getUpdateTime().getTime());
-        articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
+        articleDTO.setSourceType(SourceTypeEnum.formCode(article.getSourceType()).getDesc());
 
         //todo 不用传detail吧 展示的话用不到，点进去才要
 //        if (showReviewContent(article)) {
@@ -424,12 +416,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
                 .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode());
 
-        // 如果是查询首页的置顶文章，且没有指定分类，则只查询官方文章
-        // 如果分页中置顶的四条数据，需要加上官方的查询条件
-        // 说明是查询官方的文章，非置顶的文章，只限制全部分类
-        if (categoryId == null && pageParam.getPageSize() == CommonPageParam.TOP_PAGE_SIZE) {
-            wrapper.eq(Article::getOfficalState, OfficalStateEnum.OFFICAL.getCode());
-        }
 
         // 根据categoryId条件，添加分类ID查询条件，如果categoryId为null，则不添加
         Optional.ofNullable(categoryId)
@@ -437,7 +423,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
         // 设置分页和排序，按照置顶状态和创建时间倒序排列
         wrapper.last(CommonPageParam.getLimitSql(pageParam))
-                .orderByDesc(Article::getToppingState,  Article::getCreateTime);
+                .orderByDesc(Article::getCreateTime);
 
         // 执行查询并返回结果列表
         List<Article> articles = articleMapper.selectList(wrapper);
@@ -568,8 +554,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
                 .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode())
                 .and(!StringUtils.isEmpty(key),
                         v -> v.like(Article::getTitle, key)
-                                .or()
-                                .like(Article::getShortTitle, key)
                                 .or()
                                 .like(Article::getSummary, key));
         wrapper.last(CommonPageParam.getLimitSql(pageParam))
