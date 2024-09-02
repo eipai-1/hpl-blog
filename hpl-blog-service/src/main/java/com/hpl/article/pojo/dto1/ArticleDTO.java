@@ -1,7 +1,6 @@
 package com.hpl.article.pojo.dto1;
 
 import com.hpl.article.pojo.dto.TagDTO;
-import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
 import lombok.Data;
 
 import java.io.Serializable;

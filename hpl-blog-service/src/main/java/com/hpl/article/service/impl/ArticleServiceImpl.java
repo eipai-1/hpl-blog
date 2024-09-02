@@ -16,19 +16,17 @@ import com.hpl.article.pojo.enums.*;
 import com.hpl.article.pojo.vo.ArticleListDTO;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.ArticleTagService;
-import com.hpl.article.service.oldCategoryService;
 import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
+import com.hpl.column.service.ColumnArticleService;
+import com.hpl.count.pojo.dto.DocumentCntInfoDTO;
+import com.hpl.count.service.CountService;
 import com.hpl.exception.StatusEnum;
 import com.hpl.media.service.ImageMdService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.redis.RedisClient;
-import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
-import com.hpl.statistic.pojo.dto.CountAllDTO;
-import com.hpl.statistic.pojo.entity.ReadCount;
-import com.hpl.statistic.service.ReadCountService;
-import com.hpl.statistic.service.TraceCountService;
+import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
@@ -69,6 +67,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private ArticleDetailMapper articleDetailMapper;
 
     @Resource
+    private ColumnArticleService columnArticleService;
+
+    @Resource
     private ArticleTagService articleTagService;
 
     @Resource
@@ -84,10 +85,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private ImageMdService imageMdService;
 
     @Resource
-    private ReadCountService readCountService;
-
-    @Resource
-    private TraceCountService traceCountService;
+    private CountService countService;
 
     @Resource
     private RedisClient redisClient;
@@ -200,19 +198,20 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 2、文章标签内容拼接
         articleListDTO.setTags(articleTagService.getTagsByAId(article.getId()));
 
-        // 3、文章阅读统计信息拼接
-        ArticleCountInfoDTO countInfo = new ArticleCountInfoDTO();
-        // 3.1 获取阅读次数总和
-        countInfo.setReadCount(readCountService.getArticleReadCount(article.getId()));
-        // 3.2 遍历文章id集合，获取收藏、点赞、评论次数总和
-        CountAllDTO countAllDTO = traceCountService.getAllCountById(null,article.getId());
-
-        countInfo.setCollectionCount(countAllDTO.getCollectionCount());
-        countInfo.setCommentCount(countAllDTO.getCommentCount());
-        countInfo.setPraiseCount(countAllDTO.getPraiseCount());
+//        // 3、文章阅读统计信息拼接
+//        ArticleCountInfoDTO countInfo = new ArticleCountInfoDTO();
+//        // 3.1 获取阅读次数总和
+//        countInfo.setReadCount(readCountService.getArticleReadCount(article.getId()));
+//        // 3.2 遍历文章id集合，获取收藏、点赞、评论次数总和
+//        CountAllDTO countAllDTO = traceCountService.getAllCountById(null,article.getId());
+//
+//        countInfo.setCollectionCount(countAllDTO.getCollectionCount());
+//        countInfo.setCommentCount(countAllDTO.getCommentCount());
+//        countInfo.setPraiseCount(countAllDTO.getPraiseCount());
 
         // 3.3 内容拼接
-        articleListDTO.setCountInfo(countInfo);
+        DocumentCntInfoDTO cntInfoDTO = countService.getDocumentCntInfo(article.getId());
+        articleListDTO.setCountInfo(cntInfoDTO);
 
 
         // 4、文章作者信息拼接
@@ -313,45 +312,47 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public List<TopArticleDTO> getTopEight(){
 
-        //先查redis是否存在
-        //todo 配置redis后处理
-//        if(redisTemplate.hasKey("topEight")){
-//            return (List<TopAuthorDTO>) redisTemplate.opsForValue().get("topEight");
+//        //先查redis是否存在
+//        //todo 配置redis后处理
+////        if(redisTemplate.hasKey("topEight")){
+////            return (List<TopAuthorDTO>) redisTemplate.opsForValue().get("topEight");
+////        }
+//
+//
+//        List<ReadCount> readCounts =readCountService.getTopCountByCategoryId();
+//
+//        List<TopArticleDTO> res=new ArrayList<>();
+//
+//        //循环遍历top 拼接信息
+//        for(int i = 0; i <TOP_SIZE;i++){
+//            ReadCount readCount = readCounts.get(i);
+//
+//            // 查article
+//            Article article = getById(readCount.getDocumentId());
+//
+//            // 拼接信息
+//            TopArticleDTO topArticleDTO = new TopArticleDTO();
+//            topArticleDTO.setArticleId(article.getId());
+//
+//            //只取前8个字符
+//            if(article.getTitle().length()>10){
+//                topArticleDTO.setTitle(article.getTitle().substring(0,10)+"...");
+//            }else{
+//                topArticleDTO.setTitle(article.getTitle());
+//            }
+//
+//
+//
+//            topArticleDTO.setCnt(readCount.getCnt());
+//
+//            res.add(topArticleDTO);
 //        }
+//
+//        //todo 添加至缓存
+//
+//        return res;
 
-
-        List<ReadCount> readCounts =readCountService.getTopCountByCategoryId();
-
-        List<TopArticleDTO> res=new ArrayList<>();
-
-        //循环遍历top 拼接信息
-        for(int i = 0; i <TOP_SIZE;i++){
-            ReadCount readCount = readCounts.get(i);
-
-            // 查article
-            Article article = getById(readCount.getDocumentId());
-
-            // 拼接信息
-            TopArticleDTO topArticleDTO = new TopArticleDTO();
-            topArticleDTO.setArticleId(article.getId());
-
-            //只取前8个字符
-            if(article.getTitle().length()>10){
-                topArticleDTO.setTitle(article.getTitle().substring(0,10)+"...");
-            }else{
-                topArticleDTO.setTitle(article.getTitle());
-            }
-
-
-
-            topArticleDTO.setCnt(readCount.getCnt());
-
-            res.add(topArticleDTO);
-        }
-
-        //todo 添加至缓存
-
-        return res;
+        return new ArrayList<>();
     }
 
     /**
@@ -382,7 +383,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
 
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(Article::getId, Article::getUpdateTime)
+        queryWrapper.select(Article::getId, Article::getTitle , Article::getUpdateTime)
                 .eq(Article::getId, articleId)
                 .eq(Article::getDeleted, CommonDeletedEnum.NO.getCode());
 
@@ -404,6 +405,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         return ColumnDirectoryDTO.builder()
                 .articleId(article.getId())
+                .title(article.getTitle())
                 .updateTime(article.getUpdateTime())
                 .build();
     }
@@ -424,8 +426,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         article.setAuthorId(authorId);
         article.setId(articlePostDTO.getArticleId());
         article.setTitle(articlePostDTO.getTitle());
-        //todo 1
-//        article.setCategoryId(articlePostDTO.getCategoryId());
+        article.setCategoryId(articlePostDTO.getCategoryId());
 
         article.setSummary(this.pickSummary(articlePostDTO.getContent()));
         log.warn(article.getSummary());
@@ -434,20 +435,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         article.setSourceType(articlePostDTO.getSourceType());
         article.setSourceUrl(articlePostDTO.getSourceUrl());
 
-
-        // todo 处理文章图片
-//        String content = imageMdService.mdImgReplace(articlePostDTO.getContent());
-        String content = articlePostDTO.getContent();
-
         return transactionTemplate.execute(new TransactionCallback<Long>() {
             @Override
             public Long doInTransaction(TransactionStatus status) {
                 Long articleId;
                 if (NumUtil.eqZero(articlePostDTO.getArticleId())) {
-                    articleId = insertArticle(article, content, articlePostDTO.getTagIds());
+                    articleId = insertArticle(article, articlePostDTO.getContent(), articlePostDTO.getColumnId(),articlePostDTO.getTagIds());
                     log.info("文章发布成功! title={}", articlePostDTO.getTitle());
                 } else {
-                    articleId = updateArticle(article, content, articlePostDTO.getTagIds());
+                    articleId = updateArticle(article, articlePostDTO.getContent(), articlePostDTO.getTagIds());
                     log.info("文章更新成功！ title={}", article.getTitle());
                 }
 
@@ -497,8 +493,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * @param tags
      * @return
      */
-    private Long insertArticle(Article article, String content, Set<Long> tags) {
-        // article + article_detail + tag  三张表的数据变更
+    private Long insertArticle(Article article, String content,Long columnId, Set<Long> tags) {
+        // article + article_detail + column_article + tag  四张表的数据变更
 
 
         // 1. 保存文章
@@ -514,6 +510,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         detail.setVersion(1L);
         articleDetailMapper.insert(detail);
 
+        // 3.将文章关联对应专栏
+        if (columnId==null){
+            columnId = 0L;
+        }
+        columnArticleService.saveColumnArticle(articleId, columnId);
+
         // 3. 保存文章标签
         tags.forEach(tagId -> {
             ArticleTag tag = new ArticleTag();
@@ -523,8 +525,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             articleTagService.save(tag);
         });
 
-        // 4、文章阅读次数初始化 1
-        readCountService.InitArticleReadCount(articleId);
+        // 4、文章阅读次数初始化 1 todo
+//        readCountService.InitArticleReadCount(articleId);
 
 
         //todo
@@ -666,18 +668,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             dto.setTags(articleTagService.getTagsByAId(article.getId()));
 
             // 3、文章阅读统计信息拼接
-            ArticleCountInfoDTO countInfo = new ArticleCountInfoDTO();
-            // 3.1 获取阅读次数总和
-            countInfo.setReadCount(readCountService.getArticleReadCount(article.getId()));
-            // 3.2 遍历文章id集合，获取收藏、点赞、评论次数总和
-            CountAllDTO countAllDTO = traceCountService.getAllCountById(null,article.getId());
+            DocumentCntInfoDTO cntInfoDTO = countService.getDocumentCntInfo(article.getId());
+            dto.setCountInfo(cntInfoDTO);
 
-            countInfo.setCollectionCount(countAllDTO.getCollectionCount());
-            countInfo.setCommentCount(countAllDTO.getCommentCount());
-            countInfo.setPraiseCount(countAllDTO.getPraiseCount());
-
-            // 3.3 内容拼接
-            dto.setCountInfo(countInfo);
 
             res.add(dto);
         });
@@ -720,12 +713,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 更新标签信息
         articleDTO.setTags(articleTagService.getTagsByAId(articleId));
 
+        // 文章计数加1
+        countService.incrReadCount(articleId);
+
         // 更新阅读统计信息
-        articleDTO.setReadCount(readCountService.getArticleReadCount(articleId));
-        CountAllDTO count = traceCountService.getAllCountById(null, articleId);
-        articleDTO.setPraiseCount(count.getPraiseCount());
-        articleDTO.setCommentCount(count.getCommentCount());
-        articleDTO.setCollectionCount(count.getCollectionCount());
+        DocumentCntInfoDTO cntInfoDTO = countService.getDocumentCntInfo(articleId);
+        articleDTO.setReadCount(cntInfoDTO.getReadCount());
+        articleDTO.setPraiseCount(cntInfoDTO.getPraiseCount());
+        articleDTO.setCommentCount(cntInfoDTO.getCommentCount());
+        articleDTO.setCollectionCount(cntInfoDTO.getCollectionCount());
+
+
         return articleDTO;
 
     }

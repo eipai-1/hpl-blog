@@ -1,4 +1,4 @@
-package com.hpl.statistic.pojo.enums;
+package com.hpl.count.pojo.enums;
 
 import lombok.Getter;
 

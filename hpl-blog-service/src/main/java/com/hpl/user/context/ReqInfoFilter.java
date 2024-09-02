@@ -1,5 +1,6 @@
 package com.hpl.user.context;
 
+import com.hpl.redis.RedisClient;
 import com.hpl.user.helper.UserSessionHelper;
 import com.hpl.user.service.UserInfoService;
 import com.hpl.util.IpUtil;
@@ -31,6 +32,7 @@ public class ReqInfoFilter implements Filter {
 
     @Resource
     private UserInfoService userInfoService;
+
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

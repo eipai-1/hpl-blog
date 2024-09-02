@@ -72,4 +72,15 @@ public class ColumnInfoController {
 
         return CommonResult.success();
     }
+
+    @Operation(summary = "我的简单专栏")
+    @GetMapping("/simple-list")
+    @Permission(role = UserRole.USER)
+    public CommonResult<?> listMySimpleColumns() {
+
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
+
+        List<ColumnSimpleDTO> res =  columnInfoService.listMySimpleColumns(userId);
+        return CommonResult.data(res);
+    }
 }

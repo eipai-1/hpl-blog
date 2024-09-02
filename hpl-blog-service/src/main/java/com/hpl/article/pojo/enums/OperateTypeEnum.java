@@ -1,7 +1,7 @@
 package com.hpl.article.pojo.enums;
 
 import com.hpl.notify.pojo.enums.NotifyTypeEnum;
-import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
+import com.hpl.count.pojo.enums.DocumentTypeEnum;
 import lombok.Getter;
 
 /**

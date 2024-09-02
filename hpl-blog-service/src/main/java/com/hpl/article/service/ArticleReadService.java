@@ -61,7 +61,7 @@ public interface ArticleReadService {
      * @param currentUser 当前查看的用户ID
      * @return
      */
-    ArticleDTO getFullArticleInfo(Long articleId, Long currentUser);
+//    ArticleDTO getFullArticleInfo(Long articleId, Long currentUser);
 
     /**
      * 已处理
@@ -107,15 +107,15 @@ public interface ArticleReadService {
      */
     Map<Long, Long> queryArticleCountsAndCategory();
 
-    /**
-     * 查询某个标签下的文章，支持翻页
-     *
-     * @param tagId
-     * @param page
-     * @return
-     */
-    //todo
-    CommonPageListVo<ArticleDTO> listArticlesByTag(Long tagId, CommonPageParam page);
+//    /**
+//     * 查询某个标签下的文章，支持翻页
+//     *
+//     * @param tagId
+//     * @param page
+//     * @return
+//     */
+//    //todo
+//    CommonPageListVo<ArticleDTO> listArticlesByTag(Long tagId, CommonPageParam page);
 
     /**
      * 根据关键词匹配标题，查询用于推荐的文章列表，只返回 articleId + title
@@ -143,7 +143,7 @@ public interface ArticleReadService {
      * @param select
      * @return
      */
-    CommonPageListVo<ArticleDTO> listArticlesByUserAndType(Long userId, CommonPageParam pageParam, HomeSelectEnum select);
+//    CommonPageListVo<ArticleDTO> listArticlesByUserAndType(Long userId, CommonPageParam pageParam, HomeSelectEnum select);
 
     /**
      * 查询热门文章
@@ -176,5 +176,5 @@ public interface ArticleReadService {
 
     List<ArticleTag> listTagsByArticleId(Long articleId);
 
-    List<Article> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, CommonPageParam page);
+//    List<Article> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, CommonPageParam page);
 }

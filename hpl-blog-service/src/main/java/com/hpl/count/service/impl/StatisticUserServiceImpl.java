@@ -1,6 +1,6 @@
-package com.hpl.statistic.service.impl;
+package com.hpl.count.service.impl;
 
-import com.hpl.statistic.service.StatisticUserService;
+import com.hpl.count.service.StatisticUserService;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicInteger;

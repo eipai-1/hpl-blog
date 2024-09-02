@@ -9,9 +9,6 @@ import com.hpl.article.service.ArticleService;
 import com.hpl.exception.StatusEnum;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.redis.RedisClient;
-import com.hpl.statistic.pojo.dto.CountAllDTO;
-import com.hpl.statistic.service.ReadCountService;
-import com.hpl.statistic.service.TraceCountService;
 import com.hpl.user.helper.UserRandomGenHelper;
 import com.hpl.user.helper.UserSessionHelper;
 import com.hpl.user.pojo.dto.AuthorDTO;
@@ -50,11 +47,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Resource
     private UserRelationService userRelationService;
 
-    @Resource
-    private ReadCountService readCountService;
-
-    @Resource
-    private TraceCountService traceCountService;
 
     @Resource
     private RedisClient redisClient;
@@ -236,13 +228,14 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         AtomicReference<Long> collectionCount = new AtomicReference<>(0L);
 
 
-        articleIds.forEach(articleId -> {
-            readCount.updateAndGet(v -> v + readCountService.getArticleReadCount(articleId).longValue());
-            CountAllDTO countInfo = traceCountService.getAllCountById(null, articleId);
-            praiseCount.updateAndGet(v -> v + countInfo.getPraiseCount());
-            commentCount.updateAndGet(v -> v + countInfo.getCommentCount());
-            collectionCount.updateAndGet(v -> v + countInfo.getCollectionCount());
-        });
+        //todo
+//        articleIds.forEach(articleId -> {
+//            readCount.updateAndGet(v -> v + readCountService.getArticleReadCount(articleId).longValue());
+//            CountAllDTO countInfo = traceCountService.getAllCountById(null, articleId);
+//            praiseCount.updateAndGet(v -> v + countInfo.getPraiseCount());
+//            commentCount.updateAndGet(v -> v + countInfo.getCommentCount());
+//            collectionCount.updateAndGet(v -> v + countInfo.getCollectionCount());
+//        });
 
         authorDetailDTO.setArticleCount((long) articleIds.size());
         authorDetailDTO.setReadCount(readCount.get());

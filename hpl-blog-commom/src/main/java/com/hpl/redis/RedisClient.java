@@ -33,7 +33,6 @@ public class RedisClient {
     private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
 
 
-
     /**
      * 将对象转换为JSON字符串并存储到Redis中
      *
@@ -46,28 +45,38 @@ public class RedisClient {
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(value), time, unit);
     }
 
+    public Boolean setIfAbsent(String key, String value, Long time, TimeUnit timeUnit) {
+        return stringRedisTemplate.opsForValue().setIfAbsent(key, value, time, timeUnit);
+    }
+
     public void del(String key){
         stringRedisTemplate.delete(key);
     }
 
-    public <T> T get(String key, Class<T> type) {
-        // 1、从redis中查数据
-        String json = stringRedisTemplate.opsForValue().get(key);
-
-        // 2、数据不为null 也不等于''
-        if (StrUtil.isNotBlank(json)) {
-            // 则将数据转换为目标类型并返回
-            return JSONUtil.toBean(json,type);
-        }
-
-        // 3、等于空值 ''
-        if(json!=null){
-            return (T) json;
-        }
-
-
-        return null;
+    public String get(String key){
+        return stringRedisTemplate.opsForValue().get(key);
     }
+
+    public <T> T get(String key, Class<T> type) {
+    // 1、从redis中查数据
+    String json = stringRedisTemplate.opsForValue().get(key);
+
+    // 2、数据不为null 也不等于''
+    if (StrUtil.isNotBlank(json)) {
+        try {
+            // 将数据转换为目标类型并返回
+            return JSONUtil.toBean(json, type);
+        } catch (Exception e) {
+            // 处理转换异常
+            log.error("Failed to convert JSON to bean", e);
+            return null;
+        }
+    }
+
+    // 如果 json 为空字符串，则返回 null
+    return null;
+}
+
 
     public <T> List<T> getList(String key, Class<T> type) {
         // 1、从redis中查数据
@@ -258,14 +267,21 @@ public class RedisClient {
         return r;
     }
 
-//    private boolean tryLock(String key) {
-//        Boolean flag = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", 10, TimeUnit.SECONDS);
-//        return BooleanUtil.isTrue(flag);
-//    }
-//
-//    private void unlock(String key) {
-//        stringRedisTemplate.delete(key);
-//    }
 
+    /********************************
+     * 封装set命令
+     ********************************/
+
+    public void sAdd(String key, Object value) {
+        stringRedisTemplate.opsForSet().add(key, value.toString());
+    }
+
+    public void sRem(String key, Object value) {
+        stringRedisTemplate.opsForSet().remove(key, value.toString());
+    }
+
+    public Boolean sIsMember(String key, Object value) {
+        return stringRedisTemplate.opsForSet().isMember(key, value.toString());
+    }
 
 }

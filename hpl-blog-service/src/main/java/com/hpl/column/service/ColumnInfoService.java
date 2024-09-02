@@ -32,6 +32,13 @@ public interface ColumnInfoService extends IService<ColumnInfo> {
      */
     void deleteById(Long columnId);
 
+    /**
+     * 获取专栏的简单消息 (id、名称)
+     *
+     * @return
+     */
+    List<ColumnSimpleDTO> listMySimpleColumns(Long userId);
+
 
 //    /**
 //     * 专栏列表

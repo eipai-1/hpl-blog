@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import java.util.Random;
 
 /**
- * 用户名生成器
+ * 用户名、头像生成器
  *
  * @author YiHui
  * @date 2022/9/27
@@ -77,13 +77,4 @@ public class UserRandomGenHelper {
         return String.format(AVATAR_TEMPLATE, RANDOM.nextInt(AVATAR_NUM) + 1);
     }
 
-    /**
-     * 生成用户邀请码
-     * 规则：前缀 + 年月日转十六进制
-     *
-     * @return
-     */
-    public String genInviteCode(Long prefix) {
-        return String.format("%03x%04x", prefix, System.currentTimeMillis() / 1000 / 60 / 60 / 24).toUpperCase();
-    }
 }

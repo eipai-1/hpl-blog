@@ -1,4 +1,4 @@
-package com.hpl.statistic.service;
+package com.hpl.count.service;
 
 /**
  * @author : rbe

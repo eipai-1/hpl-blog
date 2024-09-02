@@ -238,7 +238,6 @@ public class ImageMdServiceImpl implements ImageMdService {
         log.warn("图片名：{}", urlMinio);
 
 
-//            this.addImageToMiniO(bytes, MD_IMAGE_BUCKET, urlMinio);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         try {
             minioClient.putObject(PutObjectArgs.builder()
@@ -252,7 +251,7 @@ public class ImageMdServiceImpl implements ImageMdService {
         }
 
 
-        return urlMinio;
+        return END_POINT+"/"+MD_IMAGE_BUCKET+"/"+urlMinio;
     }
 
 

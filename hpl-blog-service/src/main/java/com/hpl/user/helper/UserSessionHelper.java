@@ -4,10 +4,12 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.hpl.redis.RedisClient;
 import com.hpl.util.JsonUtil;
 import com.hpl.util.MapUtil;
 import com.hpl.util.RedisUtil;
 import com.hpl.util.TraceIdUtil;
+import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,6 +19,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 使用jwt来存储用户token，则不需要后端来存储session了
@@ -27,6 +30,10 @@ import java.util.Objects;
 @Slf4j
 @Component
 public class UserSessionHelper {
+
+    @Resource
+    private RedisClient redisClient;
+
     @Component
     @Data
     @ConfigurationProperties("hpl.jwt")
@@ -73,12 +80,14 @@ public class UserSessionHelper {
 
         // 2.使用jwt生成的token时，后端可以不存储这个session信息, 完全依赖jwt的信息
         // 但是需要考虑到用户登出，需要主动失效这个token，而jwt本身无状态，所以再这里的redis做一个简单的token -> userId的缓存，用于双重判定
-        RedisUtil.setEx(token, String.valueOf(userId), jwtProperties.getExpire() / 1000);
+        String key = "token:"+token;
+        redisClient.set(key, userId.toString(), jwtProperties.getExpire(), TimeUnit.MILLISECONDS);
         return token;
     }
 
     public void removeSession(String session) {
-        RedisUtil.del(session);
+        String key = "token:"+session;
+        redisClient.del(key);
     }
 
     /**
@@ -105,7 +114,9 @@ public class UserSessionHelper {
 
             // 从Redis中获取存储的会话信息，用于对比验证
             // 从redis中获取userId，解决用户登出，后台失效jwt token的问题
-            String user = RedisUtil.get(session);
+            String key = "token:"+session;
+            String user = redisClient.get(key);
+            log.info("redis userId: {}", user);
             // 如果Redis中的会话信息为空，或与JWT中的用户ID不匹配，则返回null
             if (user == null || !Objects.equals(userId, user)) {
                 return null;

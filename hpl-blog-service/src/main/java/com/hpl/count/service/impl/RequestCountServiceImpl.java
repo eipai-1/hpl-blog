@@ -1,10 +1,10 @@
-package com.hpl.statistic.service.impl;
+package com.hpl.count.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hpl.statistic.mapper.RequestCountMapper;
-import com.hpl.statistic.pojo.dto.StatisticsDayDTO;
-import com.hpl.statistic.pojo.entity.RequestCount;
-import com.hpl.statistic.service.RequestCountService;
+import com.hpl.count.mapper.RequestCountMapper;
+import com.hpl.count.pojo.dto.StatisticsDayDTO;
+import com.hpl.count.pojo.entity.RequestCount;
+import com.hpl.count.service.RequestCountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

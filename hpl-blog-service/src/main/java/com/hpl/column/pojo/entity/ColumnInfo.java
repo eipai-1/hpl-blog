@@ -27,10 +27,6 @@ public class ColumnInfo extends CommonEntity {
     @TableField("introduction")
     private String introduction;
 
-    /** 封面 */
-    @TableField("cover")
-    private String cover;
-
     /** 排序 */
     @TableField("section")
     private Integer section;

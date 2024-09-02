@@ -17,9 +17,6 @@ public class ColumnPostDTO implements Serializable {
     /** 简介 */
     private String introduction;
 
-    /** 封面 */
-    private String cover;
-
     /** 排序 */
     private Integer section;
 

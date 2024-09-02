@@ -1,4 +1,4 @@
-package com.hpl.statistic.pojo.constant;
+package com.hpl.count.pojo.constant;
 
 /**
  * @author : rbe

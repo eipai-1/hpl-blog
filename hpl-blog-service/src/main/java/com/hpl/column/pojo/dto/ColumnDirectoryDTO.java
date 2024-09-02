@@ -17,7 +17,7 @@ public class ColumnDirectoryDTO implements Serializable {
 
     private Long articleId;
 
-    private String shoutTitle;
+    private String title;
 
     private LocalDateTime updateTime;
 }

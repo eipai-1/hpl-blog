@@ -24,9 +24,6 @@ public class MyColumnListDTO implements Serializable {
     /** 说明 */
     private String introduction;
 
-    /** 封面 */
-    private String cover;
-
     /** 发布时间 */
     private LocalDateTime createTime;
 

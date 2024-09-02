@@ -1,4 +1,4 @@
-package com.hpl.statistic.pojo.entity;
+package com.hpl.count.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hpl.pojo.CommonEntity;

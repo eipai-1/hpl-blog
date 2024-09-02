@@ -14,8 +14,6 @@ import lombok.EqualsAndHashCode;
 @TableName("user_foot")
 public class UserFoot extends CommonEntity {
 
-    private static final long serialVersionUID = 1L;
-
     /** 用户ID */
     private Long userId;
 
@@ -29,14 +27,11 @@ public class UserFoot extends CommonEntity {
     private Long documentUserId;
 
     /** 收藏状态: 0-未收藏，1-已收藏 */
-    private Integer collectionState;
-
-    /** 阅读状态: 0-未读，1-已读 */
-    private Integer readState;
+    private Integer collected;
 
     /** 评论状态: 0-未评论，1-已评论 */
-    private Integer commentState;
+    private Integer commented;
 
     /** 点赞状态: 0-未点赞，1-已点赞 */
-    private Integer praiseState;
+    private Integer praised;
 }

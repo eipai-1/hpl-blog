@@ -1,5 +1,6 @@
 package com.hpl.column.service.impl;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.hpl.article.service.ArticleService;
@@ -30,9 +31,6 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
 
     @Resource
     private ColumnArticleMapper columnArticleMapper;
-
-    @Resource
-    private ArticleService articleService;
 
     @Resource
     private RedisClient redisClient;
@@ -66,7 +64,7 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
 
         // 2.根据文章id，查询该文章id，短标题、更新时间
         articleIds.forEach(articleId -> {
-            ColumnDirectoryDTO columnDirectoryDTO = articleService.getDirectoryById(articleId);
+            ColumnDirectoryDTO columnDirectoryDTO = SpringUtil.getBean(ArticleService.class).getDirectoryById(articleId);
 
             res.add(columnDirectoryDTO);
         });
@@ -176,24 +174,30 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
     public void saveColumnArticle(Long articleId, Long columnId) {
         // 转换参数
         // 插入的时候，需要判断是否已经存在
-        ColumnArticle exist = this.getById(articleId);
+//        ColumnArticle exist = this.getById(articleId);
+//
+//        if (exist != null) {
+//            if (!Objects.equals(columnId, exist.getColumnId())) {
+//                // 更新
+//                exist.setColumnId(columnId);
+//                columnArticleMapper.updateById(exist);
+//            }
+//        } else {
+//            // 将文章保存到专栏中，章节序号+1
+//            ColumnArticle columnArticle = new ColumnArticle();
+//            columnArticle.setColumnId(columnId);
+//            columnArticle.setArticleId(articleId);
+//            // section 自增+1
+//            Integer maxSection = this.getCountByColumnId(columnId);
+//            columnArticle.setSection(maxSection + 1);
+//            columnArticleMapper.insert(columnArticle);
+//        }
 
-        if (exist != null) {
-            if (!Objects.equals(columnId, exist.getColumnId())) {
-                // 更新
-                exist.setColumnId(columnId);
-                columnArticleMapper.updateById(exist);
-            }
-        } else {
-            // 将文章保存到专栏中，章节序号+1
-            ColumnArticle columnArticle = new ColumnArticle();
-            columnArticle.setColumnId(columnId);
-            columnArticle.setArticleId(articleId);
-            // section 自增+1
-            Integer maxSection = this.getCountByColumnId(columnId);
-            columnArticle.setSection(maxSection + 1);
-            columnArticleMapper.insert(columnArticle);
-        }
+        ColumnArticle columnArticle  = new ColumnArticle();
+        columnArticle.setColumnId(columnId);
+        columnArticle.setArticleId(articleId);
+
+        columnArticleMapper.insert(columnArticle);
     }
 
     @Override

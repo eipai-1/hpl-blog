@@ -1,4 +1,4 @@
-package com.hpl.statistic.pojo.dto;
+package com.hpl.count.pojo.dto;
 
 import lombok.Data;
 import lombok.ToString;

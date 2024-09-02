@@ -8,9 +8,6 @@ import com.hpl.column.service.ColumnArticleService;
 import com.hpl.column.service.ColumnInfoService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.redis.RedisClient;
-import com.hpl.statistic.pojo.dto.CountAllDTO;
-import com.hpl.statistic.service.ReadCountService;
-import com.hpl.statistic.service.TraceCountService;
 import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
@@ -37,13 +34,6 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
 
     @Resource
     private UserInfoService userInfoService;
-
-    @Resource
-    private TraceCountService traceCountService;
-
-    @Resource
-    private ReadCountService readCountService;
-
 
     @Autowired
     private ColumnArticleService columnArticleService;
@@ -83,7 +73,6 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             columnListDTO.setColumnId(columnInfo.getId());
             columnListDTO.setIntroduction(columnInfo.getIntroduction());
             columnListDTO.setColumnName(columnInfo.getColumnName());
-            columnListDTO.setCover(columnInfo.getCover());
             columnListDTO.setCreateTime(columnInfo.getCreateTime());
 
 
@@ -102,12 +91,12 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             // 3.2 填充文章数量
             columnListDTO.setArticleCount(articleIds.size());
 
-            // 3.3 遍历文章id集合，获取阅读次数总和
-            Integer readCountTotal = 0;
-            for (Long articleId : articleIds) {
-                readCountTotal += readCountService.getArticleReadCount(articleId);
-            }
-            columnListDTO.setReadCount(readCountTotal);
+            // 3.3 遍历文章id集合，获取阅读次数总和 todo
+//            Integer readCountTotal = 0;
+//            for (Long articleId : articleIds) {
+//                readCountTotal += readCountService.getArticleReadCount(articleId);
+//            }
+//            columnListDTO.setReadCount(readCountTotal);
 
 
             // 3.4 遍历文章id集合，获取收藏、点赞、评论次数总和
@@ -115,14 +104,15 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             Integer commentedCountTotal = 0;
             Integer praisedCountTotal = 0;
 
-            for (Long articleId : articleIds) {
-                CountAllDTO countAllDTO = traceCountService.getAllCountById(null,articleId);
-
-                collectedCountTotal += countAllDTO.getCollectionCount();
-                commentedCountTotal += countAllDTO.getCommentCount();
-                praisedCountTotal += countAllDTO.getPraiseCount();
-
-            }
+            //todo
+//            for (Long articleId : articleIds) {
+//                CountAllDTO countAllDTO = traceCountService.getAllCountById(null,articleId);
+//
+//                collectedCountTotal += countAllDTO.getCollectionCount();
+//                commentedCountTotal += countAllDTO.getCommentCount();
+//                praisedCountTotal += countAllDTO.getPraiseCount();
+//
+//            }
 
             columnListDTO.setCollectionCount(collectedCountTotal);
             columnListDTO.setCommentCount(commentedCountTotal);
@@ -158,7 +148,6 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             dto.setIntroduction(columnInfo.getIntroduction());
             dto.setColumnName(columnInfo.getColumnName());
             dto.setSection(columnInfo.getSection());
-            dto.setCover(columnInfo.getCover());
             dto.setCreateTime(columnInfo.getCreateTime());
 
 
@@ -169,12 +158,13 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             // 2.2 填充文章数量
             dto.setArticleCount(articleIds.size());
 
-            // 2.3 遍历文章id集合，获取阅读次数总和
-            Integer readCountTotal = 0;
-            for (Long articleId : articleIds) {
-                readCountTotal += readCountService.getArticleReadCount(articleId);
-            }
-            dto.setReadCount(readCountTotal);
+            //todo
+//            // 2.3 遍历文章id集合，获取阅读次数总和
+//            Integer readCountTotal = 0;
+//            for (Long articleId : articleIds) {
+//                readCountTotal += readCountService.getArticleReadCount(articleId);
+//            }
+//            dto.setReadCount(readCountTotal);
 
 
             // 2.4 遍历文章id集合，获取收藏、点赞、评论次数总和
@@ -182,14 +172,16 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
             Integer commentedCountTotal = 0;
             Integer praisedCountTotal = 0;
 
-            for (Long articleId : articleIds) {
-                CountAllDTO countAllDTO = traceCountService.getAllCountById(null,articleId);
 
-                collectedCountTotal += countAllDTO.getCollectionCount();
-                commentedCountTotal += countAllDTO.getCommentCount();
-                praisedCountTotal += countAllDTO.getPraiseCount();
-
-            }
+            //todo
+//            for (Long articleId : articleIds) {
+//                CountAllDTO countAllDTO = traceCountService.getAllCountById(null,articleId);
+//
+//                collectedCountTotal += countAllDTO.getCollectionCount();
+//                commentedCountTotal += countAllDTO.getCommentCount();
+//                praisedCountTotal += countAllDTO.getPraiseCount();
+//
+//            }
 
             dto.setCollectionCount(collectedCountTotal);
             dto.setCommentCount(commentedCountTotal);
@@ -232,7 +224,6 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
         columnInfo.setId(columnEditDTO.getColumnId());
         columnInfo.setColumnName(columnEditDTO.getColumnName());
         columnInfo.setIntroduction(columnEditDTO.getIntroduction());
-        columnInfo.setCover(columnEditDTO.getCover());
         columnInfo.setSection(columnEditDTO.getSection());
 
         // 设置更新时间为当前时间，确保时间的准确性
@@ -264,6 +255,32 @@ public class ColumnInfoServiceImpl extends ServiceImpl<ColumnInfoMapper,ColumnIn
         redisClient.del("column:"+columnId+":articleIds");
     }
 
+    /**
+     * 获取专栏的简单消息 (id、名称)
+     *
+     * @return
+     */
+    @Override
+    public List<ColumnSimpleDTO> listMySimpleColumns(Long userId){
+        List<ColumnSimpleDTO> res = redisClient.getList("column-simple:"+userId, ColumnSimpleDTO.class);
+        if(res!=null){
+            return res;
+        }
+
+        res = lambdaQuery().eq(ColumnInfo::getAuthorId,userId)
+                .eq(ColumnInfo::getDeleted,CommonDeletedEnum.NO.getCode())
+                .orderByDesc(ColumnInfo::getSection)
+                .list()
+                .stream().map(this::toSimpleDTO).toList();
+
+        redisClient.set("column-simple:user-"+userId,res,60*60*24L,TimeUnit.SECONDS);
+
+        return res;
+    }
+
+    private ColumnSimpleDTO toSimpleDTO(ColumnInfo columnInfo) {
+        return new ColumnSimpleDTO(columnInfo.getId(), columnInfo.getColumnName());
+    }
 
 //    /**
 //     * 查询专栏列表

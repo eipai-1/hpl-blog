@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hpl.statistic.mapper.RequestCountMapper">
+<mapper namespace="com.hpl.count.mapper.RequestCountMapper">
 
 
-    <select id="getPvUvDayList" resultType="com.hpl.statistic.pojo.dto.StatisticsDayDTO">
+    <select id="getPvUvDayList" resultType="com.hpl.count.pojo.dto.StatisticsDayDTO">
         SELECT sum(cnt) as pv_count, count(*) as uv_count, date
         FROM request_count
         group by date order by date desc

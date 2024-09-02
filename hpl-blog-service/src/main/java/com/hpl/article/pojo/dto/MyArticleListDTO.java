@@ -1,7 +1,7 @@
 package com.hpl.article.pojo.dto;
 
-import com.hpl.article.pojo.entity.Tag;
-import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
+import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
+import com.hpl.count.pojo.dto.DocumentCntInfoDTO;
 import lombok.Data;
 
 import java.io.Serial;
@@ -31,6 +31,7 @@ public class MyArticleListDTO implements Serializable {
     private LocalDateTime updateTime;
     private Integer status;
     private List<TagDTO> tags;
-    private ArticleCountInfoDTO countInfo;
+
+    private DocumentCntInfoDTO countInfo;
 
 }

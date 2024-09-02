@@ -24,10 +24,6 @@ import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageVo;
-import com.hpl.statistic.pojo.entity.ReadCount;
-import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
-import com.hpl.statistic.service.ReadCountService;
-import com.hpl.user.pojo.entity.UserFoot;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserFootService;
 import com.hpl.user.service.UserInfoService;
@@ -37,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -77,9 +72,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
     @Autowired
     private UserInfoService userInfoService;
-
-    @Autowired
-    private ReadCountService readCountService;
 
     @Resource
     private ArticleTagService articleTagService;
@@ -249,42 +241,42 @@ public class ArticleReadServiceImpl implements ArticleReadService {
 
 
 
-    /**
-     * 查询文章所有的关联信息，正文，分类，标签，阅读计数，当前登录用户是否点赞、评论过
-     *
-     * @param articleId
-     * @param readUser
-     * @return
-     */
-    @Override
-    public ArticleDTO getFullArticleInfo(Long articleId, Long readUser) {
-        ArticleDTO articleDTO = getArticleInfoById(articleId);
-
-        // 文章阅读计数+1
-        readCountService.incrArticleReadCount(articleDTO.getAuthorId(), articleId);
-
-        // 文章的操作标记
-        if (readUser != null) {
-            // 更新用于足迹，并判断是否点赞、评论、收藏
-            UserFoot foot = userFootService.saveOrUpdateUserFoot(DocumentTypeEnum.ARTICLE, articleId,
-                    articleDTO.getAuthorId(), readUser, OperateTypeEnum.READ);
-            articleDTO.setPraised(Objects.equals(foot.getPraiseState(), PraiseStateEnum.PRAISE.getCode()));
-            articleDTO.setCommented(Objects.equals(foot.getCommentState(), CommentStateEnum.COMMENT.getCode()));
-            articleDTO.setCollected(Objects.equals(foot.getCollectionState(), CollectionStateEnum.COLLECTION.getCode()));
-        } else {
-            // 未登录，全部设置为未处理
-            articleDTO.setPraised(false);
-            articleDTO.setCommented(false);
-            articleDTO.setCollected(false);
-        }
-
-        // 更新文章统计计数
-//        articleDTO.setCount(readCountService.getArticleStatisticInfo(articleId));
-
-        // 设置文章的点赞列表
-        articleDTO.setPraisedUsers(userFootService.getArticlePraisedUsers(articleId));
-        return articleDTO;
-    }
+//    /**
+//     * 查询文章所有的关联信息，正文，分类，标签，阅读计数，当前登录用户是否点赞、评论过
+//     *
+//     * @param articleId
+//     * @param readUser
+//     * @return
+//     */
+//    @Override
+//    public ArticleDTO getFullArticleInfo(Long articleId, Long readUser) {
+//        ArticleDTO articleDTO = getArticleInfoById(articleId);
+//
+//        // 文章阅读计数+1
+//        readCountService.incrArticleReadCount(articleDTO.getAuthorId(), articleId);
+//
+//        // 文章的操作标记
+//        if (readUser != null) {
+//            // 更新用于足迹，并判断是否点赞、评论、收藏
+//            UserFoot foot = userFootService.saveOrUpdateUserFoot(DocumentTypeEnum.ARTICLE, articleId,
+//                    articleDTO.getAuthorId(), readUser, OperateTypeEnum.READ);
+//            articleDTO.setPraised(Objects.equals(foot.getPraiseState(), PraiseStateEnum.PRAISE.getCode()));
+//            articleDTO.setCommented(Objects.equals(foot.getCommentState(), CommentStateEnum.COMMENT.getCode()));
+//            articleDTO.setCollected(Objects.equals(foot.getCollectionState(), CollectionStateEnum.COLLECTION.getCode()));
+//        } else {
+//            // 未登录，全部设置为未处理
+//            articleDTO.setPraised(false);
+//            articleDTO.setCommented(false);
+//            articleDTO.setCollected(false);
+//        }
+//
+//        // 更新文章统计计数
+////        articleDTO.setCount(readCountService.getArticleStatisticInfo(articleId));
+//
+//        // 设置文章的点赞列表
+//        articleDTO.setPraisedUsers(userFootService.getArticlePraisedUsers(articleId));
+//        return articleDTO;
+//    }
 
 
     /**
@@ -474,36 +466,36 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
 
-    @Override
-    public CommonPageListVo<ArticleDTO> listArticlesByTag(Long tagId, CommonPageParam pageParam) {
-
-//        List<Article> records = articleMapper.listRelatedArticlesOrderByReadCount(null, Arrays.asList(tagId), page);
-
-        List<Article> records = new ArrayList<>();
-
-        // 根据类别ID和标签ID列表查询文章的阅读量信息
-        List<ReadCount> list = articleMapper.listArticleByCategoryAndTags(null, Collections.singletonList(tagId), pageParam);
-
-        // 如果查询结果为空，则直接返回空列表
-        if (com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isEmpty(list)) {
-            return buildArticleListVo(records, pageParam.getPageSize());
-        }
-
-        // 将阅读量信息列表转换为文章ID列表
-        List<Long> ids = list.stream()
-                .map(ReadCount::getDocumentId)
-                .collect(Collectors.toList());
-        // 根据文章ID列表查询文章详情
-        List<Article> result = articleMapper.selectBatchIds(ids);
-        // 根据文章ID在阅读量信息列表中的顺序，对文章进行排序
-        result.sort((o1, o2) -> {
-            int i1 = ids.indexOf(o1.getId());
-            int i2 = ids.indexOf(o2.getId());
-            return Integer.compare(i1, i2);
-        });
-
-        return buildArticleListVo(records, pageParam.getPageSize());
-    }
+//    @Override
+//    public CommonPageListVo<ArticleDTO> listArticlesByTag(Long tagId, CommonPageParam pageParam) {
+//
+////        List<Article> records = articleMapper.listRelatedArticlesOrderByReadCount(null, Arrays.asList(tagId), page);
+//
+//        List<Article> records = new ArrayList<>();
+//
+//        // 根据类别ID和标签ID列表查询文章的阅读量信息 todo
+//        List<ReadCount> list = articleMapper.listArticleByCategoryAndTags(null, Collections.singletonList(tagId), pageParam);
+//
+//        // 如果查询结果为空，则直接返回空列表
+//        if (com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isEmpty(list)) {
+//            return buildArticleListVo(records, pageParam.getPageSize());
+//        }
+//
+//        // 将阅读量信息列表转换为文章ID列表
+//        List<Long> ids = list.stream()
+//                .map(ReadCount::getDocumentId)
+//                .collect(Collectors.toList());
+//        // 根据文章ID列表查询文章详情
+//        List<Article> result = articleMapper.selectBatchIds(ids);
+//        // 根据文章ID在阅读量信息列表中的顺序，对文章进行排序
+//        result.sort((o1, o2) -> {
+//            int i1 = ids.indexOf(o1.getId());
+//            int i2 = ids.indexOf(o2.getId());
+//            return Integer.compare(i1, i2);
+//        });
+//
+//        return buildArticleListVo(records, pageParam.getPageSize());
+//    }
 
 //    @Override
 //    public List<SimpleArticleDTO> querySimpleArticleBySearchKey(String key) {
@@ -564,29 +556,29 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
 
-    @Override
-    public CommonPageListVo<ArticleDTO> listArticlesByUserAndType(Long userId, CommonPageParam pageParam, HomeSelectEnum select) {
-        List<Article> records = null;
-        if (select == HomeSelectEnum.ARTICLE) {
-            // 用户的文章列表
-            records = this.getArticlesByUserId(userId, pageParam);
-        } else if (select == HomeSelectEnum.READ) {
-            // 用户的阅读记录
-            List<Long> articleIds = userFootService.listReadedAIdsByUId(userId, pageParam);
-            records = CollectionUtils.isEmpty(articleIds) ? Collections.emptyList() : articleMapper.selectBatchIds(articleIds);
-            records = sortByIds(articleIds, records);
-        } else if (select == HomeSelectEnum.COLLECTION) {
-            // 用户的收藏列表
-            List<Long> articleIds = userFootService.listCollectionedAIdsByUId(userId, pageParam);
-            records = CollectionUtils.isEmpty(articleIds) ? Collections.emptyList() : articleMapper.selectBatchIds(articleIds);
-            records = sortByIds(articleIds, records);
-        }
-
-        if (CollectionUtils.isEmpty(records)) {
-            return CommonPageListVo.emptyVo();
-        }
-        return buildArticleListVo(records, pageParam.getPageSize());
-    }
+//    @Override
+//    public CommonPageListVo<ArticleDTO> listArticlesByUserAndType(Long userId, CommonPageParam pageParam, HomeSelectEnum select) {
+//        List<Article> records = null;
+//        if (select == HomeSelectEnum.ARTICLE) {
+//            // 用户的文章列表
+//            records = this.getArticlesByUserId(userId, pageParam);
+//        } else if (select == HomeSelectEnum.READ) {
+//            // 用户的阅读记录
+//            List<Long> articleIds = userFootService.listReadedAIdsByUId(userId, pageParam);
+//            records = CollectionUtils.isEmpty(articleIds) ? Collections.emptyList() : articleMapper.selectBatchIds(articleIds);
+//            records = sortByIds(articleIds, records);
+//        } else if (select == HomeSelectEnum.COLLECTION) {
+//            // 用户的收藏列表
+//            List<Long> articleIds = userFootService.listCollectionedAIdsByUId(userId, pageParam);
+//            records = CollectionUtils.isEmpty(articleIds) ? Collections.emptyList() : articleMapper.selectBatchIds(articleIds);
+//            records = sortByIds(articleIds, records);
+//        }
+//
+//        if (CollectionUtils.isEmpty(records)) {
+//            return CommonPageListVo.emptyVo();
+//        }
+//        return buildArticleListVo(records, pageParam.getPageSize());
+//    }
 
     private List<Article> getArticlesByUserId(Long userId, CommonPageParam pageParam) {
         LambdaQueryWrapper<Article> wrapper = Wrappers.lambdaQuery();
@@ -716,28 +708,28 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         return articleTagMapper.selectList(wrapper);
     }
 
-    @Override
-    public List<Article> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, CommonPageParam pageParam){
-        // 根据类别ID和标签ID列表查询文章的阅读量信息
-        List<ReadCount> list = articleMapper.listArticleByCategoryAndTags(categoryId, tagIds, pageParam);
-        // 如果查询结果为空，则直接返回空列表
-        if (com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isEmpty(list)) {
-            return new ArrayList<>();
-        }
-
-        // 将阅读量信息列表转换为文章ID列表
-        List<Long> ids = list.stream()
-                .map(ReadCount::getDocumentId)
-                .collect(Collectors.toList());
-        // 根据文章ID列表查询文章详情
-        List<Article> result = articleMapper.selectBatchIds(ids);
-        // 根据文章ID在阅读量信息列表中的顺序，对文章进行排序
-        result.sort((o1, o2) -> {
-            int i1 = ids.indexOf(o1.getId());
-            int i2 = ids.indexOf(o2.getId());
-            return Integer.compare(i1, i2);
-        });
-        return result;
-    }
+//    @Override
+//    public List<Article> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, CommonPageParam pageParam){
+//        // 根据类别ID和标签ID列表查询文章的阅读量信息
+//        List<ReadCount> list = articleMapper.listArticleByCategoryAndTags(categoryId, tagIds, pageParam);
+//        // 如果查询结果为空，则直接返回空列表
+//        if (com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isEmpty(list)) {
+//            return new ArrayList<>();
+//        }
+//
+//        // 将阅读量信息列表转换为文章ID列表
+//        List<Long> ids = list.stream()
+//                .map(ReadCount::getDocumentId)
+//                .collect(Collectors.toList());
+//        // 根据文章ID列表查询文章详情
+//        List<Article> result = articleMapper.selectBatchIds(ids);
+//        // 根据文章ID在阅读量信息列表中的顺序，对文章进行排序
+//        result.sort((o1, o2) -> {
+//            int i1 = ids.indexOf(o1.getId());
+//            int i2 = ids.indexOf(o2.getId());
+//            return Integer.compare(i1, i2);
+//        });
+//        return result;
+//    }
 
 }

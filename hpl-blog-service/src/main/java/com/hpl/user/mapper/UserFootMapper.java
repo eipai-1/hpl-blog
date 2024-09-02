@@ -2,8 +2,8 @@ package com.hpl.user.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
-import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
-import com.hpl.statistic.pojo.dto.StatisticUserFootDTO;
+import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
+import com.hpl.count.pojo.dto.StatisticUserFootDTO;
 import com.hpl.user.pojo.entity.UserFoot;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

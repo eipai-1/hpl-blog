@@ -1,7 +1,7 @@
-package com.hpl.statistic.service;
+package com.hpl.count.service;
 
-import com.hpl.statistic.pojo.dto.StatisticsCountDTO;
-import com.hpl.statistic.pojo.dto.StatisticsDayDTO;
+import com.hpl.count.pojo.dto.StatisticsCountDTO;
+import com.hpl.count.pojo.dto.StatisticsDayDTO;
 
 import java.util.List;
 

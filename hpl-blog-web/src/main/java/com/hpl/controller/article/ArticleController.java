@@ -35,14 +35,8 @@ import java.util.List;
 @Slf4j
 public class ArticleController extends CommonController {
 
-    @Autowired
-    private ArticleReadService articleService1;
-
     @Resource
     private ArticleService articleService;
-
-    @Autowired
-    private oldCategoryService oldCategoryService;
 
     @Resource
     private CategoryService categoryService;

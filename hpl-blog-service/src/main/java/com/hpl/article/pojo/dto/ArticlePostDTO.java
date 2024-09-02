@@ -21,10 +21,13 @@ public class ArticlePostDTO implements Serializable {
     @Schema(description = "文章标题" )
     private String title;
 
+    /** 专栏ID */
+    @Schema(description = "关联的专栏ID" )
+    private Long columnId;
 
     /** 分类 */
     @Schema(description = "分类" )
-    private Long categoryId;
+    private String categoryId;
 
     /** 标签 */
     @Schema(description = "标签" )

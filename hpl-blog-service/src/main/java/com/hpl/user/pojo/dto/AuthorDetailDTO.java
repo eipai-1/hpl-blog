@@ -1,6 +1,5 @@
 package com.hpl.user.pojo.dto;
 
-import com.hpl.statistic.pojo.dto.CountAllDTO;
 import com.hpl.user.pojo.entity.IpInfo;
 import lombok.Data;
 

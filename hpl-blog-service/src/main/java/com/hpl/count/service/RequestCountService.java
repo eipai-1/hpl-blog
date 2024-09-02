@@ -1,8 +1,8 @@
-package com.hpl.statistic.service;
+package com.hpl.count.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hpl.statistic.pojo.dto.StatisticsDayDTO;
-import com.hpl.statistic.pojo.entity.RequestCount;
+import com.hpl.count.pojo.dto.StatisticsDayDTO;
+import com.hpl.count.pojo.entity.RequestCount;
 
 import java.util.List;
 

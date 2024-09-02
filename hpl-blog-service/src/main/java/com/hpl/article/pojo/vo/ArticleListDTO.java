@@ -1,7 +1,8 @@
 package com.hpl.article.pojo.vo;
 
 import com.hpl.article.pojo.dto.TagDTO;
-import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
+import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
+import com.hpl.count.pojo.dto.DocumentCntInfoDTO;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -48,7 +49,7 @@ public class ArticleListDTO implements Serializable {
     /**
      * 文章的底部计数信息，包括阅读数、点赞数等
      */
-    private ArticleCountInfoDTO countInfo;
+    private DocumentCntInfoDTO countInfo;
 
     /**
      * 文章作者的ID

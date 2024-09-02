@@ -3,13 +3,11 @@ package com.hpl.user.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
-import com.hpl.article.pojo.enums.CollectionStateEnum;
-import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
-import com.hpl.article.pojo.enums.OperateTypeEnum;
-import com.hpl.article.pojo.enums.PraiseStateEnum;
-import com.hpl.pojo.CommonPageParam;
-import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
-import com.hpl.statistic.pojo.dto.StatisticUserFootDTO;
+import com.hpl.redis.RedisClient;
+import com.hpl.count.pojo.enums.DocumentTypeEnum;
+import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
+import com.hpl.count.pojo.dto.StatisticUserFootDTO;
+import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.pojo.entity.UserFoot;
 import com.hpl.user.mapper.UserFootMapper;
 import com.hpl.user.service.UserFootService;
@@ -20,7 +18,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * @author : rbe
@@ -31,6 +28,77 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
 
     @Resource
     private UserFootMapper userFootMapper;
+
+    @Resource
+    private RedisClient redisClient;
+    
+    private final String USER_FOOT_LOCK = "lock:user-foot";
+
+    /**
+     * 点赞或取消点赞文章
+     * @param articleId
+     */
+    @Override
+    public void praiseArticle(Long articleId){
+        // 获取登录用户
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
+        String key = "praised:user-" + userId;
+        // 先用户是否点过赞
+        boolean praised = redisClient.sIsMember(key, articleId);
+
+        if (praised) {
+            // 如果点过，则取消点赞并减少文章的点赞树
+            redisClient.sRem(key, articleId);
+            redisClient.incrByStep("statistics:praised:docId-" + articleId, -1L);
+        }else {
+            // 如果没有点过，则点赞并增加文章的点赞数
+            redisClient.sAdd(key, articleId);
+            redisClient.incr("statistics:praised:docId-" + articleId);
+        }
+
+        //todo 发送给消息队列，让·定时器处理消息，保证redis和数据库的最终一致性
+
+        // 标记
+        lockUserFoot(userId + "-" + articleId);
+    }
+
+    /**
+     * 收藏或取消收藏文章
+     * @param articleId
+     */
+    @Override
+    public void collectArticle(Long articleId){
+
+        // 先获取登录用户
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
+        String key = "collected:user-" + userId;
+
+        boolean collected = redisClient.sIsMember(key, articleId);
+        if (collected) {
+            // 如果已经收藏，则取消收藏
+            redisClient.sRem(key, articleId);
+            redisClient.incrByStep("statistics:collected:docId-" + articleId, -1L);
+        }else {
+            // 如果没有收藏，则收藏
+            redisClient.sAdd(key, articleId);
+            redisClient.incr("statistics:collected:docId-" + articleId);
+        }
+
+        // 标记
+        lockUserFoot(userId + "-" + articleId);
+
+    }
+
+    /**
+     * 如果已经存在，则直接返回，否则加锁，消息队列从该缓存找更新，保证数据库和redis的最终一致性
+     * @param value
+     */
+    private void lockUserFoot(String value) {
+        boolean locked = redisClient.sIsMember(USER_FOOT_LOCK, value);
+        if(!locked){
+            redisClient.sAdd(USER_FOOT_LOCK, value);
+        }
+    }
 
     /**
      * 查询用户记录，用于判断是否点过赞、是否评论、是否收藏过
@@ -59,45 +127,45 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
      * @param userId          操作人
      * @param operateTypeEnum 操作类型：点赞，评论，收藏等
      */
-    @Override
-    public UserFoot saveOrUpdateUserFoot(DocumentTypeEnum documentType, Long documentId, Long authorId, Long userId, OperateTypeEnum operateTypeEnum) {
-        // 查询是否有该足迹；有则更新，没有则插入
-        UserFoot readUserFoot = this.getByDocIdAndUserId(documentId, documentType.getCode(), userId);
-        if (readUserFoot == null) {
-            readUserFoot = new UserFoot();
-            readUserFoot.setUserId(userId);
-            readUserFoot.setDocumentId(documentId);
-            readUserFoot.setDocumentType(documentType.getCode());
-            readUserFoot.setDocumentUserId(authorId);
-            setUserFootState(readUserFoot, operateTypeEnum);
-            userFootMapper.insert(readUserFoot);
-        } else if (setUserFootState(readUserFoot, operateTypeEnum)) {
-//            readUserFoot.setUpdateTime(new Date());
-            userFootMapper.updateById(readUserFoot);
-        }
-        return readUserFoot;
-    }
+//    @Override
+//    public UserFoot saveOrUpdateUserFoot(DocumentTypeEnum documentType, Long documentId, Long authorId, Long userId, OperateTypeEnum operateTypeEnum) {
+//        // 查询是否有该足迹；有则更新，没有则插入
+//        UserFoot readUserFoot = this.getByDocIdAndUserId(documentId, documentType.getCode(), userId);
+//        if (readUserFoot == null) {
+//            readUserFoot = new UserFoot();
+//            readUserFoot.setUserId(userId);
+//            readUserFoot.setDocumentId(documentId);
+//            readUserFoot.setDocumentType(documentType.getCode());
+//            readUserFoot.setDocumentUserId(authorId);
+//            setUserFootState(readUserFoot, operateTypeEnum);
+//            userFootMapper.insert(readUserFoot);
+//        } else if (setUserFootState(readUserFoot, operateTypeEnum)) {
+////            readUserFoot.setUpdateTime(new Date());
+//            userFootMapper.updateById(readUserFoot);
+//        }
+//        return readUserFoot;
+//    }
 
-    private boolean setUserFootState(UserFoot userFoot, OperateTypeEnum operate) {
-        switch (operate) {
-            case READ:
-                // 设置为已读
-                userFoot.setReadState(1);
-                // 需要更新时间，用于浏览记录
-                return true;
-            case PRAISE:
-            case CANCEL_PRAISE:
-                return compareAndUpdate(userFoot::getPraiseState, userFoot::setPraiseState, operate.getDbStatCode());
-            case COLLECTION:
-            case CANCEL_COLLECTION:
-                return compareAndUpdate(userFoot::getCollectionState, userFoot::setCollectionState, operate.getDbStatCode());
-            case COMMENT:
-            case DELETE_COMMENT:
-                return compareAndUpdate(userFoot::getCommentState, userFoot::setCommentState, operate.getDbStatCode());
-            default:
-                return false;
-        }
-    }
+//    private boolean setUserFootState(UserFoot userFoot, OperateTypeEnum operate) {
+//        switch (operate) {
+//            case READ:
+//                // 设置为已读
+//                userFoot.setReadState(1);
+//                // 需要更新时间，用于浏览记录
+//                return true;
+//            case PRAISE:
+//            case CANCEL_PRAISE:
+//                return compareAndUpdate(userFoot::getPraiseState, userFoot::setPraiseState, operate.getDbStatCode());
+//            case COLLECTION:
+//            case CANCEL_COLLECTION:
+//                return compareAndUpdate(userFoot::getCollectionState, userFoot::setCollectionState, operate.getDbStatCode());
+//            case COMMENT:
+//            case DELETE_COMMENT:
+//                return compareAndUpdate(userFoot::getCommentState, userFoot::setCommentState, operate.getDbStatCode());
+//            default:
+//                return false;
+//        }
+//    }
 
 
     /**
@@ -146,68 +214,68 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
 
 
 
-    /**
-     * 根据用户ID和分页参数，查询用户已读文章的ID列表。
-     *
-     * @param userId 用户ID，用于筛选用户足迹记录。
-     * @param pageParam 分页参数，包含页码和每页数量，用于限制返回的结果数量。
-     * @return 返回一个Long类型的列表，包含用户已读文章的ID。
-     *
-     * 此方法通过查询用户足迹表（UserFoot），筛选出特定用户已读的文章记录，
-     * 并按照更新时间降序排列，最后根据分页参数限制返回的结果数量。
-     */
-    @Override
-    public List<Long> listReadedAIdsByUId(Long userId, CommonPageParam pageParam) {
-        // 创建查询条件包装对象
-        LambdaQueryWrapper<UserFoot> wrapper=new LambdaQueryWrapper<>();
+//    /**
+//     * 根据用户ID和分页参数，查询用户已读文章的ID列表。
+//     *
+//     * @param userId 用户ID，用于筛选用户足迹记录。
+//     * @param pageParam 分页参数，包含页码和每页数量，用于限制返回的结果数量。
+//     * @return 返回一个Long类型的列表，包含用户已读文章的ID。
+//     *
+//     * 此方法通过查询用户足迹表（UserFoot），筛选出特定用户已读的文章记录，
+//     * 并按照更新时间降序排列，最后根据分页参数限制返回的结果数量。
+//     */
+//    @Override
+//    public List<Long> listReadedAIdsByUId(Long userId, CommonPageParam pageParam) {
+//        // 创建查询条件包装对象
+//        LambdaQueryWrapper<UserFoot> wrapper=new LambdaQueryWrapper<>();
+//
+//        // 设置查询条件：选择字段为文档ID，筛选条件为用户ID、文档类型为文章、阅读状态为已读
+//        // 并按照更新时间降序排列，最后根据分页参数拼接LIMIT语句
+//        wrapper.select(UserFoot::getDocumentId)
+//                .eq(UserFoot::getUserId, userId)
+//                .eq(UserFoot::getDocumentType, DocumentTypeEnum.ARTICLE.getCode())
+//                .eq(UserFoot::getReadState, 1)
+//                .orderByDesc(UserFoot::getUpdateTime)
+//                .last(CommonPageParam.getLimitSql(pageParam));
+//
+//        // 执行查询，将结果映射为文章ID列表并返回
+//        return userFootMapper.selectList(wrapper).stream()
+//                .map(UserFoot::getDocumentId)
+//                .collect(Collectors.toList());
+//    }
 
-        // 设置查询条件：选择字段为文档ID，筛选条件为用户ID、文档类型为文章、阅读状态为已读
-        // 并按照更新时间降序排列，最后根据分页参数拼接LIMIT语句
-        wrapper.select(UserFoot::getDocumentId)
-                .eq(UserFoot::getUserId, userId)
-                .eq(UserFoot::getDocumentType, DocumentTypeEnum.ARTICLE.getCode())
-                .eq(UserFoot::getReadState, 1)
-                .orderByDesc(UserFoot::getUpdateTime)
-                .last(CommonPageParam.getLimitSql(pageParam));
-
-        // 执行查询，将结果映射为文章ID列表并返回
-        return userFootMapper.selectList(wrapper).stream()
-                .map(UserFoot::getDocumentId)
-                .collect(Collectors.toList());
-    }
 
 
-
-    /**
-     * 查询用户收藏的文章列表。
-     *
-     * 通过用户ID和分页参数，查询用户收藏的文章ID列表。
-     * 查询条件包括：用户ID、文档类型为文章、收藏状态为已收藏。
-     * 查询结果按照更新时间降序排序，并根据分页参数限制返回结果的数量。
-     *
-     * @param userId 用户ID，用于指定查询哪个用户的收藏文章。
-     * @param pageParam 分页参数，包含当前页码和每页的条数，用于分页查询。
-     * @return 返回一个文章ID的列表，表示该用户收藏的文章。
-     */
-    @Override
-    public List<Long> listCollectionedAIdsByUId(Long userId, CommonPageParam pageParam) {
-        // 创建查询条件包装对象，用于构建查询语句
-        LambdaQueryWrapper<UserFoot> wrapper=new LambdaQueryWrapper<>();
-        // 设置查询条件：选择字段为文档ID，用户ID等于传入的userId，文档类型为文章，收藏状态为已收藏
-        wrapper.select(UserFoot::getDocumentId)
-                .eq(UserFoot::getUserId, userId)
-                .eq(UserFoot::getDocumentType, DocumentTypeEnum.ARTICLE.getCode())
-                .eq(UserFoot::getCollectionState, CollectionStateEnum.COLLECTION.getCode())
-                // 按更新时间降序排序
-                .orderByDesc(UserFoot::getUpdateTime)
-                // 根据分页参数设置查询的限制条件
-                .last(CommonPageParam.getLimitSql(pageParam));
-
-        // 执行查询，将结果转换为文章ID的列表返回
-        return userFootMapper.selectList(wrapper).stream()
-                .map(UserFoot::getDocumentId)
-                .collect(Collectors.toList());
-    }
+//    /**
+//     * 查询用户收藏的文章列表。
+//     *
+//     * 通过用户ID和分页参数，查询用户收藏的文章ID列表。
+//     * 查询条件包括：用户ID、文档类型为文章、收藏状态为已收藏。
+//     * 查询结果按照更新时间降序排序，并根据分页参数限制返回结果的数量。
+//     *
+//     * @param userId 用户ID，用于指定查询哪个用户的收藏文章。
+//     * @param pageParam 分页参数，包含当前页码和每页的条数，用于分页查询。
+//     * @return 返回一个文章ID的列表，表示该用户收藏的文章。
+//     */
+//    @Override
+//    public List<Long> listCollectionedAIdsByUId(Long userId, CommonPageParam pageParam) {
+//        // 创建查询条件包装对象，用于构建查询语句
+//        LambdaQueryWrapper<UserFoot> wrapper=new LambdaQueryWrapper<>();
+//        // 设置查询条件：选择字段为文档ID，用户ID等于传入的userId，文档类型为文章，收藏状态为已收藏
+//        wrapper.select(UserFoot::getDocumentId)
+//                .eq(UserFoot::getUserId, userId)
+//                .eq(UserFoot::getDocumentType, DocumentTypeEnum.ARTICLE.getCode())
+//                .eq(UserFoot::getCollectionState, CollectionStateEnum.COLLECTION.getCode())
+//                // 按更新时间降序排序
+//                .orderByDesc(UserFoot::getUpdateTime)
+//                // 根据分页参数设置查询的限制条件
+//                .last(CommonPageParam.getLimitSql(pageParam));
+//
+//        // 执行查询，将结果转换为文章ID的列表返回
+//        return userFootMapper.selectList(wrapper).stream()
+//                .map(UserFoot::getDocumentId)
+//                .collect(Collectors.toList());
+//    }
 
 
     @Override
@@ -239,12 +307,12 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
         return userFootMapper.countArticleByUserId(userId);
     }
 
-    @Override
-    public Long countCommentPraise(Long commentId){
-        return lambdaQuery()
-                .eq(UserFoot::getDocumentId, commentId)
-                .eq(UserFoot::getDocumentType, DocumentTypeEnum.COMMENT.getCode())
-                .eq(UserFoot::getPraiseState, PraiseStateEnum.PRAISE.getCode())
-                .count();
-    }
+//    @Override
+//    public Long countCommentPraise(Long commentId){
+//        return lambdaQuery()
+//                .eq(UserFoot::getDocumentId, commentId)
+//                .eq(UserFoot::getDocumentType, DocumentTypeEnum.COMMENT.getCode())
+//                .eq(UserFoot::getPraiseState, PraiseStateEnum.PRAISE.getCode())
+//                .count();
+//    }
 }

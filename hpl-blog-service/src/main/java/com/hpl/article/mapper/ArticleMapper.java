@@ -7,7 +7,6 @@ import com.hpl.article.pojo.dto1.SearchArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
 import com.hpl.article.pojo.entity.Article;
 import com.hpl.pojo.CommonPageParam;
-import com.hpl.statistic.pojo.entity.ReadCount;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -28,17 +27,17 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<SimpleAuthorCountDTO> getTopFourAuthor(String categoryId);
 
 
-    /**
-     * 根据类目 + 标签查询文章
-     *
-     * @param category
-     * @param tagIds
-     * @param pageParam
-     * @return
-     */
-    List<ReadCount> listArticleByCategoryAndTags(@Param("categoryId") Long category,
-                                                 @Param("tags") List<Long> tagIds,
-                                                 @Param("pageParam") CommonPageParam pageParam);
+//    /**
+//     * 根据类目 + 标签查询文章
+//     *
+//     * @param category
+//     * @param tagIds
+//     * @param pageParam
+//     * @return
+//     */
+//    List<ReadCount> listArticleByCategoryAndTags(@Param("categoryId") Long category,
+//                                                 @Param("tags") List<Long> tagIds,
+//                                                 @Param("pageParam") CommonPageParam pageParam);
 
     /**
      * 根据阅读次数获取热门文章

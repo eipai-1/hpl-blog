@@ -46,7 +46,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     public User getByUsername(String username) {
         LambdaQueryWrapper<User> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(User::getUserName, username)
-                .eq(User::getDeleted, 0);
+                .eq(User::getDeleted, CommonDeletedEnum.NO.getCode());
 
         return userMapper.selectOne(wrapper);
     }
@@ -140,8 +140,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         // 3. 新用户注册流程
         User user=new User();
         user.setUserName(registerPwdDto.getUsername());
-        user.setPassword(userPwdHelper.encodePwd(registerPwdDto.getPassword()));
         user.setSalt(userPwdHelper.genSalt());
+        user.setPassword(userPwdHelper.encodePwd(registerPwdDto.getPassword()+user.getSalt()));
         user.setLoginType(1);
         userMapper.insert(user);
 

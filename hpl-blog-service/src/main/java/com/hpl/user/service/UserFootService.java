@@ -2,11 +2,8 @@ package com.hpl.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
-import com.hpl.statistic.pojo.enums.DocumentTypeEnum;
-import com.hpl.article.pojo.enums.OperateTypeEnum;
-import com.hpl.pojo.CommonPageParam;
-import com.hpl.statistic.pojo.dto.ArticleCountInfoDTO;
-import com.hpl.statistic.pojo.dto.StatisticUserFootDTO;
+import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
+import com.hpl.count.pojo.dto.StatisticUserFootDTO;
 import com.hpl.user.pojo.entity.UserFoot;
 
 import java.util.List;
@@ -16,6 +13,19 @@ import java.util.List;
  * @date : 2024/6/29 19:25
  */
 public interface UserFootService extends IService<UserFoot> {
+
+    /**
+     * 点赞或取消点赞文章
+     * @param articleId
+     */
+    void praiseArticle(Long articleId);
+
+    /**
+     * 收藏或取消收藏文章
+     * @param articleId
+     */
+    void collectArticle(Long articleId);
+
 
     /**
      * 查询用户记录，用于判断是否点过赞、是否评论、是否收藏过
@@ -37,7 +47,7 @@ public interface UserFootService extends IService<UserFoot> {
      * @param operateTypeEnum 操作类型：点赞，评论，收藏等
      * @return
      */
-    UserFoot saveOrUpdateUserFoot(DocumentTypeEnum documentType, Long documentId, Long authorId, Long userId, OperateTypeEnum operateTypeEnum);
+//    UserFoot saveOrUpdateUserFoot(DocumentTypeEnum documentType, Long documentId, Long authorId, Long userId, OperateTypeEnum operateTypeEnum);
 
 //    /**
 //     * 保存评论足迹
@@ -68,7 +78,7 @@ public interface UserFootService extends IService<UserFoot> {
      * @param pageParam
      * @return
      */
-    List<Long> listReadedAIdsByUId(Long userId, CommonPageParam pageParam);
+//    List<Long> listReadedAIdsByUId(Long userId, CommonPageParam pageParam);
 
     /**
      * 查询收藏文章列表
@@ -77,7 +87,7 @@ public interface UserFootService extends IService<UserFoot> {
      * @param pageParam
      * @return
      */
-    List<Long> listCollectionedAIdsByUId(Long userId, CommonPageParam pageParam);
+//    List<Long> listCollectionedAIdsByUId(Long userId, CommonPageParam pageParam);
 
     /**
      * 查询文章的点赞用户信息
@@ -102,5 +112,6 @@ public interface UserFootService extends IService<UserFoot> {
 
     ArticleCountInfoDTO countArticleByUserId(Long userId);
 
-    Long countCommentPraise(Long commentId);
+//    Long countCommentPraise(Long commentId);
+
 }
