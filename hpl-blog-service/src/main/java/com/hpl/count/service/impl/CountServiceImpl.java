@@ -6,6 +6,7 @@ import com.hpl.count.pojo.dto.DocumentCntInfoDTO;
 import com.hpl.count.pojo.entity.Count;
 import com.hpl.count.service.CountService;
 import com.hpl.redis.RedisClient;
+import com.hpl.user.context.ReqInfoContext;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -156,8 +157,10 @@ public class CountServiceImpl extends ServiceImpl<CountMapper, Count> implements
 
     @Override
     public void incrReadCount(Long documentId){
-        // 文章阅读计数加1并锁定30分钟（即30分钟内重复点击不会加1）
-        if (redisClient.setIfAbsent("lock:read:"+documentId,"locked",30L,TimeUnit.MINUTES)){
+        // 文章阅读计数加1并锁定用户所在ip30分钟（即30分钟内重复点击不会加1）
+        // 为了处理未登录的清空，锁住请求ip可以兼容
+        String clientIp = ReqInfoContext.getReqInfo().getClientIp();
+        if (redisClient.setIfAbsent("lock:read:doc-"+documentId+":ip-"+clientIp,"locked",30L,TimeUnit.MINUTES)){
             redisClient.incr(preKey + ":read:docId-"+documentId);
         }
     }

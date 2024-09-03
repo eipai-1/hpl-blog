@@ -724,6 +724,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleDTO.setCollectionCount(cntInfoDTO.getCollectionCount());
 
 
+        // 查询用户是否点赞、收藏、评论状态
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
+        if(userId==null){
+            articleDTO.setPraised(false);
+            articleDTO.setCollected(false);
+            articleDTO.setCommented(false);
+        }else{
+            articleDTO.setPraised(redisClient.sIsMember("praised:user-" + userId, articleId));
+            articleDTO.setCollected(redisClient.sIsMember("collected:user-" + userId, articleId));
+            articleDTO.setCommented(redisClient.sIsMember("commented:user-" + userId, articleId));
+        }
+
+
         return articleDTO;
 
     }

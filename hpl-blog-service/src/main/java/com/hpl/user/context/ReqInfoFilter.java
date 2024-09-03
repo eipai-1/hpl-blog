@@ -70,6 +70,7 @@ public class ReqInfoFilter implements Filter {
             // 手动写入一个session，借助 OnlineUserCountListener 实现在线人数实时统计
 //            request.getSession().setAttribute("latestVisit", System.currentTimeMillis());
 
+
             ReqInfoContext.ReqInfo reqInfo = new ReqInfoContext.ReqInfo();
 
             log.warn("session: {}", request.getHeader("Authorization"));
@@ -86,6 +87,7 @@ public class ReqInfoFilter implements Filter {
                     reqInfo.setUserInfo(userInfoService.getByUserId(userId));
                 }
             }
+
 
             reqInfo.setHost(request.getHeader("host"));
             reqInfo.setPath(request.getPathInfo());

@@ -117,6 +117,7 @@ public class ArticleController extends CommonController {
         return CommonResult.data(article);
     }
 
+
     @GetMapping(path = "/top-four/author")
     @Operation(summary = "获取作者排行")
     public CommonResult<?> getTopAuthor(@RequestParam(required = true) String categoryId) {
