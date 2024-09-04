@@ -46,12 +46,4 @@ public class Application implements ApplicationRunner {
         log.info("后端启动成功，点击访问文档：{}/doc.html",index);
         log.info("template：{}",template);
     }
-
-
-//    @GetMapping("/")
-//    public String index(HttpServletRequest request) {
-//        log.info("index098u08欸点击可能是当年 da");
-//        return "error/index";
-//    }
-
 }

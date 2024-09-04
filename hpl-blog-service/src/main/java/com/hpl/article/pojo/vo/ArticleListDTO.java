@@ -39,7 +39,7 @@ public class ArticleListDTO implements Serializable {
     /**
      * 文章所属的分类名称
      */
-    private String categoryName;
+    private String categoryId;
 
     /**
      * 文章的标签列表

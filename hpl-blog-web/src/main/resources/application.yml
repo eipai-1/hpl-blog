@@ -33,6 +33,8 @@ minio:
     audio: test1-audio
     mdImage: test1-md-image
 
+elasticsearch:
+  address: 192.168.88.128:9200
 #  thymeleaf:
 #    prefix: classpath:/templates/   # 页面模板位置
 #    suffix: .html                   # 页面模板后缀名

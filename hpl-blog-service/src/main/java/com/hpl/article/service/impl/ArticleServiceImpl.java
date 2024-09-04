@@ -1,6 +1,7 @@
 package com.hpl.article.service.impl;
 
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -26,7 +27,6 @@ import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.redis.RedisClient;
-import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.pojo.entity.UserInfo;
 import com.hpl.user.service.UserInfoService;
@@ -38,12 +38,25 @@ import jakarta.annotation.Resource;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.suggest.Suggest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -90,6 +103,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Resource
     private RedisClient redisClient;
 
+    @Resource
+    private RestHighLevelClient restHighLevelClient;
 
     private Article getById(Long articleId) {
         Article article = redisClient.get("article:" + articleId, Article.class);
@@ -192,27 +207,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleListDTO.setTitle(article.getTitle());
         articleListDTO.setSummary(article.getSummary());
         articleListDTO.setUpdateTime(article.getUpdateTime());
-        // 分类信息 todo
-//        articleListDTO.setCategoryName(oldCategoryService.getNameById(article.getCategoryId()));
+        articleListDTO.setCategoryId(article.getCategoryId());
 
         // 2、文章标签内容拼接
         articleListDTO.setTags(articleTagService.getTagsByAId(article.getId()));
 
-//        // 3、文章阅读统计信息拼接
-//        ArticleCountInfoDTO countInfo = new ArticleCountInfoDTO();
-//        // 3.1 获取阅读次数总和
-//        countInfo.setReadCount(readCountService.getArticleReadCount(article.getId()));
-//        // 3.2 遍历文章id集合，获取收藏、点赞、评论次数总和
-//        CountAllDTO countAllDTO = traceCountService.getAllCountById(null,article.getId());
-//
-//        countInfo.setCollectionCount(countAllDTO.getCollectionCount());
-//        countInfo.setCommentCount(countAllDTO.getCommentCount());
-//        countInfo.setPraiseCount(countAllDTO.getPraiseCount());
 
         // 3.3 内容拼接
         DocumentCntInfoDTO cntInfoDTO = countService.getDocumentCntInfo(article.getId());
         articleListDTO.setCountInfo(cntInfoDTO);
-
 
         // 4、文章作者信息拼接
         // 查询文章作者的基本信息
@@ -773,16 +776,43 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     }
 
     @Override
-    public List<ArticleListDTO> listArticlesByCategories(List<String> leafIds, CommonPageParam pageParam){
+    public void loadArticleToEs() throws IOException {
+
+        // 已经将所有数据加载至es
+        if(redisClient.get("lock:load:es")!=null){
+            return;
+        }
+
+        List<String> listIds = redisClient.getList("category-leafIds:0", String.class);
+        List<ArticleListDTO> records = this.loadArticlesByCategories(listIds);
+
+        // 将数据加载至es todo
+        log.warn("测试一下啦");
+        // 创建es的Request
+        BulkRequest bulkRequest = new BulkRequest();
+        records.forEach(record -> {
+            bulkRequest.add(new IndexRequest("article_list_dto")
+                    .id(record.getArticleId().toString())
+                    .source(JSONUtil.toJsonStr(record), XContentType.JSON));
+        });
+
+        // 发送请求
+        restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+
+        redisClient.set("lock:load:es-ArticleListDTO","locked",30L,TimeUnit.DAYS);
+    }
+
+    @Override
+    public List<ArticleListDTO> loadArticlesByCategories(List<String> leafIds){
         List<ArticleListDTO> res = new ArrayList<>();
         leafIds.forEach(leafId -> {
-            listArticlesByLeafIds(leafId,res);
+            loadArticlesByLeafIds(leafId,res);
         });
 
         return res;
     }
 
-    private void listArticlesByLeafIds(String categoryId, List<ArticleListDTO> res) {
+    private void loadArticlesByLeafIds(String categoryId, List<ArticleListDTO> res) {
 
         // 创建查询Wrapper，设置文章未删除且状态为在线
         LambdaQueryWrapper<Article> wrapper =  Wrappers.lambdaQuery();
@@ -798,4 +828,48 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             res.add(fillArticleRelatedInfo(t));
         });
     }
+
+
+    @Override
+    public List<ArticleListDTO> getArticlesByKeyword(List<String> leafIds, String keyword){
+
+        try {
+            SearchRequest request = new SearchRequest("article_list_dto");
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+            // 处理key
+            if(StringUtils.isBlank(keyword)) {
+                boolQuery.must(QueryBuilders.matchAllQuery());
+            }else{
+                boolQuery.must(QueryBuilders.matchQuery("all",keyword));
+            }
+
+            //处理分类
+            boolQuery.filter(QueryBuilders.termsQuery("categoryId", leafIds));
+
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.query(boolQuery);
+            searchSourceBuilder.size(10);
+
+            request.source(searchSourceBuilder);
+
+            SearchResponse response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+
+
+            // 4.解析请求
+            List<ArticleListDTO> list = new ArrayList<>();
+            Suggest suggest = response.getSuggest();
+            for (SearchHit hit : response.getHits()) {
+                String sourceAsString = hit.getSourceAsString();
+                // 转换
+                ArticleListDTO article = JSONUtil.toBean(sourceAsString,ArticleListDTO.class);
+                list.add(article);
+            }
+            System.out.println(list.size());
+            return list;
+        }catch (IOException e){
+            throw new RuntimeException(e);
+        }
+    }
+
 }

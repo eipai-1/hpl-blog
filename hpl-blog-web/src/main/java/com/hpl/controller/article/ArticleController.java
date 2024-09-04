@@ -17,10 +17,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -94,15 +94,16 @@ public class ArticleController extends CommonController {
     /**
      * 查询某个分类下的文章列表
      *
-     * @param categoryTreeDTO
+     * @param articleSearchDTO
      * @return
      */
     @PostMapping(path = "categories")
     @Operation(summary = "查询分类下的文章列表")
-    public CommonResult<?> listByCategory(@RequestBody CategoryTreeDTO categoryTreeDTO) {
-        List<String> leafIds = categoryService.getLeafIds(categoryTreeDTO);
+    public CommonResult<?> listByCategory(@RequestBody ArticleSearchDTO articleSearchDTO) throws IOException {
+        articleService.loadArticleToEs();
+        List<String> leafIds = categoryService.getLeafIds(articleSearchDTO.getCategoryTreeDTO());
 
-        List<ArticleListDTO> list = articleService.listArticlesByCategories(leafIds, CommonPageParam.newInstance());
+        List<ArticleListDTO> list = articleService.getArticlesByKeyword(leafIds,articleSearchDTO.getKeyword());
 
         return CommonResult.data(list);
     }

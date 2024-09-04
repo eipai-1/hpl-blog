@@ -9,6 +9,7 @@ import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -83,5 +84,9 @@ public interface ArticleService extends IService<Article> {
 
     SimpleDetailDTO getSimpleArticleDetail(Long articleId);
 
-    List<ArticleListDTO> listArticlesByCategories(List<String> leafIds, CommonPageParam pageParam);
+    List<ArticleListDTO> loadArticlesByCategories(List<String> leafIds);
+
+    void loadArticleToEs() throws IOException;
+
+    List<ArticleListDTO> getArticlesByKeyword(List<String> leafIds,String keyword);
 }
