@@ -3,6 +3,7 @@ package com.hpl.article.service.impl;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.enent.ArticleMsgEvent;
@@ -49,7 +50,9 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.suggest.Suggest;
+
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
@@ -779,7 +782,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public void loadArticleToEs() throws IOException {
 
         // 已经将所有数据加载至es
-        if(redisClient.get("lock:load:es")!=null){
+        if(redisClient.get("lock:load:es-ArticleListDTO")!=null){
             return;
         }
 
@@ -842,6 +845,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 boolQuery.must(QueryBuilders.matchAllQuery());
             }else{
                 boolQuery.must(QueryBuilders.matchQuery("all",keyword));
+
             }
 
             //处理分类
@@ -849,20 +853,38 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             searchSourceBuilder.query(boolQuery);
-            searchSourceBuilder.size(10);
+            searchSourceBuilder.size(100);
 
             request.source(searchSourceBuilder);
+            request.source().highlighter(new HighlightBuilder()
+                    .field("title").requireFieldMatch(false).preTags("<mark>").postTags("</mark>")
+                    .field("summary").requireFieldMatch(false).preTags("<mark>").postTags("</mark>"));
+//            request.source().highlighter(new HighlightBuilder().field("summary").requireFieldMatch(false));
 
             SearchResponse response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
 
 
             // 4.解析请求
             List<ArticleListDTO> list = new ArrayList<>();
-            Suggest suggest = response.getSuggest();
             for (SearchHit hit : response.getHits()) {
                 String sourceAsString = hit.getSourceAsString();
                 // 转换
                 ArticleListDTO article = JSONUtil.toBean(sourceAsString,ArticleListDTO.class);
+                // 高亮处理
+                Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+                if(!CollectionUtils.isEmpty(highlightFields)){
+                    HighlightField highlightTitle = highlightFields.get("title");
+                    if(highlightTitle!=null){
+                        // 覆盖原值
+                        article.setTitle(highlightTitle.fragments()[0].toString());
+                    }
+
+                    HighlightField highlightSummary = highlightFields.get("summary");
+                    if(highlightSummary!=null){
+                        // 覆盖原值
+                        article.setSummary(highlightSummary.fragments()[0].toString());
+                    }
+                }
                 list.add(article);
             }
             System.out.println(list.size());
