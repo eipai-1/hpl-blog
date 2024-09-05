@@ -22,10 +22,9 @@ public class MyArticleListDTO implements Serializable {
     private Long articleId;
     private Long authorId;
     private String title;
-    private String shortTitle;
     private String summary;
 
-    private String categoryName;
+    private String categoryId;
 
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

@@ -209,7 +209,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         articleListDTO.setArticleId(article.getId());
         articleListDTO.setTitle(article.getTitle());
         articleListDTO.setSummary(article.getSummary());
+        articleListDTO.setCreateTime(article.getCreateTime());
         articleListDTO.setUpdateTime(article.getUpdateTime());
+        articleListDTO.setStatus(article.getStatus());
         articleListDTO.setCategoryId(article.getCategoryId());
 
         // 2、文章标签内容拼接
@@ -640,48 +642,100 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public List<MyArticleListDTO> listMyArticles(SearchMyArticleDTO searchMyArticleDTO, Long userId){
 
-        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        try {
+            SearchRequest request = new SearchRequest("article_list_dto");
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
-        // todo 处理搜索条件
-//        if(searchMyselfDTO!=null){
+            boolQuery.filter(QueryBuilders.matchQuery("authorId", userId));
+
+            // 处理关键字
+            if(StringUtils.isBlank(searchMyArticleDTO.getSearchKey())){
+                boolQuery.must(QueryBuilders.matchAllQuery());
+            }else {
+                boolQuery.must(QueryBuilders.matchQuery("all", searchMyArticleDTO.getSearchKey()));
+            }
+
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.query(boolQuery);
+            searchSourceBuilder.size(100);
+            request.source(searchSourceBuilder);
+
+            // 处理高亮
+            request.source().highlighter(new HighlightBuilder()
+                    .field("title").requireFieldMatch(false).preTags("<mark>").postTags("</mark>")
+                    .field("summary").requireFieldMatch(false).preTags("<mark>").postTags("</mark>")
+            );
+
+            SearchResponse response = restHighLevelClient.search(request,RequestOptions.DEFAULT);
+
+            List<MyArticleListDTO> list = new ArrayList<>();
+            for(SearchHit hit : response.getHits()){
+                String sourceAsString = hit.getSourceAsString();
+                // 转换
+                MyArticleListDTO article = JSONUtil.toBean(sourceAsString,MyArticleListDTO.class);
+                // 高亮处理
+                Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+                if(!CollectionUtils.isEmpty(highlightFields)){
+                    HighlightField highlightTitle = highlightFields.get("title");
+                    if(highlightTitle!=null){
+                        // 覆盖原值
+                        article.setTitle(highlightTitle.fragments()[0].toString());
+                    }
+
+                    HighlightField highlightSummary = highlightFields.get("summary");
+                    if(highlightSummary!=null){
+                        // 覆盖原值
+                        article.setSummary(highlightSummary.fragments()[0].toString());
+                    }
+                }
+                list.add(article);
+            }
+            return list;
+        }catch (IOException e){
+            throw ExceptionUtil.of(StatusEnum.UNEXPECT_ERROR);
+        }
+       //        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
 //
-//        }
-
-
-        wrapper.eq(Article::getAuthorId, userId)
-                .eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
-                .orderByDesc(Article::getCategoryId,Article::getCreateTime);
-
-        //查询文章列表 todo cache
-        List<Article> articles = articleMapper.selectList(wrapper);
-
-        List<MyArticleListDTO> res = new ArrayList<>();
-
-        articles.forEach(article -> {
-            // 1、文章基本信息拼接
-            MyArticleListDTO dto = new MyArticleListDTO();
-            dto.setArticleId(article.getId());
-            dto.setAuthorId(article.getAuthorId());
-            dto.setTitle(article.getTitle());
-            dto.setSummary(article.getSummary());
-            //todo 1
-//            dto.setCategoryName(oldCategoryService.getNameById(article.getCategoryId()));
-            dto.setStatus(article.getStatus());
-            dto.setCreateTime(article.getCreateTime());
-            dto.setUpdateTime(article.getUpdateTime());
-
-            // 2、文章标签内容拼接
-            dto.setTags(articleTagService.getTagsByAId(article.getId()));
-
-            // 3、文章阅读统计信息拼接
-            DocumentCntInfoDTO cntInfoDTO = countService.getDocumentCntInfo(article.getId());
-            dto.setCountInfo(cntInfoDTO);
-
-
-            res.add(dto);
-        });
-
-        return res;
+//        // todo 处理搜索条件
+////        if(searchMyselfDTO!=null){
+////
+////        }
+//
+//
+//        wrapper.eq(Article::getAuthorId, userId)
+//                .eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
+//                .orderByDesc(Article::getCategoryId,Article::getCreateTime);
+//
+//        //查询文章列表 todo cache
+//        List<Article> articles = articleMapper.selectList(wrapper);
+//
+//        List<MyArticleListDTO> res = new ArrayList<>();
+//
+//        articles.forEach(article -> {
+//            // 1、文章基本信息拼接
+//            MyArticleListDTO dto = new MyArticleListDTO();
+//            dto.setArticleId(article.getId());
+//            dto.setAuthorId(article.getAuthorId());
+//            dto.setTitle(article.getTitle());
+//            dto.setSummary(article.getSummary());
+//            //todo 1
+////            dto.setCategoryName(oldCategoryService.getNameById(article.getCategoryId()));
+//            dto.setStatus(article.getStatus());
+//            dto.setCreateTime(article.getCreateTime());
+//            dto.setUpdateTime(article.getUpdateTime());
+//
+//            // 2、文章标签内容拼接
+//            dto.setTags(articleTagService.getTagsByAId(article.getId()));
+//
+//            // 3、文章阅读统计信息拼接
+//            DocumentCntInfoDTO cntInfoDTO = countService.getDocumentCntInfo(article.getId());
+//            dto.setCountInfo(cntInfoDTO);
+//
+//
+//            res.add(dto);
+//        });
+//
+//        return res;
     }
 
     @Override
@@ -817,12 +871,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     private void loadArticlesByLeafIds(String categoryId, List<ArticleListDTO> res) {
 
-        // 创建查询Wrapper，设置文章未删除且状态为在线
+        // 创建查询Wrapper，设置文章未删除
         LambdaQueryWrapper<Article> wrapper =  Wrappers.lambdaQuery();
         wrapper.eq(Article::getDeleted, CommonDeletedEnum.NO.getCode())
-                .eq(Article::getStatus, PublishStatusEnum.PUBLISHED.getCode())
-                .eq(Article::getCategoryId, categoryId)
-                .orderByDesc(Article::getCreateTime);
+                .eq(Article::getCategoryId, categoryId);
+
 
         // 执行查询并返回结果列表
         List<Article> records = articleMapper.selectList(wrapper);

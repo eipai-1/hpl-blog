@@ -48,9 +48,10 @@ public class ArticleController extends CommonController {
 
 
     @Operation(summary = "列表查询我的文章")
-    @GetMapping(path = "myself-list")
+    @PostMapping(path = "myself-list")
     @Permission(role = UserRole.USER)
-    public CommonResult<?> myselfList(@RequestBody(required = false) SearchMyArticleDTO searchMyArticleDTO) {
+    public CommonResult<?> myselfList(@RequestBody SearchMyArticleDTO searchMyArticleDTO) throws IOException {
+        articleService.loadArticleToEs();
         Long userId = ReqInfoContext.getReqInfo().getUserId();
         List<MyArticleListDTO> list =articleService.listMyArticles(searchMyArticleDTO,userId);
 

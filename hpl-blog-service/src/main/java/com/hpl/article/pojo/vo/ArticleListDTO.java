@@ -32,6 +32,16 @@ public class ArticleListDTO implements Serializable {
     private String summary;
 
     /**
+     * 文章状态，0：未发布，1：已发布
+     */
+    private Integer status;
+
+    /**
+     * 文章的创建时间，记录文章首次发布的时间
+     */
+    private LocalDateTime createTime;
+
+    /**
      * 文章的更新时间，记录文章最后一次修改的时间
      */
     private LocalDateTime updateTime;
