@@ -53,6 +53,8 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
@@ -658,6 +660,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             searchSourceBuilder.query(boolQuery);
             searchSourceBuilder.size(100);
+
+            // 添加排序
+            searchSourceBuilder.sort(SortBuilders.fieldSort("updateTime").order(SortOrder.DESC)); // 假设你想按发布日期降序排序
+
             request.source(searchSourceBuilder);
 
             // 处理高亮
@@ -856,7 +862,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 发送请求
         restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
 
-        redisClient.set("lock:load:es-ArticleListDTO","locked",30L,TimeUnit.DAYS);
+        // todo 先区别一下，还没实现rabbitmq完成sql、es最终一致性处理
+        redisClient.set("lock:load:es-ArticleListDTO1","locked",30L,TimeUnit.DAYS);
     }
 
     @Override

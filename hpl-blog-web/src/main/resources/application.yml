@@ -23,6 +23,12 @@ spring:
       max-file-size: 50MB     #单个文件的大小限制
       max-request-size: 50MB  #单次请求的大小限制
 
+  rabbitmq:
+    host: 192.168.88.128
+    port: 5672
+    username: hpl-blog
+    password: 1234
+
 minio:
   endpoint: http://192.168.88.128:9000
   accessKey: minioadmin
@@ -45,9 +51,16 @@ elasticsearch:
 #    cache: false                     # 开发时设置为false，生产时设置为true
 
 
+
 mybatis-plus:
   global-config:
     banner: false                       # 关闭mp的banner打印
   configuration:
     map-underscore-to-camel-case: true  # 开启下滑线转驼峰
   mapper-locations: classpath*:com/hpl/**/mapping/*.xml
+
+hpl:
+  jwt:
+    issuer: hpl-blog    # 签发者
+    secret: hyper       # 签名密钥
+    expire: 259200000   # 默认过期时间，3天

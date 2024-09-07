@@ -1,9 +1,5 @@
 env:
   name: dev
 
-hpl:
-  jwt:
-    issuer: hpl-blog    # 签发者
-    secret: hyper       # 签名密钥
-    expire: 259200000   # 默认过期时间，3天
+
 

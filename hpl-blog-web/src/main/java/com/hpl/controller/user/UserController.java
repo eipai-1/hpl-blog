@@ -2,6 +2,7 @@ package com.hpl.controller.user;
 
 import cn.hutool.core.util.StrUtil;
 import com.hpl.pojo.CommonResult;
+import com.hpl.rabbitmq.RabbitMqSender;
 import com.hpl.redis.RedisClient;
 import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.permission.Permission;
@@ -37,6 +38,9 @@ public class UserController {
     @Resource
     private RedisClient redisClient;
 
+    @Resource
+    private RabbitMqSender rabbitMqSender;
+
     @Operation(summary = "获取文章作者信息")
     @GetMapping("/{articleId}")
     public CommonResult<?> getAuthorByAId(@PathVariable Long articleId) {
@@ -64,28 +68,11 @@ public class UserController {
         return CommonResult.data(ReqInfoContext.getReqInfo());
     }
 
-    @Operation(summary = "根据token获取用户信息2")
-    @GetMapping("/info2")
-    public CommonResult<?> getUserInfo(String token) {
-        log.warn("info: {}", ReqInfoContext.getReqInfo());
-        log.warn("redisClient:{}", redisClient);
-        redisClient.set("test-token", 1, 30L, TimeUnit.SECONDS);
-        redisClient.set("token", token, 30L, TimeUnit.MINUTES);
-        redisClient.set("test-token2", 2, 3L, TimeUnit.HOURS);
-
-
-        redisClient.set("test-null", "", 3L, TimeUnit.HOURS);
-        Object result = redisClient.get("123",Object.class);
-        log.warn("result:{}",result);
-
-        Object result1 = redisClient.get("test-null",Object.class);
-        log.warn("result1:{}",result1);
-
-        if(result1!=null){
-            log.warn("等于’‘，但不为空");
-        }
-
-        return CommonResult.data(userInfoService.getUserInfoBySessionId(token, "127.0.0.1"));
+    @Operation(summary = "测试")
+    @GetMapping("/test")
+    public CommonResult<?> getTest(String token) {
+        rabbitMqSender.sengMessage(token);
+        return CommonResult.success();
     }
 
 
