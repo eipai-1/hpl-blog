@@ -48,8 +48,20 @@ elasticsearch:
 #    encoding: UTF-8
 ##    servlet:
 ##      content-type: text/html
-#    cache: false                     # 开发时设置为false，生产时设置为true
-
+#    cache: false
+  # 开发时设置为false，生产时设置为true
+xxl:
+  job:
+    admin:
+      addresses: http://192.168.88.128:9999/xxl-job-admin
+    executor:
+      appname: hpl-blog-timerTask
+      address:
+      ip:
+      port: 8180
+      logpath: /data/applogs/xxl-job/jobhandler
+      logretentiondays: 30
+    accessToken: default_token
 
 
 mybatis-plus:

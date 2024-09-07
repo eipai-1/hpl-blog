@@ -1,4 +1,4 @@
-package com.hpl.timer;
+package com.hpl.xxljob;
 
 /**
  * 定时执行器，定时器都要实现本接口，并需要把实现类加入到spring容器中
