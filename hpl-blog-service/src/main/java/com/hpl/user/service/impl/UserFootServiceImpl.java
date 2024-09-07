@@ -59,6 +59,9 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
         //todo 发送给消息队列，让·定时器处理消息，保证redis和数据库的最终一致性
 
         // 标记
+        if(!redisClient.sIsMember("lock:statistics", articleId.toString())) {
+            redisClient.sAdd("lock:statistics", articleId.toString());
+        }
         lockUserFoot(userId + "-" + articleId);
     }
 
@@ -85,6 +88,9 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
         }
 
         // 标记
+        if(!redisClient.sIsMember("lock:statistics", articleId.toString())) {
+            redisClient.sAdd("lock:statistics", articleId.toString());
+        }
         lockUserFoot(userId + "-" + articleId);
 
     }

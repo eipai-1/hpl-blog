@@ -1,15 +1,19 @@
 package com.hpl.count.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.count.mapper.CountMapper;
 import com.hpl.count.pojo.dto.DocumentCntInfoDTO;
 import com.hpl.count.pojo.entity.Count;
+import com.hpl.count.pojo.enums.DocumentTypeEnum;
 import com.hpl.count.service.CountService;
 import com.hpl.redis.RedisClient;
 import com.hpl.user.context.ReqInfoContext;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -17,6 +21,7 @@ import java.util.concurrent.TimeUnit;
  * @date : 2024/9/1 22:28
  */
 @Service
+@Slf4j
 public class CountServiceImpl extends ServiceImpl<CountMapper, Count> implements CountService {
 
     @Resource
@@ -119,7 +124,8 @@ public class CountServiceImpl extends ServiceImpl<CountMapper, Count> implements
      * 对于不存在的记录，初始化缓存
      * @param documentId
      */
-    private void doInitCache(Long documentId) {
+    @Override
+    public void doInitCache(Long documentId) {
         redisClient.set(preKey + ":read:docId-" + documentId, "0", 3L, TimeUnit.DAYS);
         redisClient.set(preKey + ":praised:docId-" + documentId, "0", 3L, TimeUnit.DAYS);
         redisClient.set(preKey + ":collected:docId-" + documentId, "0", 3L, TimeUnit.DAYS);
@@ -151,8 +157,8 @@ public class CountServiceImpl extends ServiceImpl<CountMapper, Count> implements
         }
 
 
-        // 加锁标记
-        redisClient.sAdd("lock:statistics", count.getDocumentId().toString());
+//        // 加锁标记
+//        redisClient.sAdd("lock:statistics", count.getDocumentId().toString());
     }
 
     @Override
@@ -162,6 +168,73 @@ public class CountServiceImpl extends ServiceImpl<CountMapper, Count> implements
         String clientIp = ReqInfoContext.getReqInfo().getClientIp();
         if (redisClient.setIfAbsent("lock:read:doc-"+documentId+":ip-"+clientIp,"locked",30L,TimeUnit.MINUTES)){
             redisClient.incr(preKey + ":read:docId-"+documentId);
+
+            // 标记
+            if(!redisClient.sIsMember("lock:statistics", documentId.toString())) {
+                redisClient.sAdd("lock:statistics", documentId.toString());
+            }
         }
+
+    }
+
+    /**
+     * 将redis的countInfo消息持久化到MySQL
+     */
+    @Override
+    public void handleUpdateCountInfo(){
+        log.info("开始处理redis中count消息");
+        // 获取redis的statistics 锁标记
+        Set<String> lockStatistics = redisClient.sMembers("lock:statistics");
+        log.warn("lockStatistics: {}", lockStatistics);
+        log.warn("lockStatistics size: {}", lockStatistics.size());
+        lockStatistics.forEach(this::savaToDb);
+    }
+
+    private void savaToDb(String value) {
+        Long documentId = Long.parseLong(value);
+
+        // 先查询是否存在
+        LambdaQueryWrapper<Count> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Count::getDocumentId, documentId);
+        Count count = this.getOne(wrapper);
+        // 存在更新数据
+        if (count != null) {
+            if (redisClient.get("statistics:read:docId-" + documentId) != null) {
+                count.setReadCnt(Integer.valueOf(redisClient.get("statistics:read:docId-" + documentId)));
+            }
+            if (redisClient.get("statistics:praised:docId-" + documentId) != null) {
+                count.setPraiseCnt(Integer.valueOf(redisClient.get("statistics:praised:docId-" + documentId)));
+            }
+            if (redisClient.get("statistics:collected:docId-" + documentId) != null) {
+                count.setCollectionCnt(Integer.valueOf(redisClient.get("statistics:collected:docId-" + documentId)));
+            }
+            if (redisClient.get("statistics:commented:docId-" + documentId) != null) {
+                count.setCommentCnt(Integer.valueOf(redisClient.get("statistics:commented:docId-" + documentId)));
+            }
+
+            this.updateById(count);
+        } else {
+            count = new Count();
+            count.setDocumentId(documentId);
+            count.setDocumentType(DocumentTypeEnum.ARTICLE.getCode());
+            // 不存在 新增数据
+            String read = redisClient.get("statistics:read:docId-" + documentId);
+            count.setReadCnt(read == null ? 0 : Integer.parseInt(read));
+
+            String praise = redisClient.get("statistics:praised:docId-" + documentId);
+            count.setPraiseCnt(read == null ? 0 : Integer.parseInt(praise));
+
+            String collect = redisClient.get("statistics:collected:docId-" + documentId);
+            count.setReadCnt(read == null ? 0 : Integer.parseInt(collect));
+
+            String comment = redisClient.get("statistics:commented:docId-" + documentId);
+            count.setCommentCnt(read == null ? 0 : Integer.parseInt(comment));
+
+            this.save(count);
+        }
+
+
+        // 删除锁标记
+        redisClient.sRem("lock:statistics",value);
     }
 }

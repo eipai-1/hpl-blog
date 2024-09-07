@@ -546,20 +546,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             articleTagService.save(tag);
         });
 
-        // 4、文章阅读次数初始化 1 todo
-//        readCountService.InitArticleReadCount(articleId);
-
-
-        //todo
-//        // 发布文章，阅读计数+1
-//        userFootService.saveOrUpdateUserFoot(DocumentTypeEnum.ARTICLE, articleId, article.getAuthorId(), article.getAuthorId(), OperateTypeEnum.READ);
-//
-//        // todo 事件发布这里可以进行优化，一次发送多个事件？ 或者借助bit知识点来表示多种事件状态
-//        // 发布文章创建事件
-//        SpringUtil.publishEvent(new ArticleMsgEvent<>(this, ArticleEventEnum.CREATE, article));
-//        // 文章直接上线时，发布上线事件
-//        SpringUtil.publishEvent(new ArticleMsgEvent<>(this, ArticleEventEnum.ONLINE, article));
-        return articleId;
+        // 4、文章计数次数初始化
+        countService.doInitCache(articleId);
+         return articleId;
     }
 
     /**

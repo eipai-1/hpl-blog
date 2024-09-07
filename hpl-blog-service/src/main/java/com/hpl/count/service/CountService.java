@@ -15,4 +15,8 @@ public interface CountService extends IService<Count> {
     DocumentCntInfoDTO getDocumentCntInfo(Long documentId);
 
     void incrReadCount(Long documentId);
+
+    void doInitCache(Long documentId);
+
+    void handleUpdateCountInfo();
 }

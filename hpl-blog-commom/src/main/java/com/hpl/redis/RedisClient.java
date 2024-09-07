@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -282,6 +283,10 @@ public class RedisClient {
 
     public Boolean sIsMember(String key, Object value) {
         return stringRedisTemplate.opsForSet().isMember(key, value.toString());
+    }
+
+    public Set<String> sMembers(String key) {
+        return stringRedisTemplate.opsForSet().members(key);
     }
 
 }
