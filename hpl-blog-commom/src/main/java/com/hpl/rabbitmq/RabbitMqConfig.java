@@ -10,10 +10,12 @@ import org.springframework.context.annotation.Configuration;
  * @date : 2024/9/7 10:24
  */
 @Configuration
-public class RabbitMQConfig {
+public class RabbitMqConfig {
 
     @Bean
-    public Queue queue() {
-        return new Queue("simple.hello");
+    public Queue queueArticleInsert() {
+        return new Queue(RabbitQueueEnum.ARTICLE_INSERT.getName());
     }
+
+
 }

@@ -27,6 +27,7 @@ public interface ArticleService extends IService<Article> {
      */
     CommonPageListVo<ArticleListDTO> listArticlesByCategory(Long categoryId, CommonPageParam pageParam);
 
+
     /**
      * 返回 优质作者信息
      */
@@ -86,7 +87,9 @@ public interface ArticleService extends IService<Article> {
 
     List<ArticleListDTO> loadArticlesByCategories(List<String> leafIds);
 
-    void loadArticleToEs() throws IOException;
+    void loadArticleListToEs() throws IOException;
+
+    void loadArticleToEs(Long articleId) throws IOException ;
 
     List<ArticleListDTO> getArticlesByKeyword(List<String> leafIds,String keyword);
 }

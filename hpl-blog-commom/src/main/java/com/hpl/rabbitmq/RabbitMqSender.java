@@ -15,8 +15,8 @@ public class RabbitMqSender {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    public void sengMessage(String message) {
+    public void sengMessage(String key,String message) {
         System.out.println("发送祝福："+message);
-        rabbitTemplate.convertAndSend("simple.hello",message);
+        rabbitTemplate.convertAndSend(key,message);
     }
 }

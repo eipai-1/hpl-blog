@@ -71,7 +71,7 @@ public class UserController {
     @Operation(summary = "测试")
     @GetMapping("/test")
     public CommonResult<?> getTest(String token) {
-        rabbitMqSender.sengMessage(token);
+        rabbitMqSender.sengMessage("123",token);
         return CommonResult.success();
     }
 

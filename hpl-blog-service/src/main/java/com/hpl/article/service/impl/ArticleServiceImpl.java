@@ -27,6 +27,8 @@ import com.hpl.media.service.ImageMdService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageListVo;
 import com.hpl.pojo.CommonPageParam;
+import com.hpl.rabbitmq.RabbitMqSender;
+import com.hpl.rabbitmq.RabbitQueueEnum;
 import com.hpl.redis.RedisClient;
 import com.hpl.user.context.ReqInfoContext;
 import com.hpl.user.pojo.entity.UserInfo;
@@ -111,6 +113,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Resource
     private RestHighLevelClient restHighLevelClient;
 
+    @Resource
+    private RabbitMqSender rabbitMqSender;
+
     private Article getById(Long articleId) {
         Article article = redisClient.get("article:" + articleId, Article.class);
         if (article != null) {
@@ -188,6 +193,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 根据转换后的文章DTO列表和分页大小，构建并返回分页列表视图对象
         return CommonPageListVo.newVo(result, pageSize);
     }
+
 
     /**
      * 根据文章数据对象（Article）填充文章详情传输对象（ArticleDTO）的关联信息。
@@ -457,6 +463,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     log.info("文章更新成功！ title={}", article.getTitle());
                 }
 
+                // 通知消息队列有文章新增或更新
+                rabbitMqSender.sengMessage(RabbitQueueEnum.ARTICLE_INSERT.getName(), String.valueOf(articleId));
                 return articleId;
             }
         });
@@ -548,7 +556,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 //        SpringUtil.publishEvent(new ArticleMsgEvent<>(this, ArticleEventEnum.CREATE, article));
 //        // 文章直接上线时，发布上线事件
 //        SpringUtil.publishEvent(new ArticleMsgEvent<>(this, ArticleEventEnum.ONLINE, article));
-
         return articleId;
     }
 
@@ -839,7 +846,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     }
 
     @Override
-    public void loadArticleToEs() throws IOException {
+    public void loadArticleListToEs() throws IOException {
 
         // 已经将所有数据加载至es
         if(redisClient.get("lock:load:es-ArticleListDTO")!=null){
@@ -863,7 +870,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
 
         // todo 先区别一下，还没实现rabbitmq完成sql、es最终一致性处理
-        redisClient.set("lock:load:es-ArticleListDTO1","locked",30L,TimeUnit.DAYS);
+        redisClient.set("lock:load:es-ArticleListDTO","locked",30L,TimeUnit.DAYS);
+    }
+
+    @Override
+    public void loadArticleToEs(Long articleId) throws IOException {
+        Article article = this.getById(articleId);
+        ArticleListDTO dto = fillArticleRelatedInfo(article);
+
+        IndexRequest indexRequest = new IndexRequest("article_list_dto");
+        indexRequest.id(articleId.toString())
+                .source(JSONUtil.toJsonStr(dto),XContentType.JSON);
+
+        restHighLevelClient.index(indexRequest,RequestOptions.DEFAULT);
     }
 
     @Override

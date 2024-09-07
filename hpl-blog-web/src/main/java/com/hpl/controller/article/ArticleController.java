@@ -7,7 +7,6 @@ import com.hpl.article.pojo.enums.PublishStatusEnum;
 import com.hpl.article.pojo.vo.ArticleListDTO;
 import com.hpl.article.service.*;
 import com.hpl.pojo.CommonController;
-import com.hpl.pojo.CommonPageParam;
 import com.hpl.pojo.CommonResult;
 import com.hpl.redis.RedisClient;
 import com.hpl.user.context.ReqInfoContext;
@@ -51,7 +50,7 @@ public class ArticleController extends CommonController {
     @PostMapping(path = "myself-list")
     @Permission(role = UserRole.USER)
     public CommonResult<?> myselfList(@RequestBody SearchMyArticleDTO searchMyArticleDTO) throws IOException {
-        articleService.loadArticleToEs();
+        articleService.loadArticleListToEs();
         Long userId = ReqInfoContext.getReqInfo().getUserId();
         List<MyArticleListDTO> list =articleService.listMyArticles(searchMyArticleDTO,userId);
 
@@ -101,7 +100,7 @@ public class ArticleController extends CommonController {
     @PostMapping(path = "categories")
     @Operation(summary = "查询分类下的文章列表")
     public CommonResult<?> listByCategory(@RequestBody ArticleSearchDTO articleSearchDTO) throws IOException {
-        articleService.loadArticleToEs();
+        articleService.loadArticleListToEs();
         List<String> leafIds = categoryService.getLeafIds(articleSearchDTO.getCategoryTreeDTO());
 
         List<ArticleListDTO> list = articleService.getArticlesByKeyword(leafIds,articleSearchDTO.getKeyword());
