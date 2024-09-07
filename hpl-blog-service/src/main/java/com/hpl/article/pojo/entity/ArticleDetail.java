@@ -21,7 +21,7 @@ public class ArticleDetail extends CommonEntity {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 文章ID
+     * ColumnArticle
      */
     private Long articleId;
 

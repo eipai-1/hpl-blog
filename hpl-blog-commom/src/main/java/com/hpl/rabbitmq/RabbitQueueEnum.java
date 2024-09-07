@@ -9,7 +9,8 @@ import lombok.Getter;
 @Getter
 public enum RabbitQueueEnum {
 
-    ARTICLE_INSERT("article_insert","新增文章队列"),
+    ARTICLE_INSERT("article_insert_update","新增or更新文章队列"),
+    ARTICLE_DELETE("article_delete","删除文章队列")
     ;
 
     private final String name;

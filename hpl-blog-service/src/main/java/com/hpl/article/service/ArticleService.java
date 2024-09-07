@@ -72,6 +72,7 @@ public interface ArticleService extends IService<Article> {
      */
     void deleteArticle(Long articleId, Long loginUserId);
 
+    void deleteArticleToEs(Long articleId);
 
     List<MyArticleListDTO> listMyArticles(SearchMyArticleDTO searchMyselfDTO, Long userId);
 
@@ -92,4 +93,7 @@ public interface ArticleService extends IService<Article> {
     void loadArticleToEs(Long articleId) throws IOException ;
 
     List<ArticleListDTO> getArticlesByKeyword(List<String> leafIds,String keyword);
+
+
+    void handleDeleteArticle();
 }

@@ -26,4 +26,5 @@ public interface ArticleTagService extends IService<ArticleTag> {
 
     void saveTagByAId(Set<Long> tagIds, Long articleId);
 
+    void handleDeleteArticleTags();
 }

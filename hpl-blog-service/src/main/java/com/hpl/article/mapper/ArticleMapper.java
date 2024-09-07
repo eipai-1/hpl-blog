@@ -9,6 +9,7 @@ import com.hpl.article.pojo.entity.Article;
 import com.hpl.pojo.CommonPageParam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 import java.util.Set;
@@ -65,4 +66,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     Set<Long> getArticleIdsByAuthorId(Long authorId);
 
+    @Select("select id from article where deleted = 1")
+    List<Long> getDeletedArticleIds();
 }

@@ -2,6 +2,7 @@ package com.hpl.column.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.hpl.column.pojo.dto.ColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SearchColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleArticleDTO;
@@ -15,7 +16,7 @@ import java.util.List;
  * @author : rbe
  * @date : 2024/7/6 11:28
  */
-public interface ColumnArticleService {
+public interface ColumnArticleService extends IService<ColumnArticle> {
 
     /**
      * 根据专栏id，查询该专栏下的所有文章id
@@ -88,8 +89,6 @@ public interface ColumnArticleService {
 
     void insert(ColumnArticle columnArticle);
 
-    void updateById(ColumnArticle columnArticle);
-
     void deleteById(Long id);
 
     void update(LambdaUpdateWrapper<ColumnArticle> wrapper);
@@ -99,4 +98,9 @@ public interface ColumnArticleService {
     Integer countColumnArticles(SearchColumnArticleDTO searchColumnArticleDTO);
 
 
+    /**
+     * 删除专栏对应id文章
+     * @param articleId
+     */
+    void deleteArticle(Long articleId);
 }

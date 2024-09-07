@@ -19,6 +19,7 @@ import com.hpl.article.pojo.vo.ArticleListDTO;
 import com.hpl.article.service.ArticleService;
 import com.hpl.article.service.ArticleTagService;
 import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
+import com.hpl.column.pojo.entity.ColumnArticle;
 import com.hpl.column.service.ColumnArticleService;
 import com.hpl.count.pojo.dto.DocumentCntInfoDTO;
 import com.hpl.count.service.CountService;
@@ -42,6 +43,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -643,9 +646,28 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             articleMapper.updateById(article);
             redisClient.del("article:" + articleId);
 
-            // 发布文章删除事件
-            SpringUtil.publishEvent(new ArticleMsgEvent<>(this, ArticleEventEnum.DELETE, article));
+            // 删除专栏的对应文章
+            columnArticleService.deleteArticle(articleId);
+
+            // 通知消息队列
+            rabbitMqSender.sengMessage(RabbitQueueEnum.ARTICLE_DELETE.getName(), articleId.toString());
         }
+    }
+
+    @Override
+    public void deleteArticleToEs(Long articleId) {
+        try {
+            // 创建一个删除请求
+            DeleteRequest deleteRequest = new DeleteRequest("article_list_dto");
+            deleteRequest.id(articleId.toString());
+
+            // 执行删除请求
+            DeleteResponse deleteResponse = restHighLevelClient.delete(deleteRequest, RequestOptions.DEFAULT);
+
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -973,4 +995,38 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
     }
 
+    @Override
+    public void handleDeleteArticle(){
+        // 先获取删除了的文章id
+        List<Long> articleIds = articleMapper.getDeletedArticleIds();
+        log.info("articleIds：{}",articleIds.toString());
+        articleIds.forEach(articleId->{
+            // 事务管理
+            transactionTemplate.execute(new TransactionCallback(){
+                @Override
+                public Object doInTransaction(TransactionStatus status) {
+                    // 删除文章
+                    articleMapper.deleteById(articleId);
+
+                    // 删除文章详情
+                    LambdaQueryWrapper<ArticleDetail> detailWrapper = Wrappers.lambdaQuery();
+                    detailWrapper.eq(ArticleDetail::getArticleId,articleId);
+                    articleDetailMapper.delete(detailWrapper);
+
+                    // 删除专栏关联文章
+                    LambdaQueryWrapper<ColumnArticle> columnsWrapper = Wrappers.lambdaQuery();
+                    columnsWrapper.eq(ColumnArticle::getArticleId,articleId);
+                    columnArticleService.remove(columnsWrapper);
+                    //todo
+//                    // 删除统计表
+//                    articleStatisticsService.deleteArticleStatistics(articleId);
+//                    // 删除user_foot
+//                    userFootService.deleteByArticleId(articleId);
+
+                    return null;
+                }
+            });
+        });
+
+    }
 }

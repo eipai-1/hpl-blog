@@ -1,17 +1,16 @@
 package com.hpl.article.service.impl;
 
-import cn.hutool.core.lang.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.mapper.ArticleTagMapper;
 import com.hpl.article.pojo.dto.TagDTO;
 import com.hpl.article.pojo.entity.ArticleTag;
-import com.hpl.article.pojo.entity.Tag;
 import com.hpl.article.service.ArticleTagService;
 import com.hpl.article.service.TagService;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.redis.RedisClient;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,6 +23,7 @@ import java.util.concurrent.TimeUnit;
  * @date : 2024/7/28 9:00
  */
 @Service
+@Slf4j
 public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, ArticleTag> implements ArticleTagService {
 
     @Resource
@@ -88,5 +88,14 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
             articleTag.setTagId(tagId);
             articleTagMapper.insert(articleTag);
         });
+    }
+
+    @Override
+    public void handleDeleteArticleTags() {
+        // 先获取已删除标签的id
+        List<Long> deletedTagIds = articleTagMapper.getDeletedTagIds();
+        log.info("deletedTagIds：{}",deletedTagIds.toString());
+        // 批量删除文章标签
+        this.removeBatchByIds(deletedTagIds);
     }
 }

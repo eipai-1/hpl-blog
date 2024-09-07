@@ -17,5 +17,9 @@ public class RabbitMqConfig {
         return new Queue(RabbitQueueEnum.ARTICLE_INSERT.getName());
     }
 
+    @Bean
+    public Queue queueArticleDelete() {
+        return new Queue(RabbitQueueEnum.ARTICLE_DELETE.getName());
+    }
 
 }

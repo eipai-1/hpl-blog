@@ -20,11 +20,16 @@ public class ArticleInsertConsumer {
     @Resource
     private ArticleService articleService;
 
-    private String key = RabbitQueueEnum.ARTICLE_INSERT.getName();
 
-    @RabbitListener(queues = "article_insert")
-    public void handleMessage(String message) throws IOException {
+    @RabbitListener(queues = "article_insert_update")
+    public void loadArticleToEs(String message) throws IOException {
         Long articleId = Long.parseLong(message);
         articleService.loadArticleToEs(articleId);
+    }
+
+    @RabbitListener(queues = "article_delete")
+    public void deleteArticleToEs(String message) {
+        Long articleId = Long.parseLong(message);
+        articleService.deleteArticleToEs(articleId);
     }
 }

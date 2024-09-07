@@ -3,6 +3,7 @@ package com.hpl.column.service.impl;
 import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.service.ArticleService;
 import com.hpl.column.pojo.dto.ColumnArticleDTO;
 import com.hpl.article.pojo.dto1.SearchColumnArticleDTO;
@@ -11,6 +12,7 @@ import com.hpl.column.pojo.dto.ColumnDirectoryDTO;
 import com.hpl.column.pojo.entity.ColumnArticle;
 import com.hpl.column.mapper.ColumnArticleMapper;
 import com.hpl.column.service.ColumnArticleService;
+import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.pojo.CommonPageParam;
 import com.hpl.redis.RedisClient;
 import jakarta.annotation.Resource;
@@ -19,7 +21,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @date : 2024/7/6 11:29
  */
 @Service
-public class ColumnArticleServiceImpl implements ColumnArticleService {
+public class ColumnArticleServiceImpl extends ServiceImpl<ColumnArticleMapper, ColumnArticle> implements ColumnArticleService {
 
     @Resource
     private ColumnArticleMapper columnArticleMapper;
@@ -210,10 +211,6 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
         columnArticleMapper.insert(columnArticle);
     }
 
-    @Override
-    public void updateById(ColumnArticle columnArticle){
-        columnArticleMapper.updateById(columnArticle);
-    }
 
     @Override
     public void deleteById(Long id){
@@ -241,5 +238,16 @@ public class ColumnArticleServiceImpl implements ColumnArticleService {
     public Integer countColumnArticles(SearchColumnArticleDTO searchColumnArticleDTO) {
         return columnArticleMapper.countColumnArticlesByColumnIdArticleName(searchColumnArticleDTO.getColumnId(),
                 searchColumnArticleDTO.getArticleTitle()).intValue();
+    }
+
+    /**
+     * 删除专栏对应id文章
+     * @param articleId
+     */
+    @Override
+    public void deleteArticle(Long articleId){
+        update(new LambdaUpdateWrapper<ColumnArticle>()
+                .eq(ColumnArticle::getArticleId, articleId)
+                .set(ColumnArticle::getDeleted, CommonDeletedEnum.YES.getCode()));
     }
 }
