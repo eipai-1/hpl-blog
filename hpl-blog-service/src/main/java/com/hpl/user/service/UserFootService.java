@@ -114,6 +114,8 @@ public interface UserFootService extends IService<UserFoot> {
 
     ArticleCountInfoDTO countArticleByUserId(Long userId);
 
+    void handleUpdateUserFoot();
+
 //    Long countCommentPraise(Long commentId);
 
 }

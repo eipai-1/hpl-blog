@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public enum CommentStateEnum {
 
-    NOT_COMMENTED(0, ""),
+    NOT_COMMENTED(0, "未评论"),
     COMMENTED(1, "已评论"),
     CANCEL_COMMENTED(2, "取消评论");
 

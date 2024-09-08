@@ -3,6 +3,9 @@ package com.hpl.user.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
+import com.hpl.count.pojo.enums.CollectionStateEnum;
+import com.hpl.count.pojo.enums.CommentStateEnum;
+import com.hpl.count.pojo.enums.PraiseStateEnum;
 import com.hpl.redis.RedisClient;
 import com.hpl.count.pojo.enums.DocumentTypeEnum;
 import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
@@ -12,10 +15,12 @@ import com.hpl.user.pojo.entity.UserFoot;
 import com.hpl.user.mapper.UserFootMapper;
 import com.hpl.user.service.UserFootService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -24,6 +29,7 @@ import java.util.function.Supplier;
  * @date : 2024/6/29 19:25
  */
 @Service
+@Slf4j
 public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> implements UserFootService {
 
     @Resource
@@ -311,6 +317,69 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
     @Override
     public ArticleCountInfoDTO countArticleByUserId(Long userId){
         return userFootMapper.countArticleByUserId(userId);
+    }
+
+    @Override
+    public void handleUpdateUserFoot(){
+        // 先查询user_foot锁信息
+        Set<String> locks = redisClient.sMembers("lock:user-foot");
+        log.warn(locks.toString());
+        log.warn("locks' length：{}",locks.size());
+
+        locks.forEach(t->{
+             String[] str= t.split("-");
+            Long userId = Long.parseLong(str[0]);
+            String documentId = str[1];
+
+            // 查询数据库是否存在记录
+            LambdaQueryWrapper<UserFoot> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(UserFoot::getUserId, userId)
+                    .eq(UserFoot::getDocumentId, Long.parseLong(documentId));
+            UserFoot userFoot = this.getOne(wrapper);
+
+            if(userFoot == null){ // 新增
+                userFoot = loadFromRedis(userId,documentId);
+                this.save(userFoot);
+            }else{ // 更新
+                UserFoot cache = loadFromRedis(userId,documentId);
+                userFoot.setPraised(cache.getPraised());
+                userFoot.setCollected(cache.getCollected());
+                userFoot.setCommented(cache.getCommented());
+                this.save(userFoot);
+            }
+
+            // 删除lock标记
+            redisClient.sRem("lock:user-foot",t);
+        });
+
+    }
+
+    /**
+     * 从redis中加载点赞、收藏、评论信息
+     * @param userId
+     * @param documentId
+     * @return
+     */
+    private UserFoot loadFromRedis(Long userId,String documentId){
+        redisClient.sIsMember("praised:user-"+userId,documentId);
+        UserFoot userFoot = new UserFoot();
+        userFoot.setUserId(userId);
+        userFoot.setDocumentId(Long.parseLong(documentId));
+        userFoot.setDocumentType(DocumentTypeEnum.ARTICLE.getCode());
+
+        userFoot.setPraised(redisClient.sIsMember("praised:user-"+userId,documentId)
+                ? PraiseStateEnum.PRAISED.getCode()
+                :PraiseStateEnum.NOT_PRAISED.getCode());
+
+        userFoot.setCollected(redisClient.sIsMember("collected:user-"+userId,documentId)
+                ? CollectionStateEnum.COLLECTED.getCode()
+                :CollectionStateEnum.NOT_CONTAINED.getCode());
+
+        userFoot.setCommented(redisClient.sIsMember("commented:user-"+userId,documentId)
+                ? CommentStateEnum.COMMENTED.getCode()
+                :CommentStateEnum.NOT_COMMENTED.getCode());
+
+        return userFoot;
     }
 
 //    @Override
