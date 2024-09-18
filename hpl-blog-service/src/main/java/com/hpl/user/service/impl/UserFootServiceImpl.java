@@ -1,7 +1,9 @@
 package com.hpl.user.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
 import com.hpl.count.pojo.enums.CollectionStateEnum;
 import com.hpl.count.pojo.enums.CommentStateEnum;
@@ -23,6 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author : rbe
@@ -354,6 +357,7 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
 
     }
 
+
     /**
      * 从redis中加载点赞、收藏、评论信息
      * @param userId
@@ -390,4 +394,19 @@ public class UserFootServiceImpl extends ServiceImpl<UserFootMapper, UserFoot> i
 //                .eq(UserFoot::getPraiseState, PraiseStateEnum.PRAISE.getCode())
 //                .count();
 //    }
+
+    /**
+     * 获取登录用户最近阅读文章
+     * @return
+     */
+    @Override
+    public List<SimpleArticleDTO> getReadRecent(){
+        // 获取登录用户id
+        Long userId = ReqInfoContext.getReqInfo().getUserId();
+        List<String> res = redisClient.lRange("recent:"+userId,0,-1);
+
+        return res.stream()
+                .map(t-> JSONUtil.toBean(t,SimpleArticleDTO.class))
+                .collect(Collectors.toList());
+    }
 }

@@ -1,5 +1,6 @@
 package com.hpl.controller.user;
 
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
 import com.hpl.pojo.CommonResult;
 import com.hpl.user.permission.Permission;
 import com.hpl.user.permission.UserRole;
@@ -8,10 +9,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author : rbe
@@ -40,6 +40,14 @@ public class UserFootController {
     public CommonResult<?> collectArticle(@PathVariable Long articleId) {
         userFootService.collectArticle(articleId);
         return CommonResult.success();
+    }
+
+    @Operation(summary = "获取用户最近阅读文章")
+    @GetMapping("/recent")
+    @Permission(role = UserRole.USER)
+    public CommonResult<?> getReadRecent() {
+        List<SimpleArticleDTO> recents = userFootService.getReadRecent();
+        return CommonResult.data(recents);
     }
 
 }

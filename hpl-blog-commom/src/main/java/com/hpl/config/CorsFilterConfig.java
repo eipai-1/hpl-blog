@@ -45,12 +45,6 @@ public class CorsFilterConfig implements Filter {
         // 允许预检请求的特定头信息
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-//        // 检查是否为预检请求（OPTIONS）
-//        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-//            // 对于预检请求，直接返回响应，不继续过滤器链
-//            return;
-//        }
-
         // 对于实际的请求，继续过滤器链
         chain.doFilter(request, response);
     }

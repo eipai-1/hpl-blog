@@ -10,4 +10,6 @@ import java.io.Serializable;
  */
 @Data
 public class SearchMyColumnDTO implements Serializable {
+
+    private Long authorId;
 }

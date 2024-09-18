@@ -289,4 +289,23 @@ public class RedisClient {
         return stringRedisTemplate.opsForSet().members(key);
     }
 
+
+    /********************************
+     * 封装list命令
+     ********************************/
+    public void lPush(String key, Object value) {
+        stringRedisTemplate.opsForList().leftPush(key, JSONUtil.toJsonStr(value));
+    }
+
+    public void lRemove(String key, long count, Object value) {
+        stringRedisTemplate.opsForList().remove(key, count, JSONUtil.toJsonStr(value));
+    }
+
+    public List<String> lRange(String key, long start, long end) {
+        return stringRedisTemplate.opsForList().range(key, start, end);
+    }
+
+    public void lTrim(String key, long start, long end) {
+        stringRedisTemplate.opsForList().trim(key, start, end);
+    }
 }

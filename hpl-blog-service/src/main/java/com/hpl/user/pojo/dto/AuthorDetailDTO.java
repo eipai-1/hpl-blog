@@ -27,6 +27,8 @@ public class AuthorDetailDTO implements Serializable {
 
     private Long articleCount;
 
+    private Long columnCount;
+
     private Long readCount;
 
     private Long fansCount;

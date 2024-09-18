@@ -820,6 +820,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             articleDTO.setCommented(redisClient.sIsMember("commented:user-" + userId, articleId));
         }
 
+        // 如果是登录用户，则加入最近阅读逻辑
+        if(ReqInfoContext.getReqInfo().getUserId()!=null){
+            SimpleArticleDTO simpleArticleDTO = new SimpleArticleDTO(articleId,article.getTitle());
+
+            redisClient.lRemove("recent:"+ReqInfoContext.getReqInfo().getUserId(),1,JSONUtil.toJsonStr(simpleArticleDTO));
+            redisClient.lPush("recent:"+ReqInfoContext.getReqInfo().getUserId(),simpleArticleDTO);
+
+            // 维护队列长度为10
+            redisClient.lTrim("recent:"+ReqInfoContext.getReqInfo().getUserId(),0,9);
+        }
+
 
         return articleDTO;
 

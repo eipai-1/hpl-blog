@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hpl.article.mapper.ArticleMapper;
 import com.hpl.article.service.ArticleService;
+import com.hpl.column.service.ColumnInfoService;
 import com.hpl.exception.StatusEnum;
 import com.hpl.pojo.CommonDeletedEnum;
 import com.hpl.redis.RedisClient;
@@ -226,6 +227,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         AtomicReference<Long> praiseCount = new AtomicReference<>(0L);
         AtomicReference<Long> commentCount = new AtomicReference<>(0L);
         AtomicReference<Long> collectionCount = new AtomicReference<>(0L);
+
+        // 2.4 获取专栏数
+        authorDetailDTO.setColumnCount((long) SpringUtil.getBean(ColumnInfoService.class).listMySimpleColumns(userId).size());
 
 
         //todo

@@ -14,4 +14,6 @@ public class SearchMyArticleDTO implements Serializable {
 
     private String searchKey;
 
+    private Long authorId;
+
 }

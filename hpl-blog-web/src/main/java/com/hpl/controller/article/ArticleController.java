@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -52,10 +53,16 @@ public class ArticleController extends CommonController {
     public CommonResult<?> myselfList(@RequestBody SearchMyArticleDTO searchMyArticleDTO) throws IOException {
         articleService.loadArticleListToEs();
         Long userId = ReqInfoContext.getReqInfo().getUserId();
+        if(searchMyArticleDTO.getAuthorId()!=null){
+            userId = searchMyArticleDTO.getAuthorId();
+        }
+
         List<MyArticleListDTO> list =articleService.listMyArticles(searchMyArticleDTO,userId);
 
         return CommonResult.data(list);
     }
+
+
 
     @Operation(summary = "新增或更新文章")
     @PostMapping

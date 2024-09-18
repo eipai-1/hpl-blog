@@ -1,6 +1,7 @@
 package com.hpl.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hpl.article.pojo.dto.SimpleArticleDTO;
 import com.hpl.article.pojo.dto1.SimpleUserInfoDTO;
 import com.hpl.count.pojo.dto.ArticleCountInfoDTO;
 import com.hpl.count.pojo.dto.StatisticUserFootDTO;
@@ -115,6 +116,12 @@ public interface UserFootService extends IService<UserFoot> {
     ArticleCountInfoDTO countArticleByUserId(Long userId);
 
     void handleUpdateUserFoot();
+
+    /**
+     * 获取登录用户最近阅读文章
+     * @return
+     */
+    List<SimpleArticleDTO> getReadRecent();
 
 //    Long countCommentPraise(Long commentId);
 
