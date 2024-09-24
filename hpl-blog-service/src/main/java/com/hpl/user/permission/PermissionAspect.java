@@ -12,11 +12,8 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.method.HandlerMethod;
 
 import java.lang.reflect.Method;
 
@@ -70,7 +67,7 @@ public class PermissionAspect {
 
         // 如果用户信息为空或用户ID为空，则根据情况处理未登录的访问
         if (ReqInfoContext.getReqInfo() == null || ReqInfoContext.getReqInfo().getUserId() == null) {
-            ExceptionUtil.of(StatusEnum.FORBID_NOTLOGIN);
+            ExceptionUtil.of(StatusEnum.FORBID_NOT_LOGIN);
         } else if (permission.role() == UserRole.ADMIN) { // 管理员权限
             // 检查用户是否为超管
             Integer userRole = ReqInfoContext.getReqInfo().getUserInfo().getUserRole();

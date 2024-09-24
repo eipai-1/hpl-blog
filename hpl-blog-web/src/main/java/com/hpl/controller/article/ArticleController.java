@@ -47,9 +47,8 @@ public class ArticleController extends CommonController {
     private RedisClient redisClient;
 
 
-    @Operation(summary = "列表查询我的文章")
+    @Operation(summary = "列表查询作者文章")
     @PostMapping(path = "myself-list")
-    @Permission(role = UserRole.USER)
     public CommonResult<?> myselfList(@RequestBody SearchMyArticleDTO searchMyArticleDTO) throws IOException {
         articleService.loadArticleListToEs();
         Long userId = ReqInfoContext.getReqInfo().getUserId();

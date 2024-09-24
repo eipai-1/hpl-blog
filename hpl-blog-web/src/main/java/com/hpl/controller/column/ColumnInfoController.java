@@ -35,9 +35,8 @@ public class ColumnInfoController {
         return CommonResult.data(res);
     }
 
-    @Operation(summary = "我的专栏")
+    @Operation(summary = "作者专栏")
     @PostMapping("myself-list")
-    @Permission(role = UserRole.USER)
     public CommonResult<?> listMyColumns(@RequestBody SearchMyColumnDTO searchMyColumnDTO) {
 
         Long userId = ReqInfoContext.getReqInfo().getUserId();

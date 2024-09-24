@@ -39,7 +39,7 @@ public class UserPwdHelper {
 
     public String genSalt(){
         // 从BCrypt生成的随机盐值中获取一个子字符串作为最终的盐值
-        return BCrypt.gensalt().substring(8,9+ RANDOM.nextInt(8));
+        return BCrypt.gensalt().substring(8,9 + RANDOM.nextInt(8));
     }
 
 
