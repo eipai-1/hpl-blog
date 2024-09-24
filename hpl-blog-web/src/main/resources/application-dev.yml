@@ -1,0 +1,77 @@
+server:
+  port: 8181
+
+spring:
+  config:
+    import: application-config.yml
+
+  data:
+    redis:
+      host: 192.168.88.128
+      port: 6379
+      database: 0
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.88.128:3306/hpl_blog?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 1234
+
+  servlet:
+    multipart:
+      max-file-size: 50MB     #单个文件的大小限制
+      max-request-size: 50MB  #单次请求的大小限制
+
+  rabbitmq:
+    host: 192.168.88.128
+    port: 5672
+    username: hpl-blog
+    password: 1234
+
+minio:
+  endpoint: http://192.168.88.128:9000
+  accessKey: minioadmin
+  secretKey: minio1234
+  bucket:
+    image: test1-image
+    video: test1-video
+    audio: test1-audio
+    mdImage: test1-md-image
+
+elasticsearch:
+  address: 192.168.88.128:9200
+#  thymeleaf:
+#    prefix: classpath:/templates/   # 页面模板位置
+#    suffix: .html                   # 页面模板后缀名
+#    mode: HTML
+#    encoding: UTF-8
+##    servlet:
+##      content-type: text/html
+#    cache: false
+  # 开发时设置为false，生产时设置为true
+xxl:
+  job:
+    admin:
+      addresses: http://192.168.88.128:9999/xxl-job-admin
+    executor:
+      appname: hpl-blog-timerTask
+      address:
+      ip:
+      port: 8180
+      logpath: /data/applogs/xxl-job/jobhandler
+      logretentiondays: 30
+    accessToken: default_token
+
+
+mybatis-plus:
+  global-config:
+    banner: false                       # 关闭mp的banner打印
+  configuration:
+    map-underscore-to-camel-case: true  # 开启下滑线转驼峰
+  mapper-locations: classpath*:com/hpl/**/mapping/*.xml
+
+hpl:
+  jwt:
+    issuer: hpl-blog    # 签发者
+    secret: hyper       # 签名密钥
+    expire: 259200000   # 默认过期时间，3天
