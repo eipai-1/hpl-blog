@@ -34,6 +34,7 @@ public class LoginController {
 
     @Operation(summary = "用户注册")
     @PostMapping("/register")
+//
     public CommonResult<?> registerByUserPwd(@RequestBody @Valid RegisterPwdDTO registerPwdDto) {
         String session = userService.registerByUserPwd(registerPwdDto);
         return CommonResult.data(session);
