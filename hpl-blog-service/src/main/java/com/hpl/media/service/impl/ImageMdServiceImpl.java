@@ -51,7 +51,7 @@ public class ImageMdServiceImpl implements ImageMdService {
     private String END_POINT;
 
     /**
-     * 外网图片转存缓存
+     *  外网图片转存缓存
      */
     private LoadingCache<String, String> imgReplaceCache = CacheBuilder
             .newBuilder()
