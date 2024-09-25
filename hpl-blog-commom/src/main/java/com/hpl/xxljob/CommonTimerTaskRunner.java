@@ -9,7 +9,7 @@ package com.hpl.xxljob;
 public interface CommonTimerTaskRunner {
 
     /**
-     * 任务执行的具体内容
+     * 任务执行的具体内容1
      */
     void run();
 }

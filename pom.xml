@@ -25,7 +25,7 @@
     </properties>
 
     <modules>
-        <!-- 主启动模块-->
+        <!-- 主启动模块1-->
         <module>hpl-blog-web</module>
 
         <!-- 业务逻辑模块-->

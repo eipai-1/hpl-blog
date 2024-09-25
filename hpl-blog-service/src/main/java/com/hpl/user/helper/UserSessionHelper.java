@@ -39,7 +39,7 @@ public class UserSessionHelper {
     @ConfigurationProperties("hpl.jwt")
     public static class JwtProperties {
 
-        /** 签发人 */
+        /** 签发人  */
         private String issuer;
 
         /** 密钥 */
