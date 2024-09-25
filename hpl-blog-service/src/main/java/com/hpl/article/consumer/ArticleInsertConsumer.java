@@ -21,6 +21,7 @@ public class ArticleInsertConsumer {
     private ArticleService articleService;
 
 
+//    定时器
     @RabbitListener(queues = "article_insert_update")
     public void loadArticleToEs(String message) throws IOException {
         Long articleId = Long.parseLong(message);

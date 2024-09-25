@@ -39,7 +39,7 @@
     <dependencyManagement>
         <dependencies>
 
-            <!-- hpl-blog-commom -->
+            <!-- hpl-blog-commom1 -->
             <dependency>
                 <groupId>hpl-blog</groupId>
                 <artifactId>hpl-blog-commom</artifactId>
