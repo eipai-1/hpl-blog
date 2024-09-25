@@ -44,6 +44,5 @@ public class Application implements ApplicationRunner {
         String index="http://127.0.0.1:" + webPort;
         log.info("后端启动成功，点击访问首页：{}",index);
         log.info("后端启动成功，点击访问文档：{}/doc.html",index);
-        log.info("template：{}",template);
     }
 }

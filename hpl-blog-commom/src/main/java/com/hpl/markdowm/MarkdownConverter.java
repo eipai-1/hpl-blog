@@ -21,7 +21,7 @@ public class MarkdownConverter {
         // 创建一个 MutableDataSet 对象来配置 Markdown 解析器的选项
         MutableDataSet options = new MutableDataSet();
 
-        // 添加各种 Markdown 解析器的扩展
+        // 添加各种 Markdown 解析器的扩展1
         options.set(Parser.EXTENSIONS, Arrays.asList(
                 AutolinkExtension.create(),     // 自动链接扩展，将URL文本转换为链接
                 EmojiExtension.create(),        // 表情符号扩展，用于解析表情符号

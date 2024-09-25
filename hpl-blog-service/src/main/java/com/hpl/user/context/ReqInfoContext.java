@@ -63,9 +63,6 @@ public class ReqInfoContext {
         /** 消息数量 */
         private Integer msgNum;
 
-//        /** 搜索引擎优化 */
-//        private Seo seo;
-
         /** 设备id */
         private String deviceId;
 
