@@ -96,7 +96,11 @@
             <artifactId>aspectjweaver</artifactId>
         </dependency>
 
-
+        <dependency>
+            <groupId>net.bramp.ffmpeg</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>0.6.2</version>
+        </dependency>
     </dependencies>
 
 </project>
